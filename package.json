@@ -1,0 +1,32 @@
+{
+  "name": "node-sleepbot-cgi",
+  "version": "0.0.1",
+  "description": "Perl CGI replacement for sleepbot.com",
+  "author": "Daniel M Foley",
+  "license": "CC-BY-3.0",
+  "homepage": "http://sleepbot.com",
+  "email": "webmaster@sleepbot.com",
+  "main": "index.js",
+  "directories": {
+    "app": "./app",
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://emperor@seb.sleepbot.com/usr/share/git/node-sleepbot-cgi.git"
+  },
+  "dependencies": {
+    "express": "4.0.x",
+    "minimist": "0.0.x",
+    "underscore": "1.6.x",
+    "bluebird": "~1.2.1"
+  },
+  "devDependencies": {
+    "mocha": "1.18.x",
+    "chai": "1.9.x",
+    "sinon": "1.9.x"
+  }
+}
