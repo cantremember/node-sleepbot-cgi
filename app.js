@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-//
+
 // https://github.com/flatiron/nconf
+// http://expressjs.com/4x/api.html
+// http://flippinawesome.org/2014/04/07/the-basics-of-express-routes/
+// https://github.com/nodejitsu/forever
 
 var path = require('path');
 var params = (function() {
@@ -23,8 +26,8 @@ if (! params.port) {
 var express = require('express');
 var app = express();
 
-app.get('/', function(req, res){
-  res.send('hello world');
+app.get('*', function(req, res, cb) {
+    res.send(req.path);
 });
 
 app.listen(params.port);
