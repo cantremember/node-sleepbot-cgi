@@ -8,7 +8,7 @@ module.exports = function(app) {
 
     return function(req, res, cb) {
         return render('http404.ejs', {
-            real_uri: req.headers['X-Real-Uri'],
+            real_uri: req.headers['x-real-uri'],
         }).then(function(body) {
             res.send(body);
         }).error(cb);

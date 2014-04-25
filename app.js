@@ -49,9 +49,37 @@ app.engine('markdown', require('marked-engine').__express);
 
 app.route('/status.cgi').all(appLib.status(app));
 app.route('/404.cgi').all(appLib.http404(app));
-app.route('/derp').all(appLib.derp(app));
+// /ambience/cgi/listen.cgi/listen.pls
+//   CGI file interrupts path resolution
+//   URI resolves as its filename past the final '/'
+app.route(/^\/ambience\/cgi\/listen.cgi(?:|\/.*)$/).all(appLib.sebPlaylist(app));
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
+app.route('/derp').all(appLib.derp(app));
 
 app.listen(params.port);
+
+/*
+./ambience/cgi/7-cgi
+./ambience/cgi/any_f.cgi
+./ambience/cgi/imgpage.cgi
+./ambience/cgi/viewxml-fetch.cgi
+./cgi/animbot.cgi
+./cgi/cgi-lib.pl
+./cgi/log.cgi
+./critturs/cgi/anyaudio.cgi
+./critturs/cgi/critlogo.cgi
+./dfoley/index.cgi
+./drummond/realaudio/index.cgi
+./fucc/cgi/anyaudio.cgi
+./fucc/cgi/schednow.cgi
+./lookit/cgi/anyfoley.cgi
+./lookit/cgi/anystory.cgi
+./lookit/cgi/imgfoley.cgi
+./morgan/cgi/morglay.cgi
+./morgan/cgi/morgpick.cgi
+./morgan/index.cgi
+./WRLDtime/cgi/anyclock.cgi
+./WRLDtime/cgi/utc.cgi
+*/
