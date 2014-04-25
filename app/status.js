@@ -1,10 +1,7 @@
 'use strict';
 
-// capture the app
-module.exports = function(app) {
-    return function(req, res, cb) {
-        res.send({
-            ok: true,
-        });
-    };
+module.exports = function(req, res, cb) {
+    res.send({
+        ok: true,
+    });
 };
