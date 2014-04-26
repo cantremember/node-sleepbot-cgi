@@ -6,6 +6,9 @@ var path = require('path');
 module.exports = {
     httpPort: 3000,
     wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
+    // !!!
+    // baseURL: 'http://www.sleepbot.com',
+    baseURL: 'http://sleepbot.localhost:8080',
 
     sebServers: [
         { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true },

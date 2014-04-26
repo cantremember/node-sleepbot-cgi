@@ -66,8 +66,6 @@ var express = require('express');
 var app = express();
 var viewPath = path.join(process.cwd(), 'views');
 
-var theApp = require('./app/index');
-
 app.enable('trust proxy');
 app.enable('case sensitive');
 app.disable('strict routing');
@@ -78,26 +76,39 @@ app.engine('ejs', theLib.setupEJS(require('ejs')).__express);
 app.engine('md', require('marked-engine').__express);
 app.engine('markdown', require('marked-engine').__express);
 
-app.route('/status.cgi').all(theApp.status);
-app.route('/404.cgi').all(theApp.http404);
+
+app.route('/status.cgi').all(require('./app/status'));
+app.route('/404.cgi').all(require('./app/http404'));
+
+app.route('/cgi/animbot.cgi').all(require('./app/rootBotImage'));
+
+
 // /ambience/cgi/listen.cgi/listen.pls
 //   CGI file interrupts path resolution
 //   URI resolves as its filename past the final '/'
-app.route('/ambience/cgi/listen.*').all(theApp.sebPlaylist);
-app.route('/ambience/cgi/7.:format').all(theApp.sebStatusHTML);
-app.route('/ambience/cgi/viewxml.:format').all(theApp.sebStatusXML);
-app.route('/ambience/cgi/imgpage.cgi').all(theApp.redirectTo('/ambience'));
-app.route('/ambience/cgi/any_f.cgi').all(theApp.ambienceAnyAlbum);
+app.route('/ambience/cgi/listen.*').all(require('./app/sebPlaylist'));
+app.route('/ambience/cgi/7.:format').all(require('./app/sebStatusHTML'));
+app.route('/ambience/cgi/viewxml.:format').all(require('./app/sebStatusXML'));
+app.route('/ambience/cgi/imgpage.cgi').all(require('./app/redirectTo')('/ambience'));
+app.route('/ambience/cgi/any_f.cgi').all(require('./app/ambienceAnyAlbum'));
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
 
 app.listen(params.port);
 
+
 /*
-./ambience/cgi/any_f.cgi
-./ambience/cgi/imgpage.cgi
-./cgi/animbot.cgi
+curl -v http://localhost:3000/status.cgi
+curl -v http://localhost:3000/404.cgi
+curl -v http://localhost:3000/cgi/animbot.cgi
+curl -v http://localhost:3000/ambience/cgi/listen.cgi
+curl -v http://localhost:3000/ambience/cgi/7.cgi
+curl -v http://localhost:3000/ambience/cgi/viewxml.cgi
+curl -v http://localhost:3000/ambience/cgi/imgpage.cgi
+curl -v http://localhost:3000/ambience/cgi/any_f.cgi
+
+.
 ./cgi/cgi-lib.pl
 ./cgi/log.cgi
 ./critturs/cgi/anyaudio.cgi

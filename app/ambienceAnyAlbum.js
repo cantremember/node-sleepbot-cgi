@@ -26,7 +26,7 @@ var columnMap = function columnMap(row, columns) {
     }, {});
 };
 
-// load the random samples file
+// load the samples file
 var loadSamples = function() {
     return theLib.loadWwwCSV('ambience/any.txt').then(function(rows) {
         // memoize
@@ -54,8 +54,7 @@ module.exports = function handler(req, res, cb) {
 
     loadSamples().then(function(rows) {
         // choose a random sample
-        var choice = Math.floor(Math.random() * rows.length);
-        sample = columnMap(rows[choice], sampleColumns);
+        sample = columnMap(theLib.chooseAny(rows), sampleColumns);
 
         // we split sample storage into two subdirectories
         sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
@@ -79,10 +78,10 @@ module.exports = function handler(req, res, cb) {
         return loadQuips();
     }).then(function(rows) {
         // choose a random quip
-        var choice = Math.floor(Math.random() * rows.length);
-        quip = columnMap(rows[choice], quipColumns);
+        quip = columnMap(theLib.chooseAny(rows), quipColumns);
     }).then(function() {
         return Promise.promisify(res.render, res)('ambienceAnyAlbum.ejs', {
+            config: theLib.config,
             sample: sample,
             quip: quip,
         }).then(function(body) {
