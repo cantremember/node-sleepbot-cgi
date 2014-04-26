@@ -12,7 +12,6 @@
 
 var path = require('path');
 var theLib = require('./lib/index');
-var theApp = require('./app/index');
 
 
 /*
@@ -45,7 +44,7 @@ if (! params.port) {
 }
 
 // expand upon configuration
-theLib.config.wwwRoot = process.env['WWW_ROOT'];
+theLib.config.wwwRoot = theLib.config.wwwRoot || process.env['WWW_ROOT'];
 
 
 /*
@@ -65,6 +64,8 @@ theLib.config.wwwRoot = process.env['WWW_ROOT'];
 var express = require('express');
 var app = express();
 var viewPath = path.join(process.cwd(), 'views');
+
+var theApp = require('./app/index');
 
 app.enable('trust proxy');
 app.enable('case sensitive');
