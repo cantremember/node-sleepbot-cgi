@@ -7,7 +7,7 @@ var theLib = require('../lib/index');
 var sebServerPrimary = theLib.config.get('sebServerPrimary');
 
 // capture the app
-module.exports = function(req, res, cb) {
+module.exports = function handler(req, res, cb) {
     return request({
         uri: (sebServerPrimary.url + '/admin.cgi?mode=viewxml'),
         method: 'GET',

@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird');
 
-module.exports = function(req, res, cb) {
+module.exports = function handler(req, res, cb) {
     return Promise.promisify(res.render, res)('http404.ejs', {
         real_uri: req.headers['x-real-uri'],
     }).then(function(body) {

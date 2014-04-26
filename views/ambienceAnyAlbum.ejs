@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+   <title>Ambience by the Dice :: Ambience for the Masses</title>
+   <base href="http://www.sleepbot.com/">
+
+<link rel="stylesheet" type="text/css" href="/css/granular.css" media="all" charset="UTF-8" />
+<link rel="stylesheet" type="text/css" href="/css/ambience.css" media="all" charset="UTF-8" />
+
+
+
+<!-- local -->
+<link rel="stylesheet" type="text/css" href="/css/ambience-green.css" media="all" charset="UTF-8" />
+<style type="text/css" media="all" xml:space="preserve">
+.albumTitle {
+	font-family: "Trebuchet MS", "Geneva", Helvetica, Arial, sans-serif;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+.artistNames {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 16px;
+}
+
+.albumCoverGif {
+	width:125px;
+	height:125px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+/* Box Hack */
+.albumNoCover {
+	width:121px;
+	height:121px;
+	_width:125px;
+	_height:125px;
+	border: 2px #E6F3E2 dashed;
+	text-align: center;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 125px;
+}
+
+.albumReview {
+	font-family: "Trebuchet MS", "Geneva", Helvetica, Arial, sans-serif;
+	font-size: 16px;
+	line-height: 1.4em;
+}
+
+.trackNumber {
+	padding-top: 5px;
+	font-size: 18px;
+	font-weight: bold;
+}
+.trackName {
+	padding: 5px;
+	font-size: 18px;
+	background-color: #E6F3E2;
+}
+.trackAudioLink {
+	padding: 0 3px 0 3px;
+	background-color: #9FE89A;
+}
+
+</style>
+
+<!-- local -->
+<script type="text/javascript" charset="UTF-8" xml:space="preserve" src="/javascript/Sleepbot/Util.js"></script>
+<script type="text/javascript" charset="UTF-8" xml:space="preserve">
+	function showFullCover(ops) {
+		var div = Sleepbot.byId('divFullCover'), img = Sleepbot.byId('imgFullCover');
+		if (! (div && img))  { return; }
+		var isLoaded = (true === img['__sbLoaded']);
+		var fOnLoad = function() {
+			var w = (img.width || 350), h = (img.height || 350);
+			Sleepbot.Util.visible(div, false);
+			Sleepbot.Util.show(div, true);
+			if (! isLoaded) {
+				Sleepbot.Util.propsCopy({
+					left:  ((-1 * (w - 125)) + Math.max(0, (w - 400))) + 'px',
+					top:  (-30 - Math.max(0, (h - 400))) + 'px',
+					width:  w + 'px',
+					height:  h + 'px'
+				}, div.style);
+				img.__sbLoaded = true;
+			}
+			window.setTimeout(function() {
+				Sleepbot.Util.visible(div, true);
+			}, 0);
+		};
+		if (isLoaded) { fOnLoad() };
+		img.onload = function() {
+			setTimeout(fOnLoad, 0);
+		};
+		img.src = ops.src;
+	}
+	function hideFullCover(ops) {
+		var div = Sleepbot.Util.byId('divFullCover');
+		if (! div)  { return; }
+		Sleepbot.Util.show(div, false);
+	}
+</script>
+
+</head>
+<body><!-- any_f.cgi -->
+
+<div class="sideBarContainer">
+	<div class="sideBarGradient ftrAlp50"><img style="
+		width:100%; height:125px;
+	" src="/ambience/images/gradient_grassToGreen.jpg" /></div>
+
+	<div class="relative fntSz14 bold" style="padding-top: 20px">Back&nbsp;to&nbsp;<a
+		class="lnkUlOff" href="/ambience/" title="Ambience for the Masses"
+		>Ambience&nbsp;for&nbsp;the&nbsp;Masses</a
+	>.</div>
+
+	<div class="relative fntSz14 bold" style="padding-top: 20px">Have another <a
+		class="lnkUlOff" href="/ambience/cgi/any_f.cgi" title="Ambience by the Dice"
+		>Roll of the Dice</a
+	>.</div>
+
+	<div class="relative fntSz14 bold" style="padding-top: 30px">View the complete <a
+		class="lnkUlOff" href="/ambience/album.html" title="Ambience by Album"
+		>Album</a
+	> listing.</div>
+
+	<div class="relative fntSz14 bold" style="padding-top: 10px">Back&nbsp;to&nbsp;<a
+		class="lnkUlOff" href="/ambience/" title="Ambience for the Masses"
+		>Ambience&nbsp;for&nbsp;the&nbsp;Masses</a
+	>.</div>
+</div>
+
+
+
+
+<div style="z-index: 0">
+<!--
+non-beveled, to say consistent with albumDetail.jsp
+-->
+	<div class="relative" style="
+		padding: 50px 0 15px 30px;
+	"><span class="albumTitle"><a href="/ambience/album/<%= sample.albumFile %>.html" title="<%= sample.album %>"><%= sample.album %></a></span></div>
+
+	<div class="relative" style="
+		padding: 0 0 0 100px;
+	"><span class="fntFmSans fntSz12">by &nbsp;<span class="artistNames"><%= sample.artist %></span></span></div>
+
+</div>
+<div class="clr"></div>
+
+
+
+<div class="posFlL" style="width:35%; padding: 0 0 40px 30px; margin-top: 8em">
+	<table class="fntFmSans fntSz16" cellspacing="5" cellspacing="0" border="0">
+
+			<tr class="posAlL posAlT">
+				<td>
+					<div class="trackName"><%= sample.track %></div>
+
+					<div class="posAlR" style="padding: 5px 5px 0 20px">
+						<a class="trackAudioLink" href="/ambience/sample<%= sample.dirNum %>/<%= sample.file %>.<%= sample.ext %>"
+							title="<%= sample.track %>"
+						>Sample</a>
+						&nbsp;(<%= sample.size %>)
+					</div>
+				</td>
+			</tr>
+
+	</table>
+</div>
+
+
+
+<div class="posFlL relative" style="width:55%; padding: 0 0 40px 30px; margin-top: 4em">
+
+	<div style="padding-bottom: 30px">
+		<span class="albumReview">
+
+<%= quip.text %><br />
+
+		</span>
+	</div>
+
+	<div style="padding-bottom: 30px">
+		<div style="padding: 20px; width: 125px; height: 125px; background-color: #9FE89A">
+        	<% if (sample.coverExists) { %>
+                <a class="img" href="/ambience/album/<%= sample.albumFile %>.html" title="<%= sample.album %>"><img
+                	src="/ambience/covergif/<%= sample.albumFile %>.gif"
+                	alt="<%= sample.album %>"
+                	title="<%= sample.album %>"
+                	class="albumCoverGif"
+                /></a>
+        	<% }
+        	else { %>
+                <a class="img" href="/ambience/album/<%= sample.albumFile %>.html" title="<%= sample.album %>"><div
+                	class="albumNoCover">(No Cover)</div
+                ></a>
+            <% } %>
+		</div>
+		<div class="posAlC fntSz12 italic" style="padding: 3px 20px 0 20px; width: 125px"><a class="lnkUlOff" href="/ambience/album/<%= sample.albumFile %>.html" title="<%= sample.album %>">
+			click for more
+		</a></div>
+	</div>
+
+	<div style="padding-bottom: 30px">
+		<span class="albumReview">
+
+If album isn't to your fancy, feel free to have another <b><a href="/ambience/cgi/any_f.cgi">Roll of the Dice</a></b>.
+&nbsp;
+If you click that link and get the same album a second time, you may have to click your browser's <b>Reload</b> button...
+
+		</span>
+	</div>
+
+</div>
+</div>
+
+
+
+<!-- === -->
+<div class="clr dotRuleWhite"></div>
+<div class="bkgWhite" style="width: 100%; padding-top: 15px">
+	<div class="posFlR" style="width: 50%">
+		<div class="posFlL bdrDotBody">
+			<div class="fntFmSans fntSz11 bkgBody" style="padding: 6px 14px 6px 14px;">
+HTML Implementation &nbsp; (c) 1997 - 2006<br />
+
+Lookit the Cat Productions<br />
+<br />
+Don't forget the <a href="http://www.hyperreal.org/" target="_top">Hyperreal</a> Archives.
+			</div>
+		</div>
+	</div>
+
+	<table class="noBMP" style="padding-right: 25px"><tr>
+
+		<td class="posAlT posAlL" style="padding: 5px"><a class="img" href="/ambience/" target="_top"><img src="/ambience/images/icn_sbot.gif" alt="Ambience" target="_top" height="75" width="75" border="0" /></a></td>
+		<td class="posAlT posAlL" style="padding: 10px">
+			<span class="fntFmMono fntSz12 bold"><a href="/ambience/" target="_top">Ambience for the Masses</a></span><br />
+			<div class="fntFmMono fntSz11" style="padding: 10px 0 0 15px">
+peace brain space
+			</div>
+	  </td>
+	</tr></table>
+
+	<table class="noBMP" style="padding-right: 25px"><tr>
+
+		<td class="posAlT posAlL" style="padding: 5px"><a class="img" href="/" target="_top"><div style="width:75px; height:25px; float:none"></div></a></td>
+		<td class="posAlT posAlL" style="padding: 10px">
+			<span class="fntFmMono fntSz12 bold"><a href="/" target="_top">Sleepbot Constructs</a></span><br />
+	  </td>
+	</tr></table>
+
+	&nbsp;
+</div>
+<div class="clr dotRuleWhite"></div>
+
+</body>
+</html>

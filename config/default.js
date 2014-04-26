@@ -1,6 +1,12 @@
 'use strict';
 
+var path = require('path');
+
+
 module.exports = {
+    httpPort: 3000,
+    wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
+
     sebServers: [
         { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true },
         { url: 'http://sc7.shoutcaststreaming.us:8044' },

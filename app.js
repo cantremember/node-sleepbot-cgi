@@ -44,7 +44,7 @@ if (! params.port) {
 }
 
 // expand upon configuration
-theLib.config.wwwRoot = theLib.config.wwwRoot || process.env['WWW_ROOT'];
+theLib.config.wwwRoot = process.env['WWW_ROOT'] || theLib.config.wwwRoot;
 
 
 /*
@@ -55,6 +55,7 @@ theLib.config.wwwRoot = theLib.config.wwwRoot || process.env['WWW_ROOT'];
      https://github.com/visionmedia/ejs
      https://github.com/jaredhanson/marked-engine
      https://github.com/mikeal/request
+     https://github.com/wdavidw/node-csv
    TODO:
      https://github.com/expressjs/body-parser
      https://github.com/expressjs/cookie-parser
@@ -73,7 +74,7 @@ app.disable('strict routing');
 app.set('view engine', 'ejs');
 app.set('views', viewPath);
 
-app.engine('ejs', require('ejs').__express);
+app.engine('ejs', theLib.setupEJS(require('ejs')).__express);
 app.engine('md', require('marked-engine').__express);
 app.engine('markdown', require('marked-engine').__express);
 
@@ -85,6 +86,8 @@ app.route('/404.cgi').all(theApp.http404);
 app.route('/ambience/cgi/listen.*').all(theApp.sebPlaylist);
 app.route('/ambience/cgi/7.:format').all(theApp.sebStatusHTML);
 app.route('/ambience/cgi/viewxml.:format').all(theApp.sebStatusXML);
+app.route('/ambience/cgi/imgpage.cgi').all(theApp.redirectTo('/ambience'));
+app.route('/ambience/cgi/any_f.cgi').all(theApp.ambienceAnyAlbum);
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config

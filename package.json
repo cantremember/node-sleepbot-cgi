@@ -25,6 +25,7 @@
         "forever": "0.10.x",
         "minimist": "0.0.x",
         "underscore": "1.6.x",
+        "csv": "0.3.x",
         "request": "~2.34.0",
         "bluebird": "1.2.x"
     },

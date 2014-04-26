@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(req, res, cb) {
+module.exports = function handler(req, res, cb) {
     res.send({
         ok: true,
     });

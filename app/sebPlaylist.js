@@ -8,7 +8,7 @@ var theLib = require('../lib/index');
 var sebServers = theLib.config.get('sebServers');
 
 // capture the app
-module.exports = function(req, res, cb) {
+module.exports = function handler(req, res, cb) {
     // http://gonze.com/playlists/playlist-format-survey.html
     //   "A proprietary format used for playing Shoutcast and Icecast streams"
     //   audio/mpegurl
