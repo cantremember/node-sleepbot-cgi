@@ -1,13 +1,27 @@
 #!/usr/bin/env node
-// https://github.com/nodejitsu/forever
+/*
+   ENV
+     NODE_ENV
+     HTTP_PORT
+     WWW_ROOT
+   /etc/init.d
+     https://github.com/nodejitsu/forever
+*/
+
+'use strict';
 
 var path = require('path');
-var appLib = require(path.join(__dirname, 'app/index'));
+var theLib = require('./lib/index');
+var theApp = require('./app/index');
 
-// https://github.com/flatiron/nconf
-// https://github.com/trentm/node-bunyan
-//   app.use(logger);
 
+/*
+    https://github.com/flatiron/nconf
+    https://github.com/trentm/node-bunyan
+        app.use(logger);
+*/
+
+// could from the command line
 var params = (function() {
     var argv = process.argv;
     var i = argv.indexOf(__filename);
@@ -19,22 +33,34 @@ var params = (function() {
     });
 })();
 
+// could come from ENV
+params.port = params.port || process.env['HTTP_PORT'];
+
+// or from configuration
+params.port = params.port || theLib.config.httpPort;
+
 if (! params.port) {
     console.error(['Usage:  ', path.basename(__filename), ' --port <PORT>'].join(''));
     process.exit(1);
 }
 
-// express
-//   http://expressjs.com/4x/api.html
-//   http://flippinawesome.org/2014/04/07/the-basics-of-express-routes/
-// render, etc.
-//   https://github.com/visionmedia/ejs
-//   https://github.com/jaredhanson/marked-engine
-//   https://github.com/mikeal/request
-// TODO:
-//   https://github.com/expressjs/body-parser
-//   https://github.com/expressjs/cookie-parser
-//   https://github.com/expressjs/cookie-session
+// expand upon configuration
+theLib.config.wwwRoot = process.env['WWW_ROOT'];
+
+
+/*
+   express
+     http://expressjs.com/4x/api.html
+     http://flippinawesome.org/2014/04/07/the-basics-of-express-routes/
+   render, etc.
+     https://github.com/visionmedia/ejs
+     https://github.com/jaredhanson/marked-engine
+     https://github.com/mikeal/request
+   TODO:
+     https://github.com/expressjs/body-parser
+     https://github.com/expressjs/cookie-parser
+     https://github.com/expressjs/cookie-session
+*/
 
 var express = require('express');
 var app = express();
@@ -50,14 +76,14 @@ app.engine('ejs', require('ejs').__express);
 app.engine('md', require('marked-engine').__express);
 app.engine('markdown', require('marked-engine').__express);
 
-app.route('/status.cgi').all(appLib.status);
-app.route('/404.cgi').all(appLib.http404);
+app.route('/status.cgi').all(theApp.status);
+app.route('/404.cgi').all(theApp.http404);
 // /ambience/cgi/listen.cgi/listen.pls
 //   CGI file interrupts path resolution
 //   URI resolves as its filename past the final '/'
-app.route('/ambience/cgi/listen.*').all(appLib.sebPlaylist);
-app.route('/ambience/cgi/7.:format').all(appLib.sebStatusHTML);
-app.route('/ambience/cgi/viewxml.:format').all(appLib.sebStatusXML);
+app.route('/ambience/cgi/listen.*').all(theApp.sebPlaylist);
+app.route('/ambience/cgi/7.:format').all(theApp.sebStatusHTML);
+app.route('/ambience/cgi/viewxml.:format').all(theApp.sebStatusXML);
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
