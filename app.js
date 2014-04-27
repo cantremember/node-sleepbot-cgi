@@ -45,7 +45,7 @@ if (! params.port) {
 
 // expand upon configuration
 theLib.config.wwwRoot = process.env['WWW_ROOT'] || theLib.config.wwwRoot;
-
+console.log('WWW root is:', theLib.config.wwwRoot)
 
 /*
    express
@@ -101,6 +101,7 @@ app.route('/fucc/cgi/schednow.cgi').all(require('./app/fuccSchedule'));
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
 
+console.log('http port is:', params.port)
 app.listen(params.port);
 
 
