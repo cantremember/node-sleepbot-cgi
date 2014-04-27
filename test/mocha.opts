@@ -1,0 +1,5 @@
+--ui bdd
+--reporter spec
+--timeout 3000
+--globals ngServer,logger,httpLogger
+--recursive

@@ -12,7 +12,7 @@
         "lib": "./lib"
     },
     "scripts": {
-        "test": "NODE_ENV=test npm test"
+        "test": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha test"
     },
     "repository": {
         "type": "git",

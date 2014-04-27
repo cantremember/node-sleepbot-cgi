@@ -80,8 +80,7 @@ app.engine('markdown', require('marked-engine').__express);
 app.route('/status.cgi').all(require('./app/status'));
 app.route('/404.cgi').all(require('./app/http404'));
 
-app.route('/cgi/animbot.cgi').all(require('./app/rootBotImage'));
-
+app.route('/cgi/animbot.cgi').all(require('./app/redirectToRandomFile')('/images/animbot', '*.gif'));
 
 // /ambience/cgi/listen.cgi/listen.pls
 //   CGI file interrupts path resolution
@@ -91,6 +90,13 @@ app.route('/ambience/cgi/7.:format').all(require('./app/sebStatusHTML'));
 app.route('/ambience/cgi/viewxml.:format').all(require('./app/sebStatusXML'));
 app.route('/ambience/cgi/imgpage.cgi').all(require('./app/redirectTo')('/ambience'));
 app.route('/ambience/cgi/any_f.cgi').all(require('./app/ambienceAnyAlbum'));
+
+app.route('/critturs/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')('/critturs/mp2', '*.mp2'));
+app.route('/critturs/cgi/critlogo.cgi').all(require('./app/redirectToRandomFile')('/critturs/images/logo', '*.gif'));
+
+app.route('/fucc/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')('/fucc/mpg', '*.mp2'));
+app.route('/fucc/cgi/schednow.cgi').all(require('./app/fuccSchedule'));
+
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
@@ -108,14 +114,9 @@ curl -v http://localhost:3000/ambience/cgi/viewxml.cgi
 curl -v http://localhost:3000/ambience/cgi/imgpage.cgi
 curl -v http://localhost:3000/ambience/cgi/any_f.cgi
 
-.
-./cgi/cgi-lib.pl
-./cgi/log.cgi
-./critturs/cgi/anyaudio.cgi
-./critturs/cgi/critlogo.cgi
-./dfoley/index.cgi
-./drummond/realaudio/index.cgi
-./fucc/cgi/anyaudio.cgi
+curl -v http://localhost:3000/critturs/cgi/anyaudio.cgi
+curl -v http://localhost:3000/critturs/cgi/critlogo.cgi
+curl -v http://localhost:3000/fucc/cgi/anyaudio.cgi
 ./fucc/cgi/schednow.cgi
 ./lookit/cgi/anyfoley.cgi
 ./lookit/cgi/anystory.cgi

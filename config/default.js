@@ -11,7 +11,7 @@ module.exports = {
     baseURL: 'http://sleepbot.localhost:8080',
 
     sebServers: [
-        { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true },
+        { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true, user: 'admin', pass: 'deepDeepSleep' },
         { url: 'http://sc7.shoutcaststreaming.us:8044' },
         { url: 'http://209.104.5.207:8096/seb' },
     ],

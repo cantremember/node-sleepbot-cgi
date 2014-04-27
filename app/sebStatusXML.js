@@ -15,8 +15,8 @@ module.exports = function handler(req, res, cb) {
             'User-Agent': 'XML Getter (Mozilla Compatible)',
         },
         auth: {
-            user: 'admin',
-            pass: 'deepDeepSleep',
+            user: sebServerPrimary.user,
+            pass: sebServerPrimary.pass,
             sendImmediately: true,
         },
         followAllRedirects: true,
