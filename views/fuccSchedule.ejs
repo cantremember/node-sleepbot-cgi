@@ -1,0 +1,99 @@
+<HTML>
+<HEAD><TITLE>F.U.C.C Radio Now</TITLE></HEAD>
+<BODY BACKGROUND="/fucc/img/bkgrnd.gif" BGCOLOR="000000" TEXT="#FFFFFF" LINK="FFFFFF" ALINK="000000" VLINK="FFFFFF">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+	function ListenTo(sFile, sPath) {
+		sURL = (((typeof sPath) == 'undefined') ? '/fucc/realaudio/' : sPath);
+		alert(
+'sleepbot.com\\'s RealAudio streams have been temporarily disabled.\\n\\n' +
+'They will be restored pending arrangements with a stream provider.\\n' +
+'We apologize for the inconvenience.'
+		);
+		return false;
+	}
+//	-->
+</SCRIPT>
+<!-- B2A900 -->
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=610 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR ALIGN=CENTER VALIGN=MIDDLE>
+<TD WIDTH=430 VALIGN=TOP>
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR ALIGN=CENTER VALIGN=MIDDLE>
+<TD WIDTH=346><FONT SIZE=+2 COLOR="#B2A900"><B><TT>F.U.C.C Radio Now</TT></B></FONT>
+<TD WIDTH=9></TD>
+<TD WIDTH=75 VALIGN=TOP><A HREF="javascript:ListenTo('anyaudio.cgi', '/fucc/cgi/'); void(0);" onMouseOver="window.status=''; return true"><IMG SRC="/fucc/img/vib_now.gif" ALT="( * )" BORDER=0 WIDTH=75 HEIGHT=75 ALIGN=CENTER></A></TD>
+</TR>
+</TABLE>
+</TD>
+<TD WIDTH=9></TD>
+<TD WIDTH=171><A HREF="/fucc/"><IMG SRC="/fucc/img/skelly.gif" ALT="F.U.C.C Radio" WIDTH=171 HEIGHT=118 BORDER=0 ALIGN=CENTER></A></TD>
+</TR>
+</TABLE>
+<BR><BR><BR>
+
+<% if (dead) { // we are down %>
+    <BR>
+    <%- dead %>
+    <BR><BR>
+<% } else if (! current) { // we are not scheduled %>
+    <BR><BR>
+    <DIV ALIGN=CENTER><H2>
+    Dead Air
+    </H2></DIV>
+
+    <CENTER>
+    <TABLE BORDER=0 CELLSPACING=5 WIDTH=610><TR><TD>
+    <A HREF="/fucc/show.html#<%= dayOfWeekAnchor %>">
+    <TT>see for yourself...</TT>
+    </A>
+    </TR></TABLE>
+    </DIV>
+
+    <BR><BR>
+<% } else { // yay!  what is on now? %>
+    <DIV ALIGN=CENTER><FONT COLOR="#FF0000" SIZE=+2><B><%= dayOfWeekName %></B></FONT><BR><FONT SIZE=+1><%- quip.text %></FONT></DIV>&nbsp;
+
+    <DIV ALIGN=CENTER>
+    <TABLE BORDER=0 CELLSPACING=5 WIDTH=610><TR><TD>
+        <DL>
+        <%- current.body %>
+        <% if (current.title) { %>
+            <A CLASS=Yellow HREF="/fucc/<%= current.file %>#<%= current.anchor %>"><%- current.title %></A>
+        <% } %>
+        </DL>
+    </TR></TABLE>
+<% } %>
+<BR><BR><BR>
+</DIV>
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=610 BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR>
+<TD WIDTH=100% ALIGN=RIGHT><FONT SIZE=-1 COLOR="#FF0000"><BLINK><B>warning:</B></BLINK>&nbsp;&nbsp;&nbsp;&nbsp;pages contain secret links</FONT></TD>
+</TR>
+<TR>
+<TD WIDTH=100% BGCOLOR="#FF0000"><FONT SIZE=-10>&nbsp;</FONT></TD>
+</TR>
+</TABLE>
+<BR>
+
+<FONT SIZE=-1><B>
+Content made possible by F.U.C.C Radio<BR>
+HTML Implementation (c)1995, Lookit the Cat Productions
+</B></FONT>
+</DIV>
+<BR>
+
+<A HREF="/fucc/"><IMG HEIGHT=75 WIDTH=75 SRC="/fucc/img/icn_fucc.gif" ALT="Fucc" BORDER=0></A>
+<A HREF="/fucc/"><FONT COLOR="#FF0000"><TT><B>F.U.C.C Radio</B></TT></FONT></A><BR>
+<TT>Pirate Radio in the fragrant city of Seattle</TT>
+
+<BR><BR>
+<IMG HEIGHT=12 WIDTH=75 SRC="/images/shim_clear.gif" ALT="Root" BORDER=0>
+<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>
+
+</BODY>
+</HTML>

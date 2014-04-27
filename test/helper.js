@@ -13,6 +13,7 @@ var callsLastArg = function callsLastArg(result) {
     };
 };
 
+
 module.exports = {
     // returns a Function that throws
     throws: function(e) {

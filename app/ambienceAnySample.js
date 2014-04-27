@@ -50,7 +50,7 @@ module.exports = function handler(req, res, cb) {
         }
 
         sample = _und.extend(sample, album);
-    }).then(function() {
+
         return loadQuips();
     }).then(function(rows) {
         // choose a random quip

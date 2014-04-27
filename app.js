@@ -113,11 +113,10 @@ curl -v http://localhost:3000/ambience/cgi/7.cgi
 curl -v http://localhost:3000/ambience/cgi/viewxml.cgi
 curl -v http://localhost:3000/ambience/cgi/imgpage.cgi
 curl -v http://localhost:3000/ambience/cgi/any_f.cgi
-
 curl -v http://localhost:3000/critturs/cgi/anyaudio.cgi
 curl -v http://localhost:3000/critturs/cgi/critlogo.cgi
 curl -v http://localhost:3000/fucc/cgi/anyaudio.cgi
-./fucc/cgi/schednow.cgi
+curl -v http://localhost:3000/fucc/cgi/schednow.cgi
 ./lookit/cgi/anyfoley.cgi
 ./lookit/cgi/anystory.cgi
 ./lookit/cgi/imgfoley.cgi

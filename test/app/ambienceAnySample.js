@@ -49,8 +49,8 @@ describe('ambienceAnySample', function() {
 
         it('gets a sample and a quip', function(done) {
             willHandle(req, res).then(function() {
-                assert(theLib.wwwRoot.willLoadCSV.calledTwice);
-                assert(theLib.wwwRoot.hasFile.calledOnce);
+                assert.equal(2, theLib.wwwRoot.willLoadCSV.callCount);
+                assert.equal(1, theLib.wwwRoot.hasFile.callCount);
                 assert(res.render.calledOnce);
                 assert(res.send.calledOnce);
 
