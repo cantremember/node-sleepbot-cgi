@@ -6,10 +6,10 @@ var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
-var willHandle = require('../../app/ambienceAnyAlbum');
+var willHandle = require('../../app/ambienceAnySample');
 
 
-describe('ambienceAnyAlbum', function() {
+describe('ambienceAnySample', function() {
     var sandbox;
     var req, res;
     beforeEach(function() {

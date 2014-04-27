@@ -89,7 +89,7 @@ app.route('/ambience/cgi/listen.*').all(require('./app/sebPlaylist'));
 app.route('/ambience/cgi/7.:format').all(require('./app/sebStatusHTML'));
 app.route('/ambience/cgi/viewxml.:format').all(require('./app/sebStatusXML'));
 app.route('/ambience/cgi/imgpage.cgi').all(require('./app/redirectTo')('/ambience'));
-app.route('/ambience/cgi/any_f.cgi').all(require('./app/ambienceAnyAlbum'));
+app.route('/ambience/cgi/any_f.cgi').all(require('./app/ambienceAnySample'));
 
 app.route('/critturs/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')('/critturs/mp2', '*.mp2'));
 app.route('/critturs/cgi/critlogo.cgi').all(require('./app/redirectToRandomFile')('/critturs/images/logo', '*.gif'));

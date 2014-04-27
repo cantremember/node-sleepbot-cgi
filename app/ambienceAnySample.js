@@ -56,7 +56,7 @@ module.exports = function handler(req, res, cb) {
         // choose a random quip
         quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns);
     }).then(function() {
-        return Promise.promisify(res.render, res)('ambienceAnyAlbum.ejs', {
+        return Promise.promisify(res.render, res)('ambienceAnySample.ejs', {
             config: theLib.config,
             sample: sample,
             quip: quip,
