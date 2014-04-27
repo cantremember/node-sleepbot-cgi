@@ -30,7 +30,7 @@ describe('redirectToRandomFile', function() {
     });
 
 
-    it('will redirect to a ', function(done) {
+    it('will redirect to a route relative to baseURL', function(done) {
         sandbox.stub(theLib.wwwRoot, 'willGetFilenames', function(pathname) {
             assert.equal('path/glob', pathname);
 
