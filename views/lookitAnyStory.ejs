@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+   <TITLE>Lookit Tells You a Story</TITLE>
+   <BASE HREF="<%= config.baseURL %>">
+</HEAD>
+<BODY BACKGROUND="/images/backgd/bub_pch.gif" BGCOLOR="FF8080" TEXT="000000" LINK="FF00FF" ALINK="000000" VLINK="000000">
+
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR ALIGN=CENTER VALIGN=MIDDLE>
+<TD WIDTH=75%><FONT SIZE=+3 COLOR="#000000"><TT>l<B>ookit</B> t<B>ells</B> y<B>ou</B> a s<B>tory</B></TT></FONT></TD>
+<TD WIDTH=25%><IMG ALT="" SRC="/images/shim_clear.gif" HEIGHT=125 WIDTH=1 BORDER=0></TD>
+</TR>
+<TR ALIGN=CENTER VALIGN=MIDDLE>
+<TD COLSPAN=2 WIDTH=100% BGCOLOR="#FF8080"><FONT SIZE=-10>&nbsp;</FONT></TD>
+</TR>
+</TABLE>
+<BR>
+
+
+
+<!-- old design disclaimer -->
+<script type="text/javascript" charset="UTF-8" xml:space="preserve" src="/javascript/Sleepbot/Util.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="/css/old-design.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/css/granular.css" />
+<div class="disclaimOuter">
+	<div class="disclaimInner fntFmSans" style="background-color: #fee">
+		<span class="fntSz11 bold">* <a class="lnkDisclaim fntSz11 bold" href="javascript:void(0);" onClick="Sleepbot.Util.toggleShow('disclaimOldDesign'); return false">old&nbsp;design&nbsp;dislaimer</a></span>
+		<div id="disclaimOldDesign" class="disclaimBody fntSz11" style="display:none">
+			this portion of my site was originally designed between 1995 and 1997.
+			&nbsp;
+			please pardon the ancient, clunky appearance.
+		</div>
+	</span></div>
+</div>
+&nbsp;<br />
+<!-- old design disclaimer -->
+
+
+
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR ALIGN=LEFT VALIGN=TOP>
+<TD WIDTH=1%><TT>&nbsp;&nbsp;&nbsp;</TT></TD>
+<TD WIDTH=98%><TT><B>
+
+<% body.split("\n").forEach(function(line) { %>
+    <% if (line) { %>
+        <P>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= line %></P>
+    <% } %>
+<% }) %>
+
+</B></TT></TD>
+<TD WIDTH=1%><TT>&nbsp;&nbsp;&nbsp;</TT></TD>
+</TR>
+</TABLE>
+
+<BR><BR>
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR>
+<TD WIDTH=100% BGCOLOR="#FF8080"><FONT SIZE=-10>&nbsp;</FONT></TD>
+</TR>
+</TABLE>
+<BR>
+
+<FONT SIZE=-1><B>
+HTML Implementation (c)1996, Lookit the Cat Productions
+</B></FONT>
+</DIV>
+<BR>
+
+<A HREF="/lookit/" TARGET="_top"><IMG HEIGHT=75 WIDTH=75 SRC="/lookit/images/icn_lkit.gif" ALT="Lookit" BORDER=0 TARGET="_top"></A>
+<A HREF="/lookit/" TARGET="_top"><TT><B>The Root of All Stuff</B></TT></A><BR>
+<TT>...because he's got so goddamn many stories to tell that he could keep you up until all hours of the morning.  well, actually, just <EM>knowing</EM> that such a place exists would keep any sane person from being able to sleep at night anyway.</TT>
+
+<BR><BR>
+<IMG HEIGHT=12 WIDTH=75 SRC="/images/shim_clear.gif" ALT="Root" BORDER=0 TARGET="_top">
+<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>
+
+</BODY>
+</HTML>
+EOB
+#---------------------------------^
+
+   1;

@@ -7,8 +7,9 @@ module.exports = {
     httpPort: 3000,
     wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
     // !!!
-    // baseURL: 'http://www.sleepbot.com',
-    baseURL: 'http://sleepbot.localhost:8080',
+    baseURL: 'http://www.sleepbot.com',
+    // baseURL: 'http://sleepbot.localhost:8080',
+    // baseURL: 'http://localhost:3000',
 
     sebServers: [
         { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true, user: 'admin', pass: 'deepDeepSleep' },

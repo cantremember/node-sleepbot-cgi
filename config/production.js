@@ -6,6 +6,8 @@ var _und = require('underscore');
 
 module.exports = _und.defaults({
     // overrides
+    caching: true,
+
     baseURL: 'http://www.sleepbot.com',
 
     // overrides the default config

@@ -76,26 +76,49 @@ app.engine('ejs', theLib.setupEJS(require('ejs')).__express);
 app.engine('md', require('marked-engine').__express);
 app.engine('markdown', require('marked-engine').__express);
 
+// the CGI routes
 
 app.route('/status.cgi').all(require('./app/status'));
 app.route('/404.cgi').all(require('./app/http404'));
 
-app.route('/cgi/animbot.cgi').all(require('./app/redirectToRandomFile')('/images/animbot', '*.gif'));
+//   /cgi
+app.route('/cgi/animbot.cgi').all(require('./app/redirectToRandomFile')(
+    '/images/animbot', '*.gif'
+));
 
-// /ambience/cgi/listen.cgi/listen.pls
-//   CGI file interrupts path resolution
-//   URI resolves as its filename past the final '/'
+//   /ambience
+//   /ambience/cgi/listen.cgi/listen.pls
+//     CGI file interrupts path resolution
+//     URI resolves as its filename past the final '/'
+//     implemented it as such in nginx.conf
 app.route('/ambience/cgi/listen.*').all(require('./app/sebPlaylist'));
 app.route('/ambience/cgi/7.:format').all(require('./app/sebStatusHTML'));
 app.route('/ambience/cgi/viewxml.:format').all(require('./app/sebStatusXML'));
-app.route('/ambience/cgi/imgpage.cgi').all(require('./app/redirectTo')('/ambience'));
+app.route('/ambience/cgi/imgpage.cgi').all(require('./app/redirectTo')(
+    '/ambience'
+));
 app.route('/ambience/cgi/any_f.cgi').all(require('./app/ambienceAnySample'));
 
-app.route('/critturs/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')('/critturs/mp2', '*.mp2'));
-app.route('/critturs/cgi/critlogo.cgi').all(require('./app/redirectToRandomFile')('/critturs/images/logo', '*.gif'));
+//   /critturs
+app.route('/critturs/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')(
+    '/critturs/mp2', '*.mp2'
+));
+app.route('/critturs/cgi/critlogo.cgi').all(require('./app/redirectToRandomFile')(
+    '/critturs/images/logo', '*.gif'
+));
 
-app.route('/fucc/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')('/fucc/mpg', '*.mp2'));
+//   /fucc
+app.route('/fucc/cgi/anyaudio.cgi').all(require('./app/redirectToRandomFile')(
+    '/fucc/mpg', '*.mp2'
+));
 app.route('/fucc/cgi/schednow.cgi').all(require('./app/fuccSchedule'));
+
+//   /lookit
+app.route('/lookit/cgi/anyfoley.cgi').all(require('./app/redirectToRandomFile')(
+    '/lookit/etc', '*.mp2'
+));
+app.route('/lookit/cgi/anystory.cgi').all(require('./app/lookitAnyStory'));
+app.route('/lookit/cgi/imgfoley.cgi').all(require('./app/lookitImgFoley'));
 
 
 // all *real* misses get HTTP 404s
@@ -118,9 +141,10 @@ curl -v http://localhost:3000/critturs/cgi/anyaudio.cgi
 curl -v http://localhost:3000/critturs/cgi/critlogo.cgi
 curl -v http://localhost:3000/fucc/cgi/anyaudio.cgi
 curl -v http://localhost:3000/fucc/cgi/schednow.cgi
-./lookit/cgi/anyfoley.cgi
-./lookit/cgi/anystory.cgi
-./lookit/cgi/imgfoley.cgi
+curl -v http://localhost:3000/lookit/cgi/anyfoley.cgi
+curl -v http://localhost:3000/lookit/cgi/anystory.cgi
+curl -v http://localhost:3000/lookit/cgi/imgfoley.cgi
+
 ./morgan/cgi/morglay.cgi
 ./morgan/cgi/morgpick.cgi
 ./morgan/index.cgi
