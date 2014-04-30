@@ -64,7 +64,7 @@ console.log('WWW root is:', theLib.config.wwwRoot)
 
 var express = require('express');
 var app = express();
-var viewPath = path.join(process.cwd(), 'views');
+var viewPath = path.resolve(path.join(__dirname, 'views')); // relative to *me*
 
 app.enable('trust proxy');
 app.enable('case sensitive');
@@ -127,7 +127,7 @@ app.route('/morgan/cgi/morglay.cgi').all(require('./app/morganLayout'));
 app.route('/morgan/cgi/morgpick.cgi').all(require('./app/redirectToRandomFile')(
     '/morgan/card', '*.html'
 ));
-app.route('/morgan/index.*').all(require('./app/morganIndex'));
+app.route('/morgan/index.:format').all(require('./app/morganIndex'));
 app.route('/morgan').all(require('./app/morganIndex'));
 
 // all *real* misses get HTTP 404s
