@@ -4,33 +4,11 @@ var Promise = require('bluebird');
 var net = require('net');
 var theLib = require('../lib/index');
 
-// http://tf.nist.gov/tf-cgi/servers.cgi
-var servers = [
-    'nist1-nj2.ustiming.org',
-    'nist1-ny2.ustiming.org',
-    'nist1-pa.ustiming.org',
-    'time-c.nist.gov',
-    // 'time-d.nist.gov', // "All services via IPV6"
-    'nist1-macon.macon.ga.us',
-    'wolfnisttime.com',
-    'nist1-chi.ustiming.org',
-    'nist.time.nosc.us',
-    'nist.netservicesgroup.com',
-    'nisttime.carsoncity.k12.mi.us',
-    'nist1-lnk.binary.net',
-    'wwv.nist.gov',
-    'time.nist.gov',
-    'utcnist.colorado.edu',
-    'utcnist2.colorado.edu',
-    'ntp-nist.ldsbc.edu',
-    'nist1-lv.ustiming.org',
-    'nist-time-server.eoni.com',
-    'nist1.symmetricom.com',
-];
-
 
 // keeps Promising to try another one ...
 var willTryServers = function willTryServers(res, tried) {
+    var servers = theLib.config.get('ntpServers');
+
     // state
     tried = tried || [];
 
