@@ -23,5 +23,5 @@ module.exports = function handler(req, res, cb) {
     }).spread(function(incoming, body) {
         res.set('Content-Type', 'text/xml');
         res.send(body);
-    }).catch(cb).error(cb);
+    }).error(theLib.callbackAndThrowError(cb));
 };

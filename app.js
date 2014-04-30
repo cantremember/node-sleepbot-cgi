@@ -130,6 +130,12 @@ app.route('/morgan/cgi/morgpick.cgi').all(require('./app/redirectToRandomFile')(
 app.route('/morgan/index.:format').all(require('./app/morganIndex'));
 app.route('/morgan').all(require('./app/morganIndex'));
 
+//   /WRLDtime
+app.route('/WRLDtime/cgi/anyclock.cgi').all(require('./app/redirectToRandomFile')(
+    '/WRLDtime/face', '*.html'
+));
+app.route('/WRLDtime/cgi/utc.cgi').all(require('./app/WRLDtimeUTC'));
+
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
 
@@ -156,7 +162,11 @@ curl -v http://localhost:3000/lookit/cgi/imgfoley.cgi
 curl -v http://localhost:3000/morgan/cgi/morglay.cgi
 curl -v http://localhost:3000/morgan/cgi/morgpick.cgi
 curl -v http://localhost:3000/morgan/index.cgi
+curl -v http://localhost:3000/morgan/index.derp
+curl -v http://localhost:3000/morgan/
+curl -v http://localhost:3000/morgan
+curl -v http://localhost:3000/morgan/card.txt
 
-./WRLDtime/cgi/anyclock.cgi
-./WRLDtime/cgi/utc.cgi
+curl -v http://localhost:3000/WRLDtime/cgi/anyclock.cgi
+curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
 */

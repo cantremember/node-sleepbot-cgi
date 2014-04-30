@@ -18,5 +18,5 @@ module.exports = function handler(req, res, cb) {
     }).spread(function(incoming, body) {
         res.set('Content-Type', 'text/html');
         res.send(body);
-    }).catch(cb).error(cb);
+    }).error(theLib.callbackAndThrowError(cb));
 };
