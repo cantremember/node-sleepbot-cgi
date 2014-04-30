@@ -1,0 +1,341 @@
+<HTML>
+<HEAD>
+   <TITLE>Morgan's Tarot:  <%= quip.text %></TITLE>
+   <BASE HREF="<%= config.baseURL %>">
+
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+    var pageReady = false;
+    var gfxBrowser = (((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) >= 3 )) || ((navigator.appName == "Microsoft Internet Explorer") && (parseInt(navigator.appVersion) >= 4 )));
+    var root = '/morgan';
+
+	var imageBase;
+	imageBase = new Array();
+//-->
+</SCRIPT>
+</HEAD>
+<STYLE>
+<!--
+   A.Purple { color: #CC3399 }
+-->
+</STYLE>
+<BODY
+ BGCOLOR="#BD8E5A" BACKGROUND="/morgan/images/cloth.gif"
+ TEXT="#000000" LINK="#FFFFFF" ALINK="#EFC69C" VLINK="#FFFFFF"
+ onLoad="OnPageLoad(); return false"
+>
+
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+    var rip;
+    var seq;
+
+	function OnPageLoad() {
+		var i;
+
+        if (gfxBrowser) {
+            rip = new MakeArray(2);
+
+            i = 1;
+            rip[i++].src = root + '/images/bead/purple1_vib.gif';
+            rip[i++].src = root + '/images/bead/purple2_vib.gif';
+
+            seq = new Array();
+
+            i = 0;
+            seq[i++] = '1234';
+            seq[i++] = '4321';
+            seq[i++] = '3412';
+            seq[i++] = '2143';
+        }
+
+        pageReady = true;
+	}
+
+// - - - - - - - - - - -
+
+    function MakeArray(n) {
+        this.length = n
+        for (var i = 1; i<=n; i++) {
+            this[i] = new Image();
+        }
+        return this;
+    }
+
+    function BetweenOneAnd(n) {
+        var x = parseInt((Math.random() * n) + 1);
+        return ((x > n) ? n : x);
+    }
+
+    function WaitForMilli(n) {
+        var t, d;
+        d = new Date();
+        t = d.getTime() + n;
+        while (d.getTime() < t) {
+            d = new Date();
+        }
+    }
+
+// - - - - - - - - - - -
+
+    function msOver(num) {
+        var a, d, w, i, x;
+        if (! pageReady) return;
+        if (! gfxBrowser) return;
+
+        a = BetweenOneAnd(4) - 1;
+        a = seq[a];
+
+        d = new Array(0, 0);
+
+        for (i=0; i<4; ++i) {
+            w = parseInt(a.charAt(i)) - 1;
+            if (BetweenOneAnd(3) != 3) {
+                d[((BetweenOneAnd(3) != 3) ? 0 : 1)] |= (1 << w);
+            }
+        }
+
+        x = d[1];
+        if (x != 0) {
+            setTimeout("doOver(" + x + ", 1);", 300);
+        }
+        x = d[0];
+        if (x != 0) {
+            doOver(x, 1);
+        }
+    }
+
+    function doOver(which, how) {
+        var i, src;
+        var w = which;
+        if (! pageReady) return;
+        if (! gfxBrowser) return;
+
+        for (i=0; i<4; ++i) {
+            if (w & 1) {
+                src = (((i == 1) || (i == 2)) ? 1 : 2);
+                src = ((how == 1) ? rip[src].src : root + '/images/bead/purple' + src + '.gif');
+                document.images[imageBase[i] + 1].src = src;
+            }
+
+            w >>= 1;
+        }
+
+        if (how == 1) {
+            setTimeout("doOver(" + which + ", 0);", 450);
+        }
+    }
+
+    function msOut(num, dir) {
+    }
+//-->
+</SCRIPT>
+
+&nbsp;<BR>
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR>
+	<TD WIDTH=4%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=60 HEIGHT=1></TD>
+	<TD WIDTH=1%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=15 HEIGHT=1></TD>
+	<TD WIDTH=90%></TD>
+	<TD WIDTH=1%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=15 HEIGHT=1></TD>
+	<TD WIDTH=4%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=60 HEIGHT=1></TD>
+</TR>
+<TR ALIGN=RIGHT>
+	<TD></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_hrn_ul.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD BGCOLOR="#FFFFFF"><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=1 HEIGHT=1></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_hrn_ur.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD></TD>
+</TR>
+<TR ALIGN=LEFT VALIGN=MIDDLE>
+	<TD><FORM ACTION="cgi/morglay.cgi"></TD>
+
+	<TD BGCOLOR="#FFFFFF">&nbsp;</TD>
+	<TD BGCOLOR="#FFFFFF"><FONT FACE="Arial, Helvetica">
+
+<FONT SIZE=-1>
+&nbsp;&nbsp;&nbsp;Your cards are down <A CLASS=Purple HREF="#CARDS" onMouseOver="msOver(0); window.status='Go straight to the cards...'; return true" onMouseOut="msOut(0); window.status=''; return true"><FONT COLOR="#CC3399"><B>here</B></FONT></A>.<BR>
+Each card is linked to its <B>description</B>.
+Read what they present to you, and meditate (yes, <I>meditate</I>) on how it applies to the question in your mind.
+<BR>&nbsp;<BR>
+If one card doesn't make any sense, maybe it somehow relates to the applicability of another card... meditate on <I>that</I>.
+Don't be concerned if the response is confusing.
+Perhaps you need to rephrase the question and request another layout...
+</FONT>
+
+</FONT></TD>
+	<TD BGCOLOR="#FFFFFF">&nbsp;</TD>
+
+	<TD></FORM></TD>
+</TR>
+
+<TR>
+	<TD></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_clw_ll.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD BGCOLOR="#FFFFFF"><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=1 HEIGHT=1></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_clw_lr.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD></TD>
+</TR>
+</TABLE>
+
+</DIV>
+
+
+
+&nbsp;
+<A NAME="CARDS">
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR VALIGN=TOP ALIGN=CENTER>
+	<TD WIDTH=1%><SCRIPT LANGUAGE="JavaScript">
+<!--
+    if (gfxBrowser) {
+        imageBase.length += 1;
+        imageBase[0] = document.images.length - 1;
+    }
+//-->
+</SCRIPT><IMG SRC="/morgan/images/bead/purple2.gif" ALT="( * )" WIDTH=70 HEIGHT=70></TD>
+	<TD WIDTH=98%>
+&nbsp;<BR>
+&nbsp;<BR>
+
+<%
+    cards.forEach(function(card, index) {
+        // de-HTMLify
+        var title = card.title.replace(/<[^>]+>/g, '');
+        var titleJS = title.replace(/'/g, '\\i');
+%>
+    <IMG SRC="/morgan/images/shim_clear.gif" ALT="" ALIGN=CENTER WIDTH=12 HEIGHT=1
+    ><A HREF="/morgan/card/<%= card.abbrev %>.html"
+        TITLE="<%= title %>"
+        ALT="<%= title %>"
+        onMouseOver="msOver(<%= index %>); window.status='<%= titleJS %>'; return true"
+        onMouseOut="msOut(<%= index %>); return true"
+    ><IMG SRC="/morgan/images/card/<%= card.abbrev %>.gif" ALT="<%= title %>" BORDER=0 WIDTH=240 HEIGHT=360
+    ></A
+    ><IMG SRC="/morgan/images/shim_clear.gif" ALT="" ALIGN=CENTER WIDTH=11 HEIGHT=1>
+<% }); %>
+
+<BR>
+</TD>
+	<TD WIDTH=1%><SCRIPT LANGUAGE="JavaScript">
+<!--
+	if (gfxBrowser) {
+		imageBase.length += 1;
+		imageBase[1] = document.images.length - 1;
+	}
+//-->
+</SCRIPT><IMG SRC="/morgan/images/bead/purple1.gif" ALT="( * )" WIDTH=70 HEIGHT=70></TD>
+</TR>
+</TABLE>
+
+&nbsp;<BR>
+&nbsp;<BR>
+
+</DIV>
+
+
+
+&nbsp;
+
+<DIV ALIGN=CENTER>
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR>
+	<TD WIDTH=10%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=60 HEIGHT=1></TD>
+	<TD WIDTH=22%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=70 HEIGHT=1></TD>
+	<TD WIDTH=1%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=15 HEIGHT=1></TD>
+	<TD WIDTH=34%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=180 HEIGHT=1></TD>
+	<TD WIDTH=1%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=15 HEIGHT=1></TD>
+	<TD WIDTH=22%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=70 HEIGHT=1></TD>
+	<TD WIDTH=10%><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=60 HEIGHT=1></TD>
+</TR>
+<TR ALIGN=RIGHT>
+	<TD></TD>
+	<TD></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_clw_ul.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD BGCOLOR="#FFFFFF"><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=1 HEIGHT=1></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_clw_ur.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD></TD>
+	<TD></TD>
+</TR>
+<TR ALIGN=CENTER VALIGN=MIDDLE>
+	<TD></TD>
+	<TD><SCRIPT LANGUAGE="JavaScript">
+<!--
+	if (gfxBrowser) {
+		imageBase.length += 1;
+		imageBase[2] = document.images.length - 1;
+	}
+//-->
+</SCRIPT><IMG SRC="/morgan/images/bead/purple1.gif" ALT="( * )" WIDTH=70 HEIGHT=70></TD>
+	<TD BGCOLOR="#FFFFFF">&nbsp;</TD>
+	<TD ALIGN=CENTER NOWRAP BGCOLOR="#FFFFFF"><FONT FACE="Arial, Helvetica">
+&nbsp;<BR>
+
+<FONT SIZE=-1>
+If you believe that there are<BR>
+other unanswered questions with which<BR>
+this sublime oracle may assist you...<BR>
+&nbsp;<BR>
+Click <A CLASS=Purple HREF="/morgan/request.html" onMouseOver="msOver(0); window.status='Request for a Layout'; return true" onMouseOut="msOut(0); window.status=''; return true"><FONT COLOR="#CC3399"><B>here</B></FONT></A> for a fresh layout.
+</FONT>
+
+<BR>&nbsp;<BR>
+</FONT></TD>
+	<TD BGCOLOR="#FFFFFF">&nbsp;</TD>
+	<TD><SCRIPT LANGUAGE="JavaScript">
+<!--
+	if (gfxBrowser) {
+		imageBase.length += 1;
+		imageBase[3] = document.images.length - 1;
+	}
+//-->
+</SCRIPT><IMG SRC="/morgan/images/bead/purple2.gif" ALT="( * )" WIDTH=70 HEIGHT=70></TD>
+	<TD></TD>
+</TR>
+
+<TR>
+	<TD></TD>
+	<TD></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_hrn_ll.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD BGCOLOR="#FFFFFF"><IMG SRC="/morgan/images/shim_clear.gif" ALT="" WIDTH=1 HEIGHT=1></TD>
+	<TD><IMG SRC="/morgan/images/crnr/crnr_hrn_lr.gif" ALT="" WIDTH=15 HEIGHT=15></TD>
+	<TD></TD>
+	<TD></TD>
+	<TD></TD>
+</TR>
+</TABLE>
+
+</DIV>
+&nbsp;
+
+
+
+<TABLE WIDTH=100% BORDER=0 CELLSPACING=0 CELLPADDING=0><TR><TD BGCOLOR="#EFC69C">&nbsp;</TD></TR></TABLE>
+&nbsp;<BR>
+
+<DIV ALIGN=CENTER><FONT FACE="Arial, Helvetica" SIZE=-1><B>
+The Morgan's Tarot (c)1970, 1983 by <A HREF="http://www.usgamesinc.com/" TARGET="_top">U.S. Games Systems, Inc.</A>
+<BR>
+HTML Implementation (c)1998, Lookit the Cat Productions
+</B>
+<BR>&nbsp;<BR>
+Illustrations and Text from Morgan's Tarot Deck reproduced by permission of U.S. Games Systems
+<BR>
+Further reproduction prohibited.
+</FONT></DIV>
+<BR>
+
+<A HREF="/morgan/index_h.html" TARGET="_top"><IMG HEIGHT=75 WIDTH=75 SRC="/morgan/images/icn_morg.gif" ALT="Morgan" BORDER=0></A>
+<A HREF="/morgan/index_h.html" TARGET="_top"><FONT COLOR="#FF0000"><TT><B>Morgan's Tarot</B></TT></FONT></A><BR>
+<TT>...and, who could forget, <%= quip.text %></TT>
+
+<BR><BR>
+<IMG HEIGHT=12 WIDTH=75 SRC="/images/shim_clear.gif" ALT="Root" BORDER=0>
+<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>
+
+</BODY>
+</HTML>

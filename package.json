@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "express": "4.0.x",
+        "cookie-parser": "1.0.x",
         "ejs": "0.8.x",
         "marked-engine": "0.1.x",
         "forever": "0.10.x",

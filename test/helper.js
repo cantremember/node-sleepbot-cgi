@@ -30,6 +30,11 @@ module.exports = {
     mockRequest: function mockRequest(sandbox, option) {
         return _und.extend({
             headers: [],
+            params: {},
+            param: function(key) {
+                return this.params[key];
+            },
+            cookies: {},
         }, option);
     },
 

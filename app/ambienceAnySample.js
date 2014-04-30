@@ -15,12 +15,20 @@ var albumCache = {};
 
 // load the samples file
 var loadSamples = theLib.willMemoize(function() {
-    return theLib.wwwRoot.willLoadCSV('ambience/any.txt');
+    return theLib.wwwRoot.willLoadCSV('ambience/any.txt').then(function(rows) {
+        return rows.map(function(row) {
+            return theLib.dataColumnMap(row, sampleColumns);
+        });
+    });
 });
 
 // load the quips file
 var loadQuips = theLib.willMemoize(function() {
-    return theLib.wwwRoot.willLoadCSV('ambience/anyquip.txt');
+    return theLib.wwwRoot.willLoadCSV('ambience/anyquip.txt').then(function(rows) {
+        return rows.map(function(row) {
+            return theLib.dataColumnMap(row, quipColumns);
+        });
+    });
 });
 
 
@@ -28,9 +36,9 @@ module.exports = function handler(req, res, cb) {
     var quip;
     var sample;
 
-    return loadSamples().then(function(rows) {
+    return loadSamples().then(function(datas) {
         // choose a random sample
-        sample = theLib.dataColumnMap(theLib.chooseAny(rows), sampleColumns);
+        sample = theLib.chooseAny(datas);
 
         // we split sample storage into two subdirectories
         sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
@@ -52,9 +60,9 @@ module.exports = function handler(req, res, cb) {
         sample = _und.extend(sample, album);
 
         return loadQuips();
-    }).then(function(rows) {
+    }).then(function(datas) {
         // choose a random quip
-        quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns);
+        quip = theLib.chooseAny(datas);
     }).then(function() {
         return Promise.promisify(res.render, res)('ambienceAnySample.ejs', {
             config: theLib.config,

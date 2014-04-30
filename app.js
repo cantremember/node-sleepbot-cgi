@@ -76,6 +76,8 @@ app.engine('ejs', theLib.setupEJS(require('ejs')).__express);
 app.engine('md', require('marked-engine').__express);
 app.engine('markdown', require('marked-engine').__express);
 
+app.use(require('cookie-parser')());
+
 // the CGI routes
 
 app.route('/status.cgi').all(require('./app/status'));
@@ -120,6 +122,13 @@ app.route('/lookit/cgi/anyfoley.cgi').all(require('./app/redirectToRandomFile')(
 app.route('/lookit/cgi/anystory.cgi').all(require('./app/lookitAnyStory'));
 app.route('/lookit/cgi/imgfoley.cgi').all(require('./app/lookitImgFoley'));
 
+//   /morgan
+app.route('/morgan/cgi/morglay.cgi').all(require('./app/morganLayout'));
+app.route('/morgan/cgi/morgpick.cgi').all(require('./app/redirectToRandomFile')(
+    '/morgan/card', '*.html'
+));
+app.route('/morgan/index.*').all(require('./app/morganIndex'));
+app.route('/morgan').all(require('./app/morganIndex'));
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
@@ -144,10 +153,10 @@ curl -v http://localhost:3000/fucc/cgi/schednow.cgi
 curl -v http://localhost:3000/lookit/cgi/anyfoley.cgi
 curl -v http://localhost:3000/lookit/cgi/anystory.cgi
 curl -v http://localhost:3000/lookit/cgi/imgfoley.cgi
+curl -v http://localhost:3000/morgan/cgi/morglay.cgi
+curl -v http://localhost:3000/morgan/cgi/morgpick.cgi
+curl -v http://localhost:3000/morgan/index.cgi
 
-./morgan/cgi/morglay.cgi
-./morgan/cgi/morgpick.cgi
-./morgan/index.cgi
 ./WRLDtime/cgi/anyclock.cgi
 ./WRLDtime/cgi/utc.cgi
 */

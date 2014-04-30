@@ -104,7 +104,7 @@ var isLiveNow = function(data, date) {
 var loadLives = theLib.willMemoize(function() {
     var datas;
     return theLib.wwwRoot.willLoadCSV('fucc/live.txt').then(function(rows) {
-        // coerce & cache
+        // coerce
         datas = rows.map(function(row) {
             var data = theLib.dataColumnMap(row, liveColumns);
             data = coerceData(data);
@@ -131,7 +131,7 @@ var loadLives = theLib.willMemoize(function() {
     });
 });
 var checkLive = function(date) {
-    // load up the rows & cache
+    // load up the rows
     return loadLives().then(function(datas) {
         // the first one that's live
         return datas && datas.filter(function(data) {
@@ -155,7 +155,7 @@ var isShowNow = function(data, date) {
 var loadShows = theLib.willMemoize(function() {
     var datas;
     return theLib.wwwRoot.willLoadCSV('fucc/show.txt').then(function(rows) {
-        // coerce & cache
+        // coerce
         datas = rows.map(function(row) {
             var data = theLib.dataColumnMap(row, showColumns);
             data = coerceData(data);
@@ -180,7 +180,7 @@ var loadShows = theLib.willMemoize(function() {
     });
 });
 var checkShow = function(date) {
-    // load up the rows & cache
+    // load up the rows
     return loadShows().then(function(datas) {
         // the first one that's live
         return datas && datas.filter(function(data) {
