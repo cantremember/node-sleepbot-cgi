@@ -33,8 +33,6 @@ var willTryServers = function willTryServers(res, tried) {
     }
     tried.push(server);
 
-    console.log('trying', server);
-
     // Daytime Protocol
     //   https://tools.ietf.org/html/rfc867
     var connection = net.connect(13, server);
@@ -43,16 +41,13 @@ var willTryServers = function willTryServers(res, tried) {
     // fail
     var failOn = function(queue) {
         connection && connection.on(queue, function() {
-            var msg = 'Daytime Protocol FAIL: ' + server;
-            console.error(msg);
+            console.error('Daytime Protocol FAIL:', server);
 
             // assume it'll come back
             //delete servers[server];
 
-            // keep on trying, ASAP
-            process.nextTick(function() {
-                return deferred.resolve(willTryServers(res, tried));
-            })
+            // keep on trying
+            return deferred.resolve(willTryServers(res, tried));
         });
     };
     failOn('error');
@@ -76,10 +71,8 @@ var willTryServers = function willTryServers(res, tried) {
                 return deferred.resolve(result);
             }
 
-            // keep on trying, ASAP
-            process.nextTick(function() {
-                return deferred.resolve(willTryServers(res, tried));
-            })
+            // keep on trying
+            return deferred.resolve(willTryServers(res, tried));
         });
     };
     succeedOn('close');
