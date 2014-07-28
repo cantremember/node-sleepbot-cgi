@@ -16,7 +16,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "ssh://emperor@seb.sleepbot.com/usr/share/git/node-sleepbot-cgi.git"
+        "url": "ssh://git@sink.cantremember.com/opt/git-repo/node-sleepbot-cgi.git"
     },
     "dependencies": {
         "express": "4.0.x",
