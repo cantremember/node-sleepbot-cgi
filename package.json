@@ -1,6 +1,6 @@
 {
     "name": "node-sleepbot-cgi",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Perl CGI replacement for sleepbot.com",
     "author": "Daniel M Foley",
     "license": "CC-BY-3.0",
