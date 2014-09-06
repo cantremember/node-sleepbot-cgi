@@ -42,6 +42,6 @@ module.exports = {
         'ntp-nist.ldsbc.edu',
         'nist1-lv.ustiming.org',
         'nist-time-server.eoni.com',
-        'nist1.symmetricom.com',
+        // 'nist1.symmetricom.com', // "Daytime Protocol FAIL"
     ],
 };

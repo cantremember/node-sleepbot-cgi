@@ -40,11 +40,16 @@ var willTryServers = function willTryServers(res, tried) {
 
     // fail
     var failOn = function(queue) {
-        connection && connection.on(queue, function() {
+        connection.on(queue, function() {
+            if (! connection) {
+                return;
+            }
+            connection = null;
+
             console.error('Daytime Protocol FAIL:', server);
 
-            // assume it'll come back
-            //delete servers[server];
+            // // assume it'll come back
+            // delete servers[server];
 
             // keep on trying
             return deferred.resolve(willTryServers(res, tried));
@@ -54,14 +59,19 @@ var willTryServers = function willTryServers(res, tried) {
     failOn('timeout');
 
     // accumulate
-    connection && connection.on('data', function(data) {
+    connection.on('data', function(data) {
+        if (! connection) {
+            return;
+        }
         parts.push(data.toString());
     });
 
     // succeed
     var succeedOn = function(queue) {
-        connection && connection.on(queue, function() {
-            // we're done with you
+        connection.on(queue, function() {
+            if (! connection) {
+                return;
+            }
             connection = null;
 
             // if it's non-blank, we've got what we want!
