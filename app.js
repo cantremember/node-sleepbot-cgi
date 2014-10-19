@@ -1,12 +1,19 @@
 #!/usr/bin/env node
 /*
-   ENV
-     NODE_ENV
-     HTTP_PORT
-     WWW_ROOT
-     BLUEBIRD_DEBUG=1
-   /etc/init.d
-     https://github.com/nodejitsu/forever
+  ENV
+    HTTP_PORT
+    WWW_ROOT
+    ...
+    NODE_ENV
+    BLUEBIRD_DEBUG=1
+    NODE_CONFIG_DIR=./config
+
+  /etc/init.d
+    https://github.com/nodejitsu/forever
+
+  TODO
+    https://github.com/lorenwest/node-config
+    https://github.com/trentm/node-bunyan
 */
 
 'use strict';
