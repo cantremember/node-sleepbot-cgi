@@ -1,9 +1,9 @@
 {
     "name": "node-sleepbot-cgi",
     "version": "0.0.2",
-    "description": "Perl CGI replacement for sleepbot.com",
+    "description": "A Node.js app to replace legacy Perl CGI scripts for sleepbot.com",
     "author": "Daniel M Foley",
-    "license": "CC-BY-3.0",
+    "license": "WTFPL",
     "homepage": "http://sleepbot.com",
     "email": "webmaster@sleepbot.com",
     "main": "index.js",
@@ -19,6 +19,7 @@
         "type": "git",
         "url": "ssh://git@sink.cantremember.com/opt/git-repo/node-sleepbot-cgi.git"
     },
+    "readmeFilename": "README.md",
     "dependencies": {
         "express": "~4.8.7",
         "cookie-parser": "~1.3.2",
