@@ -94,5 +94,6 @@ var willTryServers = function willTryServers(res, tried) {
 
 
 module.exports = function handler(req, res, cb) {
-    return willTryServers(res).error(theLib.callbackAndThrowError(cb));
+    return willTryServers(res)
+    .catch(theLib.callbackAndThrowError(cb));
 };

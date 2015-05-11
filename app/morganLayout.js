@@ -22,18 +22,22 @@ var quips = [
     return theLib.dataColumnMap(row, quipColumns);
 });
 
-// cached information
-var albumCache = {};
+var NO_CARDS = Object.freeze([]);
 
 // load the cards file
 var loadCards = theLib.willMemoize(function() {
-    return theLib.wwwRoot.willLoadCSV('morgan/card.txt').then(function(rows) {
+    return theLib.wwwRoot.willLoadTSV('morgan/card.txt')
+    .then(function(rows) {
         return rows.map(function(row) {
             var data = theLib.dataColumnMap(row, cardColumns);
             data.id = parseInt(data.id, 10);
 
             return data;
         });
+    })
+    .catch(function() {
+        // treat as no match
+        return NO_CARDS;
     });
 });
 
@@ -50,7 +54,8 @@ module.exports = function handler(req, res, cb) {
     cardCount = parseInt(cardCount, 10) || 0;
     cardCount = Math.min(Math.max(cardCount, 1), 10);
 
-    return loadCards().then(function(datas) {
+    return loadCards()
+    .then(function(datas) {
         // choose N unique cards
         while (cards.length < cardCount) {
             if (cards.length >= datas.length) {
@@ -74,8 +79,10 @@ module.exports = function handler(req, res, cb) {
             config: theLib.config,
             cards: cards,
             quip: quip,
+        })
+        .then(function(body) {
+            res.send(body);
         });
-    }).then(function(body) {
-        res.send(body);
-    }).error(theLib.callbackAndThrowError(cb));
+    })
+    .catch(theLib.callbackAndThrowError(cb));
 };

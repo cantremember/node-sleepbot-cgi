@@ -11,14 +11,14 @@ var willGetFilenames = theLib.willMemoize(function() {
 });
 
 // the files themselves
-var fileCache = {};
 var willGetFile = function(filepath) {
-    var will = fileCache[filepath] || theLib.willMemoize(function() {
+    var cache = handler.cache;
+    var will = cache[filepath] || theLib.willMemoize(function() {
         return theLib.wwwRoot.willLoadFile(filepath);
     });
     if (theLib.config.caching) {
         // cache
-        fileCache[filepath] = will;
+        cache[filepath] = will;
     }
     // execute to produce a Promise
     return will();
@@ -26,17 +26,30 @@ var willGetFile = function(filepath) {
 
 
 // capture file-path & optional glob pattern
-module.exports = function handler(req, res, cb) {
-    return willGetFilenames().then(function(filenames) {
+function handler(req, res, cb) {
+    return willGetFilenames()
+    .then(function(filenames) {
         var filepath = theLib.chooseAny(filenames);
 
         return willGetFile('lookit/story/' + filepath);
-    }).then(function(body) {
+    })
+    .then(function(body) {
         return Promise.promisify(res.render, res)('lookitAnyStory.ejs', {
             config: theLib.config,
             body: body,
+        })
+        .then(function(body) {
+            res.send(body);
         });
-    }).then(function(body) {
-        res.send(body);
-    }).error(theLib.callbackAndThrowError(cb));
+    })
+    .catch(theLib.callbackAndThrowError(cb));
 };
+
+// cached information
+handler.forget = function forget() {
+    this.cache = {};
+}
+handler.forget();
+
+
+module.exports = handler;

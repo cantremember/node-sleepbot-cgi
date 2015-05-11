@@ -7,7 +7,8 @@ var theLib = require('../lib/index');
 
 // capture file-path & optional glob pattern
 module.exports = function handler(req, res, cb) {
-    return Promise.resolve().then(function(body) {
+    return Promise.resolve()
+    .then(function(body) {
         var title = req.param('title') || '(image)';
         var image = req.param('image');
         image = (image
@@ -19,8 +20,10 @@ module.exports = function handler(req, res, cb) {
             config: theLib.config,
             title: title,
             image: image,
+        })
+        .then(function(body) {
+            res.send(body);
         });
-    }).then(function(body) {
-        res.send(body);
-    }).error(theLib.callbackAndThrowError(cb));
+    })
+    .catch(theLib.callbackAndThrowError(cb));
 };

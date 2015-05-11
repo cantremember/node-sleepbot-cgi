@@ -7,20 +7,10 @@ var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
-var willHandle = require('../../app/ambienceAnySample');
-
-var NO_DATA = new Buffer(0);
-var ANY_DATA = "\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-";
-var QUIP_DATA = "\n\
-text\n\
-text\n\
-";
+var willHandle = require('../../app/lookitAnyStory');
 
 
-describe('ambienceAnySample', function() {
+describe('lookitAnyStory', function() {
     var sandbox;
     var cb;
     var req, res;
@@ -33,7 +23,7 @@ describe('ambienceAnySample', function() {
         req = theHelper.mockRequest(sandbox);
         res = theHelper.mockResponse(sandbox);
 
-        sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
+        sandbox.spy(theLib.wwwRoot, 'willLoadFile');
     });
     afterEach(function() {
         sandbox.restore();
@@ -43,18 +33,20 @@ describe('ambienceAnySample', function() {
     });
 
 
-    describe('with a sample and quip', function() {
+    describe('with a random file', function() {
         var caching;
         beforeEach(function() {
             caching = theLib.config.caching;
 
+            theHelper.mockGlob(sandbox, function() {
+                return [ 'glob.file' ];
+            });
+
             mockfs({ '/mock-fs': {
-                'ambience': {
-                    'any.txt': ANY_DATA,
-                    'anyquip.txt': QUIP_DATA,
-                    'covergif': {
-                        'stub.gif': 'GIF89a',
-                    },
+                'lookit': {
+                    'story': {
+                        'glob.file': 'GLOB.FILE',
+                    }
                 },
             } });
         });
@@ -67,7 +59,7 @@ describe('ambienceAnySample', function() {
 
             return willHandle(req, res, cb)
             .then(function() {
-                assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
+                assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
 
                 assert(! cb.called);
                 assert(res.render.calledOnce);
@@ -77,12 +69,7 @@ describe('ambienceAnySample', function() {
                 assert.equal(Object.keys(willHandle.cache).length, 0);
 
                 var context = res.render.firstCall.args[1];
-                assert.equal(context.sample.stub, 'stub');
-                assert.equal(context.sample.albumFile, 'stub');
-                assert.equal(context.sample.albumAnchor, 'STUB');
-                assert.equal(context.sample.coverImage, '/ambience/covergif/stub.gif');
-                assert(context.sample.coverExists);
-                assert.equal(context.quip.text, 'text');
+                assert.equal(context.body, 'GLOB.FILE');
             });
         });
 
@@ -91,7 +78,7 @@ describe('ambienceAnySample', function() {
 
             return willHandle(req, res, cb)
             .then(function() {
-                assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
+                assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
 
                 assert(! cb.called);
                 assert(res.render.calledOnce);
@@ -99,53 +86,33 @@ describe('ambienceAnySample', function() {
 
                 assert.equal(Object.keys(willHandle.cache).length, 1);
 
-                return willHandle(req, res, cb);
+                return willHandle(req, res);
             })
             .then(function() {
-                assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
+                assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
 
                 assert.equal(Object.keys(willHandle.cache).length, 1);
             });
         });
     });
 
-    it('survives no data', function() {
-        mockfs({ '/mock-fs': {
-            'ambience': {
-                'any.txt': NO_DATA,
-                'anyquip.txt': NO_DATA,
-            },
-        } });
-
-        return willHandle(req, res, cb)
-        .then(function() {
-            assert(cb.calledOnce);
-            assert(! res.render.called);
-            assert(! res.send.called);
+    it('survives with no file contents', function() {
+        theHelper.mockGlob(sandbox, function() {
+            return [ 'glob.file' ];
         });
-    });
-
-    it('survives missing data', function() {
-        mockfs({ '/mock-fs': {
-            'ambience': { },
-        } });
 
         return willHandle(req, res, cb)
         .then(function() {
-            assert(cb.calledOnce);
-            assert(! res.render.called);
-            assert(! res.send.called);
+            assert(! cb.called);
+            assert(res.render.calledOnce);
+            assert(res.send.calledOnce);
+
+            var context = res.render.firstCall.args[1];
+            assert.strictEqual(context.body, '');
         });
     });
 
     it('will fail gracefully', function() {
-        mockfs({ '/mock-fs': {
-            'ambience': {
-                'any.txt': ANY_DATA,
-                'anyquip.txt': QUIP_DATA,
-            },
-        } });
-
         res.render = sandbox.stub().throws(new Error('BOOM'));
 
         return willHandle(req, res, cb)

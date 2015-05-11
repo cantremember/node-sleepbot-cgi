@@ -6,10 +6,10 @@ var _und = require('underscore');
 
 module.exports = _und.defaults({
     // overrides
-    wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
-    // wwwRoot: '/mnt/ec2-http/sleepbot.com',
+    wwwRoot: '/mock-fs',
 
-    baseURL: 'http://www.sleepbot.com',
+    baseURL: 'http://localhost:3000',
     // baseURL: 'http://sleepbot.localhost:8080',
-    // baseURL: 'http://localhost:3000',
+
+    viewsRoot: '/mock-fs',
 }, require('./default'));

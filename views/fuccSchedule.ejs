@@ -38,11 +38,11 @@
 <BR><BR><BR>
 
 <% if (dead) { // we are down %>
-    <BR>
+    <BR><!-- DEAD -->
     <%- dead %>
     <BR><BR>
 <% } else if (! current) { // we are not scheduled %>
-    <BR><BR>
+    <BR><BR><!-- OFF -->
     <DIV ALIGN=CENTER><H2>
     Dead Air
     </H2></DIV>
@@ -57,8 +57,11 @@
 
     <BR><BR>
 <% } else { // yay!  what is on now? %>
-    <DIV ALIGN=CENTER><FONT COLOR="#FF0000" SIZE=+2><B><%= dayOfWeekName %></B></FONT><BR><FONT SIZE=+1><%- quip.text %></FONT></DIV>&nbsp;
+    <DIV ALIGN=CENTER><FONT COLOR="#FF0000" SIZE=+2><B><%= dayOfWeekName %></B></FONT><BR><FONT SIZE=+1><%-
+        (quip && quip.text)
+    %></FONT></DIV>&nbsp;
 
+    <!-- ON -->
     <DIV ALIGN=CENTER>
     <TABLE BORDER=0 CELLSPACING=5 WIDTH=610><TR><TD>
         <DL>

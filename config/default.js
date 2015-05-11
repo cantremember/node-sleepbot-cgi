@@ -10,6 +10,10 @@ module.exports = {
     // baseURL: 'http://sleepbot.localhost:8080',
     // baseURL: 'http://localhost:3000',
 
+    viewsRoot: path.resolve(
+        path.join(__dirname, '../views') // relative to *me*
+    ),
+
     sebServers: [
         { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true, user: 'admin', pass: 'deepDeepSleep' },
         { url: 'http://sc7.shoutcaststreaming.us:8044' },

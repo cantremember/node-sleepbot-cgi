@@ -15,8 +15,10 @@ module.exports = function handler(req, res, cb) {
             'User-Agent': 'XML Getter (Mozilla Compatible)',
         },
         followAllRedirects: true,
-    }).spread(function(incoming, body) {
+    })
+    .spread(function(incoming, body) {
         res.set('Content-Type', 'text/html');
         res.send(body);
-    }).error(theLib.callbackAndThrowError(cb));
+    })
+    .catch(theLib.callbackAndThrowError(cb));
 };

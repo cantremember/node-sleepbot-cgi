@@ -6,8 +6,7 @@ var _und = require('underscore');
 
 module.exports = _und.defaults({
     // overrides
-    wwwRoot: '/mnt/ec2-http/sleepbot.com',
-    caching: true,
+    wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
 
-    baseURL: 'http://www.sleepbot.com',
+    baseURL: 'http://localhost:3000',
 }, require('./default'));

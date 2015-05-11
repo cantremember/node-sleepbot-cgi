@@ -20,8 +20,10 @@ module.exports = function handler(req, res, cb) {
             sendImmediately: true,
         },
         followAllRedirects: true,
-    }).spread(function(incoming, body) {
+    })
+    .spread(function(incoming, body) {
         res.set('Content-Type', 'text/xml');
         res.send(body);
-    }).error(theLib.callbackAndThrowError(cb));
+    })
+    .catch(theLib.callbackAndThrowError(cb));
 };

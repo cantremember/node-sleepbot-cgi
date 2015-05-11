@@ -13,6 +13,7 @@
     },
     "scripts": {
         "test": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha test",
+        "test-debug": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha debug test",
         "dev": "BLUEBIRD_DEBUG=1 NODE_ENV=test node app.js"
     },
     "repository": {
@@ -28,14 +29,20 @@
         "forever": "~0.11.1",
         "minimist": "~1.1.0",
         "underscore": "1.6.x",
-        "csv": "0.3.x",
+        "csv": "0.4.x",
         "glob": "~4.0.5",
         "request": "~2.40.0",
         "bluebird": "~2.3.2"
     },
     "devDependencies": {
-        "mocha": "~1.21.4",
-        "sinon": "~1.10.3",
-        "supertest": "~0.13.0"
+        "mocha": "^1.21.4",
+        "sinon": "^1.10.3",
+        "supertest": "~0.13.0",
+        "proxyquire": "^1.4.0",
+        "mock-fs": "^2.6.0",
+        "jsdoc": "3.3.0-beta1",
+        "jshint": "^2.6.3",
+        "istanbul": ">=0.2.7",
+        "jscs": "^1.12.0"
     }
 }

@@ -1,8 +1,13 @@
 'use strict';
 
 var assert = require('assert');
+var fs = require('fs');
+var path = require('path');
 var _und = require('underscore');
+var glob = require('glob');
 var Promise = require('bluebird');
+
+var VIEWS_ROOT = path.join(__dirname, '../views'); // relative to *me*
 
 var callsLastArg = function callsLastArg(result) {
     return function() {
@@ -27,6 +32,10 @@ module.exports = {
         assert(false, 'should not be called');
     },
 
+    realEjs: function(filename) {
+        return fs.readFileSync(path.join(VIEWS_ROOT, filename), { encoding: 'utf8' });
+    },
+
     mockRequest: function mockRequest(sandbox, option) {
         return _und.extend({
             headers: [],
@@ -45,4 +54,10 @@ module.exports = {
             render:   sandbox.spy(callsLastArg('body')),
         }, option);
     },
-}
+
+    mockGlob: function(sandbox, fResults) {
+        return sandbox.stub(glob.Glob.prototype, '_process', function() {
+            this.emit('end', fResults.apply(this, arguments));
+        });
+    },
+};
