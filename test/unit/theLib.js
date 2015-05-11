@@ -353,10 +353,10 @@ A\tB\n\
                         'ambienceAnySample.js',
                         'fuccSchedule.js',
                         'http404.js',
-                        'lib.js',
                         'lookitAnyStory.js',
                         'morganLayout.js',
-                        'redirectToRandomFile.js'
+                        'redirectToRandomFile.js',
+                        'theLib.js',
                     ].sort());
 
                     // no directories
