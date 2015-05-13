@@ -1,7 +1,6 @@
 'use strict';
 
 var Promise = require('bluebird');
-var _und = require('underscore');
 
 var theLib = require('../lib/index');
 

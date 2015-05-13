@@ -4,8 +4,8 @@ var Promise = require('bluebird');
 var _und = require('underscore');
 var theLib = require('../lib/index');
 
-// TODO: timezone support
-var timeZoneOffset = 0;
+// // TODO: timezone support
+// var timeZoneOffset = 0;
 
 // column -> index mapping
 var liveColumns = theLib.columnToIndexMap('file anchor year month day hourStart hourEnd');
@@ -29,7 +29,7 @@ function coerceData(data) {
         }
     });
     return data;
-};
+}
 
 function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
     if (_und.isUndefined(end)) {
@@ -80,7 +80,7 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
     });
 
     // stringify
-    data.body = body.join("\n");
+    data.body = body.join('\n');
     return data;
 }
 
@@ -108,7 +108,7 @@ function isLiveNow(data, date) {
     // and within the hour range
     var hour = date.getHours();
     return (hour >= data.hourStart) && (hour < data.hourEnd);
-};
+}
 var loadLives = theLib.willMemoize(function loadLives() {
     var datas;
 
@@ -131,7 +131,7 @@ var loadLives = theLib.willMemoize(function loadLives() {
         return theLib.wwwRoot.willLoadFile('fucc/live.html');
     })
     .then(function(page) {
-        var lines = (page || '').split("\n");
+        var lines = (page || '').split('\n');
 
         return datas.map(function(data) {
             return scrapeBodyTitle(data, lines,
@@ -154,7 +154,7 @@ function checkLive(date) {
         // treat as no match
         return undefined;
     });
-};
+}
 
 /*
    the show file
@@ -167,7 +167,7 @@ function isShowNow(data, date) {
     // and within the hour range
     var hour = date.getHours();
     return (hour >= data.hourStart) && (hour < data.hourEnd);
-};
+}
 var loadShows = theLib.willMemoize(function loadShows() {
     var datas;
 
@@ -186,8 +186,7 @@ var loadShows = theLib.willMemoize(function loadShows() {
         return theLib.wwwRoot.willLoadFile('fucc/show.html');
     })
     .then(function(page) {
-        var lines = (page || '').split("\n");
-        var rows = checkLive.rows;
+        var lines = (page || '').split('\n');
 
         return datas.map(function(data) {
             return scrapeBodyTitle(data, lines,
@@ -211,7 +210,7 @@ function checkShow(date) {
         // treat as no match
         return undefined;
     });
-};
+}
 
 
 /*

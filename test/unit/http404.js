@@ -2,9 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var Promise = require('bluebird');
 
-var theLib = require('../../lib/index');
 var theHelper = require('../helper');
 var willHandle = require('../../app/http404');
 

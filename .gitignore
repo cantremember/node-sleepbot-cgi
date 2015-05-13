@@ -1,2 +1,31 @@
-node_modules
+# ignore Node.js
+node_modules/
+.node_modules
 npm-debug.log
+
+# ignore build results
+/doc
+/coverage
+tmp
+
+
+# ignore Apple DS Store
+*.DS_Store
+Thumbs.db
+
+# ignore log files
+/logs
+*.log
+
+# ignore swap files
+*.swp
+
+# emacs turds
+*~
+
+# pid files
+/pids
+*.pid
+
+# Vagrant project files
+.vagrant

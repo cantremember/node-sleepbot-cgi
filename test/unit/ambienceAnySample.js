@@ -3,21 +3,20 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
 var willHandle = require('../../app/ambienceAnySample');
 
 var NO_DATA = new Buffer(0);
-var ANY_DATA = "\n\
+var ANY_DATA = '\n\
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-";
-var QUIP_DATA = "\n\
+';
+var QUIP_DATA = '\n\
 text\n\
 text\n\
-";
+';
 
 
 describe('ambienceAnySample', function() {

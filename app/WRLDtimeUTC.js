@@ -20,8 +20,8 @@ var willTryServers = function willTryServers(res, tried) {
     if (tried.length >= servers.length) {
         // they're ALL down?  we are SO DONE
         res.status(418);
-        return Promise.reject(new Error("I'm a teapot"));
-    };
+        return Promise.reject(new Error('I\'m a teapot'));
+    }
 
     // okay, any server we haven't tried yet ...
     var server;
@@ -75,7 +75,7 @@ var willTryServers = function willTryServers(res, tried) {
             connection = null;
 
             // if it's non-blank, we've got what we want!
-            var result = parts.join("\n");
+            var result = parts.join('\n');
             if (result) {
                 res.send(result);
                 return deferred.resolve(result);

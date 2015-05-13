@@ -13,10 +13,10 @@ var theLib = require('../../lib/index');
 var theHelper = require('../helper');
 
 var NO_DATA = new Buffer(0);
-var QUIP_DATA = "\n\
+var QUIP_DATA = '\n\
 text\n\
 quip\n\
-";
+';
 
 function mockGlobFile(sandbox) {
     theHelper.mockGlob(sandbox, function() {
@@ -34,7 +34,7 @@ function bodyIncludes(string, does) {
             (((res.text || '').indexOf(string) === -1) === does) &&
             [ 'does not include "', string, '"' ].join('')
         );
-    }
+    };
 }
 function redirectsTo(route) {
     return function(res) {
@@ -47,7 +47,7 @@ function redirectsTo(route) {
             ((res.headers['location'] || '').indexOf(absolute) !== 0) &&
             [ 'does not redirect to "', route, '"' ].join('')
         );
-    }
+    };
 }
 
 /*
@@ -193,10 +193,10 @@ describe('app', function() {
         it('with data', function() {
             mockfs({ '/mock-fs': {
                 'ambience': {
-                    'any.txt': "\n\
+                    'any.txt': '\n\
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-",
+',
                     'anyquip.txt': QUIP_DATA,
                 },
                 'ambienceAnySample.ejs': theHelper.realEjs('ambienceAnySample.ejs'),
@@ -285,18 +285,18 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         it('with live data', function() {
             mockfs({ '/mock-fs': {
                 'fucc': {
-                    'live.txt': "\
+                    'live.txt': '\
 file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t" +
+file\tanchor\t' +
     date.getYear() + '\t' + date.getMonth() + '\t' + date.getDate() + '\t' +
-    date.getHours() + '\t' + (date.getHours() + 1) + "\n\
-",
-                    'live.html': "\
-<A NAME=\"anchor\">\n\
+    date.getHours() + '\t' + (date.getHours() + 1) + '\n\
+',
+                    'live.html': '\
+<A NAME="anchor">\n\
 live1\n\
 live2\n\
 live3\n\
-",
+',
                     'showquip.txt': QUIP_DATA,
                 },
                 'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
@@ -317,20 +317,20 @@ live3\n\
         it('with show data', function() {
             mockfs({ '/mock-fs': {
                 'fucc': {
-                    'show.txt': "\
+                    'show.txt': '\
 file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t" +
-    date.getDay() + '\t' + date.getHours() + '\t' + (date.getHours() + 1) + "\n\
-",
-                    'show.html': "\
-<A NAME=\"anchor\">\n\
+file\tanchor\t' +
+    date.getDay() + '\t' + date.getHours() + '\t' + (date.getHours() + 1) + '\n\
+',
+                    'show.html': '\
+<A NAME="anchor">\n\
 show1\n\
 show2\n\
 <!-- start -->\n\
 title\n\
 show3\n\
 <!-- end -->\n\
-",
+',
                     'showquip.txt': QUIP_DATA,
                 },
                 'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
@@ -413,14 +413,14 @@ show3\n\
         beforeEach(function() {
             mockfs({ '/mock-fs': {
                 'morgan': {
-                    'card.txt': "\
+                    'card.txt': '\
 id\tabbrev\ttitle\n\
 1\tone\tONE\n\
 2\ttwo\tTWO\n\
 3\tthree\tTHREE\n\
 4\tfour\tFOUR\n\
 5\tfive\tFIVE\n\
-",
+',
                 },
                 'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
             } });
@@ -443,7 +443,7 @@ id\tabbrev\ttitle\n\
                 .expect(bodyIncludes('<A HREF="/morgan/card/one.html'))
                 .expect(bodyIncludes('TITLE="TWO"'))
                 .expect(bodyIncludes('ALT="THREE"'))
-                .expect(bodyIncludes("window.status='FOUR'"))
+                .expect(bodyIncludes('window.status=\'FOUR\''))
                 .expect(bodyIncludes('/morgan/images/card/five.gif'))
                 .endAsync()
             ;

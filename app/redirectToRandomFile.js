@@ -1,8 +1,8 @@
 'use strict';
 
 var path = require('path');
-var Promise = require('bluebird');
 var theLib = require('../lib/index');
+
 
 // capture file-path & optional glob pattern
 module.exports = function(filepath, glob) {

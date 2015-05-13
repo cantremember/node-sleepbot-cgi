@@ -3,13 +3,12 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
 var willHandle = require('../../app/morganLayout');
 
-var CARD_DATA = "\
+var CARD_DATA = '\
 id\tabbrev\ttitle\n\
 1\tone\tONE\n\
 2\ttwo\tTWO\n\
@@ -21,7 +20,7 @@ id\tabbrev\ttitle\n\
 8\teight\tEIGHT\n\
 9\tnine\tNINE\n\
 10\tten\tTEN\n\
-";
+';
 
 
 describe('morganLayout', function() {
@@ -105,12 +104,12 @@ describe('morganLayout', function() {
     it('will not display more cards that it has', function() {
         mockfs({ '/mock-fs': {
             'morgan': {
-                'card.txt': "\
+                'card.txt': '\
 id\tabbrev\ttitle\n\
 1\tone\tONE\n\
 2\ttwo\tTWO\n\
 3\tthree\tTHREE\n\
-",
+',
             },
         } });
 

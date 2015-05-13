@@ -1,0 +1,28 @@
+# https://github.com/gotwarlost/istanbul#configuring
+#   `istanbul help config`
+
+instrumentation:
+    root: .
+    default-excludes: true
+    # one or more fileset patterns e.g. "**/vendor/**"
+    excludes: []
+
+reporting:
+    print: summary
+    reports:
+        - lcov
+    dir: ./coverage
+
+check:
+    global:
+        statements: 90
+        branches: 85
+        functions: 90
+        lines: 90
+        excludes: []
+    each:
+        statements: 0
+        branches: 0
+        functions: 0
+        lines: 0
+        excludes: []

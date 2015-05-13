@@ -2,7 +2,8 @@
 
 var theLib = require('../lib/index');
 
-module.exports = function handler(req, res, cb) {
+
+module.exports = function handler(req, res) {
     // the appropriate index file
     var config = req.cookies['morgan_config'];
     var route = ((config === 'flat')

@@ -1,0 +1,59 @@
+#!/bin/sh
+
+source `dirname $0`/common
+
+# Git pre-commit hook
+#   https://git-scm.herokuapp.com/book/en/v2/Customizing-Git-Git-Hooks
+pushd . > /dev/null
+cd $ROOT
+
+#
+# modified files
+#
+
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM | grep ".js$")
+if [ "$STAGED_JS" = "" ]; then
+    INFO "no JavaScript changes"
+fi
+
+#
+# '.only' check
+#
+
+INFO "checking for .only calls"
+git grep -Eq '\.only\(' -- test
+if [[ "$?" == "0" ]]; then # there were matches
+    FAIL "please remove '.only' calls from the Test Suite"
+fi
+
+#
+# lint
+#
+
+INFO "linting"
+npm run-script lint
+if [[ "$?" != "0" ]]; then # there were failures
+    exit 1 # already reported itself
+fi
+
+#
+# style
+#
+
+INFO "styling"
+npm run-script style
+if [[ "$?" != "0" ]]; then # there were failures
+    exit 1 # already reported itself
+fi
+
+#
+# Test Suite
+#
+
+INFO "running Test Suite"
+npm test
+if [[ "$?" != "0" ]]; then # there were failures
+    FAIL "Test Suite does not pass"
+fi
+
+SUCCEED "pre-commit checks pass"

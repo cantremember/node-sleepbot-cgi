@@ -3,7 +3,6 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');

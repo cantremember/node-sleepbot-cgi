@@ -1,0 +1,20 @@
+#!/bin/sh
+
+source `dirname $0`/common
+
+# https://github.com/jscs-dev/node-jscs
+#   http://jscs.info/rules.html
+
+pushd . > /dev/null
+cd $ROOT
+
+$NODE_BIN/jscs --config .jscs.json $JS_DIRS
+CODE=$?
+
+popd > /dev/null
+
+if [[ "$CODE" != "0" ]]; then
+    FAIL "poor style"
+fi
+
+SUCCEED "has the style!"

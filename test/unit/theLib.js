@@ -13,7 +13,6 @@ var theHelper = require('../helper');
 
 describe('lib/index', function() {
     var sandbox;
-    var req, res;
     beforeEach(function() {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
@@ -64,7 +63,7 @@ describe('lib/index', function() {
                 assert.equal(value, 1);
                 assert(willPromise.calledOnce);
 
-                return willHaveMemoized(2)
+                return willHaveMemoized(2);
             })
             .then(function(value) {
                 assert.equal(value, 2);
@@ -80,14 +79,14 @@ describe('lib/index', function() {
                 assert.strictEqual(value, undefined);
                 assert(willPromise.calledOnce);
 
-                return willHaveMemoized(1)
+                return willHaveMemoized(1);
             })
             .then(function(value) {
                 // 1 is the first non-`undefined` value
                 assert.equal(value, 1);
                 assert(willPromise.calledTwice);
 
-                return willHaveMemoized(2)
+                return willHaveMemoized(2);
             })
             .then(function(value) {
                 // 2 is ignored because 1 was cached
@@ -189,14 +188,14 @@ describe('lib/index', function() {
 
 
     describe('wwwRoot', function() {
-        var TSV_CONTENT = "\
+        var TSV_CONTENT = '\
 A\tB\n\
 \n\
 # comments and blank lines ignored\n\
 1 \t2 \n\
 \n\
  ä\t 🐝\n\
-";
+';
         var wwwRoot;
         before(function() {
             wwwRoot = theLib.wwwRoot;
@@ -236,7 +235,7 @@ A\tB\n\
 
             it('loads nothing from an empty TSV', function() {
                 mockfs({ '/mock-fs': {
-                    'test.tsv': ""
+                    'test.tsv': ''
                 } });
 
                 return wwwRoot.willLoadTSV('/test.tsv')
@@ -267,7 +266,7 @@ A\tB\n\
         describe('willLoadFile', function() {
             it('loads a file', function() {
                 mockfs({ '/mock-fs': {
-                    'test.txt': " whitespace preserved "
+                    'test.txt': ' whitespace preserved '
                 } });
 
                 return wwwRoot.willLoadFile('/test.txt')
@@ -395,7 +394,6 @@ A\tB\n\
                 .then(function(exists) {
                     assert(! exists);
                 });
-                assert(! wwwRoot.hasFile('/BOGUS'));
             });
 
             it('ignores a missing file', function() {

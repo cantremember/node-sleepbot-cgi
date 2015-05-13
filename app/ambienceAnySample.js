@@ -121,12 +121,12 @@ function handler(req, res, cb) {
         });
     })
     .catch(theLib.callbackAndThrowError(cb));
-};
+}
 
 // cached information
 handler.forget = function forget() {
     this.cache = {};
-}
+};
 handler.forget();
 
 

@@ -1,0 +1,34 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": [
+            "app/",
+            "app.js",
+            "config/",
+            "index.js",
+            "views/",
+            "README.md"
+        ],
+        "exclude": []
+    },
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "markdown": {
+        "parser": "gfm",
+        "hardwrap": true
+    },
+    "opts": {
+        "recurse": true,
+        "template": "templates/default",
+        "destination": "./doc/",
+        "encoding": "utf8",
+        "lenient": true,
+        "verbose": true
+    },
+    "templates": {
+        "cleverLinks": true
+    }
+}

@@ -1,6 +1,5 @@
 'use strict';
 
-var path = require('path');
 var Promise = require('bluebird');
 var theLib = require('../lib/index');
 
@@ -8,7 +7,7 @@ var theLib = require('../lib/index');
 // capture file-path & optional glob pattern
 module.exports = function handler(req, res, cb) {
     return Promise.resolve()
-    .then(function(body) {
+    .then(function() {
         var title = req.param('title') || '(image)';
         var image = req.param('image');
         image = (image

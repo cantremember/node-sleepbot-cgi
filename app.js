@@ -47,9 +47,9 @@ if (! params.port) {
 
 // expand upon configuration
 theLib.config.wwwRoot = process.env['WWW_ROOT'] || theLib.config.wwwRoot;
-console.log('WWW root is:', theLib.config.wwwRoot)
+console.log('WWW root is:', theLib.config.wwwRoot);
 
-console.log('http port is:', params.port)
+console.log('http port is:', params.port);
 
 
 var app = theLib.app;

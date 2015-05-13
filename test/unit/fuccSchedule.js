@@ -3,7 +3,6 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var Promise = require('bluebird');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -11,22 +10,22 @@ var willHandle = require('../../app/fuccSchedule');
 
 var NO_DATA = new Buffer(0);
 var SHOW_DATA; // must be 'fresh'
-var SHOW_HTML = "\
+var SHOW_HTML = '\
 before\n\
-<A NAME=\"anchor\">\n\
+<A NAME="anchor">\n\
 body1\n\
 body2\n\
 <!-- start -->\n\
 title\n\
 body3\n\
 <!-- end -->\n\
-<A NAME=\"different\">\n\
+<A NAME="different">\n\
 after\n\
-";
-var QUIP_DATA = "\
+';
+var QUIP_DATA = '\
 text\n\
 text\n\
-";
+';
 
 
 describe('fuccSchedule', function() {
@@ -44,11 +43,11 @@ describe('fuccSchedule', function() {
         res = theHelper.mockResponse(sandbox);
 
         date = new Date();
-        SHOW_DATA = "\
+        SHOW_DATA = '\
 file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t" +
-    date.getDay() + '\t' + date.getHours() + '\t' + (date.getHours() + 1) + "\n\
-";
+file\tanchor\t' +
+    date.getDay() + '\t' + date.getHours() + '\t' + (date.getHours() + 1) + '\n\
+';
 
         sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
         sandbox.spy(theLib.wwwRoot, 'willLoadFile');
@@ -86,21 +85,21 @@ file\tanchor\t" +
     it('knows when the station has a live event', function() {
         mockfs({ '/mock-fs': {
             'fucc': {
-                'live.txt': "\
+                'live.txt': '\
 file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t" +
+file\tanchor\t' +
     date.getYear() + '\t' + date.getMonth() + '\t' + date.getDate() + '\t' +
-    date.getHours() + '\t' + (date.getHours() + 1) + "\n\
-",
-                'live.html': "\
+    date.getHours() + '\t' + (date.getHours() + 1) + '\n\
+',
+                'live.html': '\
 before\n\
-<A NAME=\"anchor\">\n\
+<A NAME="anchor">\n\
 body1\n\
 body2\n\
 body3\n\
-<A NAME=\"different\">\n\
+<A NAME="different">\n\
 after\n\
-",
+',
                 'showquip.txt': QUIP_DATA,
             }
         } });
@@ -119,7 +118,7 @@ after\n\
             assert.equal(context.current.type, 'live');
             assert.equal(context.current.anchor, 'anchor');
             assert.equal(context.current.year, date.getFullYear());
-            assert.equal(context.current.body, "body1\nbody2\nbody3");
+            assert.equal(context.current.body, 'body1\nbody2\nbody3');
             assert.strictEqual(context.current.title, undefined);
             assert.equal(context.quip.text, 'text');
         });
@@ -150,7 +149,7 @@ after\n\
             assert.equal(context.current.type, 'show');
             assert.equal(context.current.anchor, 'anchor');
             assert.equal(context.current.dayOfWeek, date.getDay());
-            assert.equal(context.current.body, "body1\nbody2\nbody3");
+            assert.equal(context.current.body, 'body1\nbody2\nbody3');
             assert.equal(context.current.title, 'title');
             assert.equal(context.quip.text, 'text');
         });

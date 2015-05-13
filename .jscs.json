@@ -1,0 +1,124 @@
+{
+    "disallowKeywords": [
+        "with"
+    ],
+    "disallowImplicitTypeConversion": [
+        "numeric", "boolean", "binary", "string"
+    ],
+    "safeContextKeyword": [
+        "self", "_this"
+    ],
+
+
+    "requireSpaceAfterKeywords": [
+        "if", "else", "switch", "case", "return", "for", "while", "do", "try", "catch"
+    ],
+    "requireCurlyBraces": [
+        "if", "else", "switch", "return", "for", "while", "do", "try", "catch"
+    ],
+    "requireKeywordsOnNewLine": [
+        "else", "case", "default"
+    ],
+    "disallowOperatorBeforeLineBreak": [
+        "?", "."
+    ],
+    "requireOperatorBeforeLineBreak": [
+        "=",
+        "+",
+        "-",
+        "/",
+        "*",
+        "==",
+        "===",
+        "!=",
+        "!==",
+        ">",
+        ">=",
+        "<",
+        "<="
+    ],
+
+
+    "disallowSpaceAfterPrefixUnaryOperators": [
+        "++", "--", "+", "-"
+    ],
+    "requireSpaceAfterPrefixUnaryOperators": [
+        "!", "~"
+    ],
+    "disallowSpaceBeforePostfixUnaryOperators": [
+        "++", "--"
+    ],
+    "disallowSpaceBeforeBinaryOperators": [
+        ","
+    ],
+    "requireSpaceBeforeBinaryOperators": [
+        "+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", "<", ">=", "<="
+    ],
+    "requireSpaceAfterBinaryOperators": [
+        "+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", "<", ">=", "<="
+    ],
+
+
+    "requireSpacesInFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "disallowSpacesInFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInNamedFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "disallowSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "disallowSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInFunctionDeclaration": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "disallowSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    },
+
+
+    "disallowSpacesInCallExpression": true,
+    "requireParenthesesAroundIIFE": true,
+    "requireSpaceBetweenArguments": true,
+    "requireSpacesInConditionalExpression": true,
+    "requireSpacesInForStatement": true,
+
+    "disallowSpaceAfterObjectKeys": true,
+    "requireSpaceAfterLineComment": true,
+    "requireSpaceBeforeBlockStatements": true,
+    "requireSpaceBeforeObjectValues": true,
+    "requireSpacesInsideObjectBrackets": "all",
+
+    "disallowEmptyBlocks": true,
+    "requireBlocksOnNewline": 1,
+    "requireCapitalizedConstructors": true,
+    "requireCommaBeforeLineBreak": true,
+    "requireSemicolons": true,
+
+
+    "disallowMixedSpacesAndTabs": true,
+    "disallowTrailingWhitespace": true,
+    "maximumLineLength": 120,
+    "requireLineFeedAtFileEnd": true,
+    "validateIndentation": 4,
+    "validateLineBreaks": "LF",
+    "validateQuoteMarks": {
+        "mark": "'",
+        "escape": true
+    },
+
+
+    "excludeFiles": [
+        "doc/**",
+        "coverage/**",
+        "node_modules/**"
+    ]
+}

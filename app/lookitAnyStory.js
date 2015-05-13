@@ -1,6 +1,5 @@
 'use strict';
 
-var path = require('path');
 var Promise = require('bluebird');
 var theLib = require('../lib/index');
 
@@ -43,12 +42,12 @@ function handler(req, res, cb) {
         });
     })
     .catch(theLib.callbackAndThrowError(cb));
-};
+}
 
 // cached information
 handler.forget = function forget() {
     this.cache = {};
-}
+};
 handler.forget();
 
 

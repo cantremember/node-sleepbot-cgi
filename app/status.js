@@ -2,8 +2,9 @@
 
 var STATUS = Object.freeze({
     ok: true
-})
+});
 
-module.exports = function handler(req, res, cb) {
+
+module.exports = function handler(req, res) {
     res.send(STATUS);
 };

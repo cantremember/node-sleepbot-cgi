@@ -5,7 +5,6 @@ var fs = require('fs');
 var path = require('path');
 var _und = require('underscore');
 var glob = require('glob');
-var Promise = require('bluebird');
 
 var VIEWS_ROOT = path.join(__dirname, '../views'); // relative to *me*
 
