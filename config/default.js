@@ -21,31 +21,38 @@ module.exports = {
     ],
     get sebServerPrimary() {
         return this.sebServers.reduce(function(prior, current) {
-            return current.primary ? current : prior;
+            return current.primary ? /* istanbul ignore next */ current : prior;
         });
     },
 
     // http://tf.nist.gov/tf-cgi/servers.cgi
     ntpServers: [
-        'nist1-nj2.ustiming.org',
-        'nist1-ny2.ustiming.org',
-        'nist1-pa.ustiming.org',
-        'time-c.nist.gov',
-        // 'time-d.nist.gov', // "All services via IPV6"
-        'nist1-macon.macon.ga.us',
-        'wolfnisttime.com',
-        'nist1-chi.ustiming.org',
-        'nist.time.nosc.us',
         'nist.netservicesgroup.com',
-        'nisttime.carsoncity.k12.mi.us',
-        'nist1-lnk.binary.net',
-        'wwv.nist.gov',
-        'time.nist.gov',
-        'utcnist.colorado.edu',
-        'utcnist2.colorado.edu',
-        'ntp-nist.ldsbc.edu',
         'nist1-lv.ustiming.org',
-        'nist-time-server.eoni.com',
-        // 'nist1.symmetricom.com', // "Daytime Protocol FAIL"
+        'nist1-macon.macon.ga.us',
+        'nist1-pa.ustiming.org',
+        'nisttime.carsoncity.k12.mi.us',
+        'ntp-nist.ldsbc.edu',
+        'time-a.nist.gov',
+        'time-a.timefreq.bldrdoc.gov',
+        'time-b.nist.gov',
+        'time-b.timefreq.bldrdoc.gov',
+        'time-c.nist.gov',
+        'time-c.timefreq.bldrdoc.gov',
+        'time-d.nist.gov',
+        'utcnist.colorado.edu',
+        // 'nist-time-server.eoni.com',
+        // 'nist.time.nosc.us',
+        // 'nist1-chi.ustiming.org',
+        // 'nist1-lnk.binary.net',
+        // 'nist1-nj2.ustiming.org',
+        // 'nist1-ny2.ustiming.org',
+        // 'nist1.symmetricom.com',
+        // 'time-nw.nist.gov',
+        // 'time.nist.gov',
+        // 'utcnist2.colorado.edu',
+        // 'wolfnisttime.com',
+        // 'wwv.nist.gov',
     ],
+    ntpTimeout: 3000, // 3s
 };

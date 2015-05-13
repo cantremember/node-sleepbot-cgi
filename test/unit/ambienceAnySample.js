@@ -3,6 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
+var httpMocks = require('node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -29,24 +30,23 @@ describe('ambienceAnySample', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
 
         sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
     });
     afterEach(function() {
         sandbox.restore();
         mockfs.restore();
+        theHelper.mockConfig();
 
+        theLib.forget();
         willHandle.forget();
     });
 
 
     describe('with a sample and quip', function() {
-        var caching;
         beforeEach(function() {
-            caching = theLib.config.caching;
-
             mockfs({ '/mock-fs': {
                 'ambience': {
                     'any.txt': ANY_DATA,
@@ -57,54 +57,96 @@ describe('ambienceAnySample', function() {
                 },
             } });
         });
-        afterEach(function() {
-            theLib.config.caching = caching;
-        });
 
         it('produces a response', function() {
-            assert(! theLib.config.caching);
+            assert(! theLib.config.get('caching'));
 
             return willHandle(req, res, cb)
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
                 assert(! cb.called);
-                assert(res.render.calledOnce);
-                assert(res.send.calledOnce);
+                assert.equal(res._getData(), 'ambienceAnySample.ejs');
+                assert.equal(res.statusCode, 200);
 
                 // no caching
                 assert.equal(Object.keys(willHandle.cache).length, 0);
 
-                var context = res.render.firstCall.args[1];
+                var context = res._getRenderData();
+
+                assert.equal(context.sample.file, 'file');
+                assert.equal(context.sample.ext, 'ext');
+                assert.equal(context.sample.page, 'page');
                 assert.equal(context.sample.stub, 'stub');
+                assert.equal(context.sample.artist, 'artist');
+                assert.equal(context.sample.track, 'track');
+                assert.equal(context.sample.size, 'size');
+
                 assert.equal(context.sample.albumFile, 'stub');
                 assert.equal(context.sample.albumAnchor, 'STUB');
+                assert.equal(context.sample.dirNum, 1);
                 assert.equal(context.sample.coverImage, '/ambience/covergif/stub.gif');
                 assert(context.sample.coverExists);
+
                 assert.equal(context.quip.text, 'text');
             });
         });
 
         it('caches a response', function() {
-            theLib.config.caching = true;
+            theHelper.mockConfig({ caching: true });
 
             return willHandle(req, res, cb)
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
                 assert(! cb.called);
-                assert(res.render.calledOnce);
-                assert(res.send.calledOnce);
+                assert.equal(res._getData(), 'ambienceAnySample.ejs');
 
                 assert.equal(Object.keys(willHandle.cache).length, 1);
 
+                // and again
+                res = httpMocks.createResponse(sandbox);
                 return willHandle(req, res, cb);
             })
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
+                assert(! cb.called);
+                assert.equal(res._getData(), 'ambienceAnySample.ejs');
+
                 assert.equal(Object.keys(willHandle.cache).length, 1);
             });
+        });
+    });
+
+    it('produces a response with a high-order file having no cover image', function() {
+        mockfs({ '/mock-fs': {
+            'ambience': {
+                'any.txt': '\n\
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
+zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
+',
+                'anyquip.txt': NO_DATA,
+            },
+        } });
+
+        return willHandle(req, res, cb)
+        .then(function() {
+            assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
+
+            assert(! cb.called);
+            assert.equal(res._getData(), 'ambienceAnySample.ejs');
+            assert.equal(res.statusCode, 200);
+
+            // no caching
+            assert.equal(Object.keys(willHandle.cache).length, 0);
+
+            var context = res._getRenderData();
+
+            assert.equal(context.sample.file, 'zzzz');
+
+            assert.equal(context.sample.dirNum, 2);
+            assert(! context.sample.coverExists);
         });
     });
 
@@ -115,6 +157,9 @@ describe('ambienceAnySample', function() {
                 'anyquip.txt': NO_DATA,
             },
         } });
+
+        sandbox.spy(res, 'render');
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(function() {
@@ -128,6 +173,9 @@ describe('ambienceAnySample', function() {
         mockfs({ '/mock-fs': {
             'ambience': { },
         } });
+
+        sandbox.spy(res, 'render');
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(function() {
@@ -145,7 +193,8 @@ describe('ambienceAnySample', function() {
             },
         } });
 
-        res.render = sandbox.stub().throws(new Error('BOOM'));
+        sandbox.stub(res, 'render').throws(new Error('BOOM'));
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(theHelper.notCalled, function(err) {

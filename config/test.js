@@ -1,9 +1,7 @@
 'use strict';
 
-var _und = require('underscore');
 
-
-module.exports = _und.defaults({
+module.exports = {
     // overrides
     wwwRoot: '/mock-fs',
 
@@ -11,4 +9,6 @@ module.exports = _und.defaults({
     // baseURL: 'http://sleepbot.localhost:8080',
 
     viewsRoot: '/mock-fs',
-}, require('./default'));
+
+    ntpTimeout: 1000, // 1s
+};

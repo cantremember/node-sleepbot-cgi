@@ -6,7 +6,7 @@ var theLib = require('../lib/index');
 
 
 // keeps Promising to try another one ...
-var willTryServers = function willTryServers(res, tried) {
+var willTryServers = Promise.method(function willTryServers(res, tried) {
     var servers = theLib.config.get('ntpServers');
 
     // state
@@ -18,9 +18,9 @@ var willTryServers = function willTryServers(res, tried) {
     var deferred = Promise.defer();
 
     if (tried.length >= servers.length) {
-        // they're ALL down?  we are SO DONE
-        res.status(418);
-        return Promise.reject(new Error('I\'m a teapot'));
+        // they're ALL down?  we are Service Unavailable
+        res.set('Content-Type', 'text/plain').status(503).end();
+        return;
     }
 
     // okay, any server we haven't tried yet ...
@@ -36,17 +36,22 @@ var willTryServers = function willTryServers(res, tried) {
     // Daytime Protocol
     //   https://tools.ietf.org/html/rfc867
     var connection = net.connect(13, server);
-    var parts = [];
+    connection.setTimeout(theLib.config.get('ntpTimeout'));
 
     // fail
-    var failOn = function(queue) {
-        connection.on(queue, function() {
+    var failOn = function(topic) {
+        connection.on(topic, function(err) {
             if (! connection) {
                 return;
             }
             connection = null;
 
-            console.error('Daytime Protocol FAIL:', server);
+            if (err instanceof Error) {
+                console.error('Daytime Protocol ERROR:', server, err);
+            }
+            else {
+                console.error('Daytime Protocol FAIL:', server);
+            }
 
             // // assume it'll come back
             // delete servers[server];
@@ -59,6 +64,8 @@ var willTryServers = function willTryServers(res, tried) {
     failOn('timeout');
 
     // accumulate
+    var parts = [];
+
     connection.on('data', function(data) {
         if (! connection) {
             return;
@@ -67,16 +74,16 @@ var willTryServers = function willTryServers(res, tried) {
     });
 
     // succeed
-    var succeedOn = function(queue) {
-        connection.on(queue, function() {
+    var succeedOn = function(topic) {
+        connection.on(topic, function() {
             if (! connection) {
                 return;
             }
             connection = null;
 
             // if it's non-blank, we've got what we want!
-            var result = parts.join('\n');
-            if (result) {
+            if (parts.length !== 0) {
+                var result = parts.join('\n');
                 res.send(result);
                 return deferred.resolve(result);
             }
@@ -90,10 +97,11 @@ var willTryServers = function willTryServers(res, tried) {
 
     // otherwise, we'll get back to you on that
     return deferred.promise;
-};
+});
 
 
 module.exports = function handler(req, res, cb) {
     return willTryServers(res)
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };

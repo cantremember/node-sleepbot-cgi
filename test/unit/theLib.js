@@ -20,14 +20,17 @@ describe('lib/index', function() {
     afterEach(function() {
         sandbox.restore();
         mockfs.restore();
+        theHelper.mockConfig();
+
+        theLib.forget();
     });
 
 
     describe('config', function() {
         it('overrides as expected', function() {
-            assert(Array.isArray(theLib.config.sebServers));
+            assert(Array.isArray(theLib.config.get('sebServers')));
 
-            assert.equal(theLib.config.wwwRoot, '/mock-fs');
+            assert.equal(theLib.config.get('wwwRoot'), '/mock-fs');
         });
     });
 
@@ -41,22 +44,17 @@ describe('lib/index', function() {
 
 
     describe('willMemoize', function() {
-        var caching;
         var willPromise;
         var willHaveMemoized;
         beforeEach(function() {
-            caching = theLib.config.caching;
             willPromise = sandbox.spy(function(value) {
                 return Promise.delay(0).return(value);
             });
             willHaveMemoized = theLib.willMemoize(willPromise);
         });
-        afterEach(function() {
-            theLib.config.caching = caching;
-        });
 
         it('does not memoize when caching is disabled', function() {
-            assert(! theLib.config.caching);
+            assert(! theLib.config.get('caching'));
 
             return willHaveMemoized(1)
             .then(function(value) {
@@ -72,7 +70,7 @@ describe('lib/index', function() {
         });
 
         it('memoizes when caching is enabled', function() {
-            theLib.config.caching = true;
+            theHelper.mockConfig({ caching: true });
 
             return willHaveMemoized()
             .then(function(value) {
@@ -92,6 +90,38 @@ describe('lib/index', function() {
                 // 2 is ignored because 1 was cached
                 assert.equal(value, 1);
                 assert(willPromise.calledTwice);
+            });
+        });
+    });
+
+    describe('forget', function() {
+        var willHaveMemoized;
+        beforeEach(function() {
+            willHaveMemoized = theLib.willMemoize(function(value) {
+                return Promise.resolve(value);
+            });
+        });
+
+        it('forgets what has been cached', function() {
+            theHelper.mockConfig({ caching: true });
+
+            return willHaveMemoized(1)
+            .then(function(value) {
+                assert.strictEqual(value, 1);
+
+                return willHaveMemoized(2);
+            })
+            .then(function(value) {
+                // already cached
+                assert.strictEqual(value, 1);
+
+                theLib.forget();
+
+                return willHaveMemoized(2);
+            })
+            .then(function(value) {
+                // cache was flushed
+                assert.strictEqual(value, 2);
             });
         });
     });
@@ -320,15 +350,6 @@ A\tB\n\
         });
 
         describe('willGetFilenames', function() {
-            var dir;
-            beforeEach(function() {
-                // physical vs. mock directory structure
-                dir = theLib.config.wwwRoot;
-            });
-            afterEach(function() {
-                theLib.config.wwwRoot = dir;
-            });
-
             it('returns filenames from a mock glob', function() {
                 theHelper.mockGlob(sandbox, function() {
                     return [ 'another.file', 'glob.file' ];
@@ -344,18 +365,22 @@ A\tB\n\
             });
 
             it('returns filenames from a physical file-system', function() {
-                theLib.config.wwwRoot = '';
+                theHelper.mockConfig({ wwwRoot: __dirname });
 
-                return wwwRoot.willGetFilenames(path.join(__dirname, '*'))
+                return wwwRoot.willGetFilenames('*')
                 .then(function(filenames) {
                     assert.deepEqual(filenames, [
                         'ambienceAnySample.js',
+                        'config.js',
                         'fuccSchedule.js',
                         'http404.js',
                         'lookitAnyStory.js',
                         'morganLayout.js',
                         'redirectToRandomFile.js',
+                        'sebStatusHTML.js',
+                        'sebStatusXML.js',
                         'theLib.js',
+                        'WRLDtimeUTC.js',
                     ].sort());
 
                     // no directories
@@ -400,6 +425,15 @@ A\tB\n\
                 return wwwRoot.willDetectFile('/BOGUS')
                 .then(function(exists) {
                     assert(! exists);
+                });
+            });
+
+            it('fails on a file-system Error', function() {
+                sandbox.stub(fs.Stats.prototype, 'isFile').throws(new Error('BOOM'));
+
+                return wwwRoot.willLoadFile('/file')
+                .then(theHelper.notCalled, function(err) {
+                    assert.equal(err.message, 'BOOM');
                 });
             });
         });

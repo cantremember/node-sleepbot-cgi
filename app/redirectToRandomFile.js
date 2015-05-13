@@ -6,7 +6,7 @@ var theLib = require('../lib/index');
 
 // capture file-path & optional glob pattern
 module.exports = function(filepath, glob) {
-    glob = glob || '*.*';
+    glob = glob || /* istanbul ignore next */ '*.*';
 
     // a Promise
     var globpath = path.join(filepath, glob);
@@ -26,6 +26,7 @@ module.exports = function(filepath, glob) {
                 path.join(filepath, theLib.chooseAny(filenames))
             ));
         })
+        .return(res)
         .catch(theLib.callbackAndThrowError(cb));
     };
 };

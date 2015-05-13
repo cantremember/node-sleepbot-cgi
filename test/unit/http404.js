@@ -2,6 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
+var httpMocks = require('node-mocks-http');
 
 var theHelper = require('../helper');
 var willHandle = require('../../app/http404');
@@ -17,8 +18,8 @@ describe('http404', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
     });
     afterEach(function() {
         sandbox.restore();
@@ -29,18 +30,22 @@ describe('http404', function() {
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+
+            assert.equal(res._getRenderView(), 'http404.ejs');
+            assert.equal(res._getData(), 'http404.ejs');
+            assert.equal(res.statusCode, 200);
         });
     });
 
     it('will fail gracefully', function() {
-        res.render = theHelper.throws(new Error('BOOM'));
+        sandbox.stub(res, 'render').throws(new Error('BOOM'));
+        sandbox.spy(res, 'send');
 
         willHandle(req, res, cb)
         .then(theHelper.notCalled, function(err) {
             assert.equal('BOOM', err.message);
 
+            assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed

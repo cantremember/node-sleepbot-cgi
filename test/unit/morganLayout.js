@@ -3,6 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
+var httpMocks = require('node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -33,8 +34,8 @@ describe('morganLayout', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
 
         sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
     });
@@ -56,10 +57,10 @@ describe('morganLayout', function() {
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 1);
 
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'morganLayout.ejs');
+            assert.equal(res.statusCode, 200);
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.cards.length, 3);
             assert(context.quip.text);
         });
@@ -72,13 +73,14 @@ describe('morganLayout', function() {
             },
         } });
 
-        req.params.cards = 0;
+        req._setParameter('cards', 0);
 
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'morganLayout.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.cards.length, 1);
         });
     });
@@ -90,13 +92,14 @@ describe('morganLayout', function() {
             },
         } });
 
-        req.params.cards = 99;
+        req._setParameter('cards', 99);
 
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'morganLayout.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.cards.length, 10);
         });
     });
@@ -113,13 +116,14 @@ id\tabbrev\ttitle\n\
             },
         } });
 
-        req.params.cards = 99;
+        req._setParameter('cards', 99);
 
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'morganLayout.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.cards.length, 3);
         });
     });
@@ -132,14 +136,16 @@ id\tabbrev\ttitle\n\
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'morganLayout.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.cards.length, 0);
         });
     });
 
     it('will fail gracefully', function() {
-        res.render = sandbox.stub().throws(new Error('BOOM'));
+        sandbox.stub(res, 'render').throws(new Error('BOOM'));
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(theHelper.notCalled, function(err) {

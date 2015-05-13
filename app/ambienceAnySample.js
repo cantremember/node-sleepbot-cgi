@@ -1,7 +1,7 @@
 'use strict';
 
 var Promise = require('bluebird');
-var _und = require('underscore');
+var lodash = require('lodash');
 
 var theLib = require('../lib/index');
 
@@ -65,7 +65,7 @@ function handler(req, res, cb) {
 
             if (album) {
                 // already cached
-                sample = _und.defaults(sample, album);
+                sample = lodash.defaults(sample, album);
                 return;
             }
 
@@ -80,7 +80,7 @@ function handler(req, res, cb) {
                 coverExists: false,
             };
 
-            if (theLib.config.caching) {
+            if (theLib.config.get('caching')) {
                 // cache
                 handler.cache[stub] = album;
             }
@@ -89,7 +89,7 @@ function handler(req, res, cb) {
             .then(function(exists) {
                 album.coverExists = exists;
 
-                sample = _und.defaults(sample, album);
+                sample = lodash.defaults(sample, album);
             });
         }),
 
@@ -120,6 +120,7 @@ function handler(req, res, cb) {
             res.send(body);
         });
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 }
 

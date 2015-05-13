@@ -24,5 +24,6 @@ module.exports = function handler(req, res, cb) {
             res.send(body);
         });
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };

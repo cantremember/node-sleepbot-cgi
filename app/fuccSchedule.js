@@ -1,7 +1,6 @@
 'use strict';
 
 var Promise = require('bluebird');
-var _und = require('underscore');
 var theLib = require('../lib/index');
 
 // // TODO: timezone support
@@ -32,7 +31,7 @@ function coerceData(data) {
 }
 
 function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
-    if (_und.isUndefined(end)) {
+    if (end === undefined) {
         end = titleStart;
         titleStart = undefined;
     }
@@ -90,7 +89,7 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
 */
 var loadDead = theLib.willMemoize(function loadDead() {
     return theLib.wwwRoot.willLoadFile('fucc/dead.txt')
-    .catch(function() {
+    .catch(/* istanbul ignore next */ function() {
         // not present
         return undefined;
     });
@@ -122,7 +121,7 @@ var loadLives = theLib.willMemoize(function loadLives() {
 
             // 2-digit year
             var yy = parseInt(data.year, 10);
-            data.year = yy + (yy < 500 ? 1900 : 0);
+            data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
 
             return data;
         });
@@ -255,7 +254,7 @@ module.exports = function handler(req, res, cb) {
     })
     .then(function(rows) {
         // choose a random quip
-        quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || FAKE_QUIP;
+        quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
 
         return Promise.promisify(res.render, res)('fuccSchedule.ejs', {
             config: theLib.config,
@@ -270,5 +269,6 @@ module.exports = function handler(req, res, cb) {
             res.send(body);
         });
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };

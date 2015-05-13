@@ -3,6 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
+var httpMocks = require('node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -39,8 +40,8 @@ describe('fuccSchedule', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
 
         date = new Date();
         SHOW_DATA = '\
@@ -72,10 +73,10 @@ file\tanchor\t' +
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 1);
 
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
+            assert.equal(res.statusCode, 200);
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.equal(context.dead, 'DEAD');
             assert(! context.current);
             assert.equal(context.quip.text, 'text');
@@ -110,10 +111,9 @@ after\n\
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert(! context.dead);
             assert.equal(context.current.type, 'live');
             assert.equal(context.current.anchor, 'anchor');
@@ -127,7 +127,11 @@ after\n\
     it('knows when the station has a show', function() {
         mockfs({ '/mock-fs': {
             'fucc': {
-                'live.txt': NO_DATA,
+                // not live
+                'live.txt': '\
+file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
+file\tanchor\t1970\t0\t1\t0\t0\n\
+',
                 'live.html': NO_DATA,
                 'show.txt': SHOW_DATA,
                 'show.html': SHOW_HTML,
@@ -141,10 +145,9 @@ after\n\
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 3);
 
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert(! context.dead);
             assert.equal(context.current.type, 'show');
             assert.equal(context.current.anchor, 'anchor');
@@ -160,7 +163,11 @@ after\n\
             'fucc': {
                 'live.txt': NO_DATA,
                 'live.html': NO_DATA,
-                'show.txt': NO_DATA,
+                // no show
+                'show.txt': '\
+file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
+file\tanchor\t1970\t0\t1\t0\t0\n\
+',
                 'show.html': NO_DATA,
                 'showquip.txt': QUIP_DATA,
             }
@@ -172,10 +179,9 @@ after\n\
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 3);
 
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert(! context.dead);
             assert(! context.current);
             assert.equal(context.quip.text, 'text');
@@ -193,8 +199,9 @@ after\n\
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.strictEqual(context.quip.text, undefined);
         });
     });
@@ -209,8 +216,9 @@ after\n\
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
+            assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert(! context.dead);
             assert(! context.current);
         });
@@ -224,7 +232,8 @@ after\n\
             }
         } });
 
-        res.render = sandbox.stub().throws(new Error('BOOM'));
+        sandbox.stub(res, 'render').throws(new Error('BOOM'));
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(theHelper.notCalled, function(err) {

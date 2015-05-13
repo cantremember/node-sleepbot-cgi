@@ -3,6 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
+var httpMocks = require('node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -19,24 +20,23 @@ describe('lookitAnyStory', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
 
         sandbox.spy(theLib.wwwRoot, 'willLoadFile');
     });
     afterEach(function() {
         sandbox.restore();
         mockfs.restore();
+        theHelper.mockConfig();
 
+        theLib.forget();
         willHandle.forget();
     });
 
 
     describe('with a random file', function() {
-        var caching;
         beforeEach(function() {
-            caching = theLib.config.caching;
-
             theHelper.mockGlob(sandbox, function() {
                 return [ 'glob.file' ];
             });
@@ -49,46 +49,47 @@ describe('lookitAnyStory', function() {
                 },
             } });
         });
-        afterEach(function() {
-            theLib.config.caching = caching;
-        });
 
         it('produces a response', function() {
-            assert(! theLib.config.caching);
+            assert(! theLib.config.get('caching'));
 
             return willHandle(req, res, cb)
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
 
                 assert(! cb.called);
-                assert(res.render.calledOnce);
-                assert(res.send.calledOnce);
+                assert.equal(res._getData(), 'lookitAnyStory.ejs');
+                assert.equal(res.statusCode, 200);
 
                 // no caching
                 assert.equal(Object.keys(willHandle.cache).length, 0);
 
-                var context = res.render.firstCall.args[1];
+                var context = res._getRenderData();
                 assert.equal(context.body, 'GLOB.FILE');
             });
         });
 
         it('caches a response', function() {
-            theLib.config.caching = true;
+            theHelper.mockConfig({ caching: true });
 
             return willHandle(req, res, cb)
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
 
                 assert(! cb.called);
-                assert(res.render.calledOnce);
-                assert(res.send.calledOnce);
+                assert.equal(res._getData(), 'lookitAnyStory.ejs');
 
                 assert.equal(Object.keys(willHandle.cache).length, 1);
 
+                // and again
+                res = httpMocks.createResponse(sandbox);
                 return willHandle(req, res);
             })
             .then(function() {
                 assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
+
+                assert(! cb.called);
+                assert.equal(res._getData(), 'lookitAnyStory.ejs');
 
                 assert.equal(Object.keys(willHandle.cache).length, 1);
             });
@@ -103,16 +104,16 @@ describe('lookitAnyStory', function() {
         return willHandle(req, res, cb)
         .then(function() {
             assert(! cb.called);
-            assert(res.render.calledOnce);
-            assert(res.send.calledOnce);
+            assert.equal(res._getData(), 'lookitAnyStory.ejs');
 
-            var context = res.render.firstCall.args[1];
+            var context = res._getRenderData();
             assert.strictEqual(context.body, '');
         });
     });
 
     it('will fail gracefully', function() {
-        res.render = sandbox.stub().throws(new Error('BOOM'));
+        sandbox.stub(res, 'render').throws(new Error('BOOM'));
+        sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
         .then(theHelper.notCalled, function(err) {

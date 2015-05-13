@@ -49,7 +49,11 @@ module.exports = function handler(req, res, cb) {
     // parameters
     //   1..10 cards, assume 3
     var cardCount = req.param('cards');
-    cardCount = (cardCount === undefined ? 3 : cardCount);
+
+    cardCount = ((cardCount === undefined || cardCount === null)
+        ? 3
+        : cardCount
+    );
     cardCount = parseInt(cardCount, 10) || 0;
     cardCount = Math.min(Math.max(cardCount, 1), 10);
 
@@ -83,5 +87,6 @@ module.exports = function handler(req, res, cb) {
             res.send(body);
         });
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };

@@ -2,6 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
+var httpMocks = require('node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -17,8 +18,8 @@ describe('redirectToRandomFile', function() {
         sandbox = sinon.sandbox.create();
 
         // mock Request & Response
-        req = theHelper.mockRequest(sandbox);
-        res = theHelper.mockResponse(sandbox);
+        req = httpMocks.createRequest(sandbox);
+        res = httpMocks.createResponse(sandbox);
 
         handle = willHandle('path', 'some-glob');
     });
@@ -34,11 +35,7 @@ describe('redirectToRandomFile', function() {
 
         return handle(req, res)
         .then(function() {
-            assert(res.redirect.calledOnce);
-
-            assert.deepEqual(res.redirect.firstCall.args, [
-                theLib.baseURL('path/glob.file')
-            ]);
+            assert.equal(res._getRedirectUrl(), theLib.baseURL('path/glob.file'));
         });
     });
 
@@ -57,6 +54,7 @@ describe('redirectToRandomFile', function() {
         theHelper.mockGlob(sandbox, function() {
             throw new Error('BOOM');
         });
+        sandbox.stub(res, 'send');
 
         return handle(req, res)
         .then(theHelper.notCalled, function(err) {

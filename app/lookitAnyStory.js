@@ -15,7 +15,7 @@ var willGetFile = function(filepath) {
     var will = cache[filepath] || theLib.willMemoize(function() {
         return theLib.wwwRoot.willLoadFile(filepath);
     });
-    if (theLib.config.caching) {
+    if (theLib.config.get('caching')) {
         // cache
         cache[filepath] = will;
     }
@@ -41,6 +41,7 @@ function handler(req, res, cb) {
             res.send(body);
         });
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 }
 

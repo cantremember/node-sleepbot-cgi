@@ -42,7 +42,7 @@ function redirectsTo(route) {
         if (res.statusCode !== 302) {
             return 'does not redirect';
         }
-        var absolute = [ theLib.config.baseURL, route ].join('');
+        var absolute = [ theLib.config.get('baseURL'), route ].join('');
         return (
             ((res.headers['location'] || '').indexOf(absolute) !== 0) &&
             [ 'does not redirect to "', route, '"' ].join('')
@@ -127,6 +127,7 @@ describe('app', function() {
             return client().get('/404.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<base href="http://localhost:3000">'))
                 .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
                 .expect(bodyIncludes('That\'s net-speak for "I can\'t find any information for":', false))
                 .endAsync()
@@ -138,7 +139,7 @@ describe('app', function() {
                 .set('x-real-uri', 'REAL-URI')
                 .expect(200)
                 .expect('content-type', /html/)
-                .expect(bodyIncludes('That\'s net-speak for "I can\'t find any information for":', true))
+                .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
                 .expect(bodyIncludes('REAL-URI'))
                 .endAsync()
             ;
@@ -165,7 +166,18 @@ describe('app', function() {
         ;
     });
 
-    it('GET /ambience/cgi/viewxml.cgi', function() {
+    // there's really no good way to mock this in an Integration test
+    it.skip('GET /ambience/cgi/7.cgi', function() {
+        return client().get('/ambience/cgi/7.cgi')
+            .expect(200)
+            .expect('content-type', /html/)
+            .expect(bodyIncludes('<meta http-equiv="Pragma" content="no-cache">'))
+            .endAsync()
+        ;
+    });
+
+    // there's really no good way to mock this in an Integration test
+    it.skip('GET /ambience/cgi/viewxml.cgi', function() {
         return client().get('/ambience/cgi/viewxml.cgi')
             .expect(200)
             .expect('content-type', /xml/)
@@ -205,6 +217,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
             return client().get('/ambience/cgi/any_f.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<base href="http://localhost:3000">'))
                 .expect(bodyIncludes('<title>Ambience by the Dice :: Ambience for the Masses</title>'))
                 .expect(bodyIncludes('href="/ambience/album/stub'))
                 .expect(bodyIncludes('quip<br />'))
@@ -257,6 +270,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
             return client().get('/fucc/cgi/schednow.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
                 .expect(bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
                 .expect(bodyIncludes('<!-- OFF -->'))
                 .endAsync()
@@ -374,6 +388,7 @@ show3\n\
         return client().get('/lookit/cgi/anystory.cgi')
             .expect(200)
             .expect('content-type', /html/)
+            .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
             .expect(bodyIncludes('<TITLE>Lookit Tells You a Story</TITLE>'))
             .expect(bodyIncludes('<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>'))
             .expect(bodyIncludes('GLOB.FILE'))
@@ -392,6 +407,7 @@ show3\n\
             return client().get('/lookit/cgi/imgfoley.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<base href="http://localhost:3000">'))
                 .expect(bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: (image)</title>'))
                 .expect(bodyIncludes('src="/images/shim_clear.gif" title="(image)"'))
                 .endAsync()
@@ -430,6 +446,8 @@ id\tabbrev\ttitle\n\
             return client().get('/morgan/cgi/morglay.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
+                .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
                 .expect(bodyIncludes('Your 3 cards'))
                 .endAsync()
             ;
@@ -439,6 +457,7 @@ id\tabbrev\ttitle\n\
             return client().get('/morgan/cgi/morglay.cgi?cards=23')
                 .expect(200)
                 .expect('content-type', /html/)
+                .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
                 .expect(bodyIncludes('Your 5 cards')) // all we have is 5
                 .expect(bodyIncludes('<A HREF="/morgan/card/one.html'))
                 .expect(bodyIncludes('TITLE="TWO"'))
@@ -491,9 +510,8 @@ id\tabbrev\ttitle\n\
         ;
     });
 
-    it('GET /WRLDtime/cgi/utc.cgi', function() {
-        this.timeout(5000);
-
+    // there's really no good way to mock this in an Integration test
+    it.skip('GET /WRLDtime/cgi/utc.cgi', function() {
         return client().get('/WRLDtime/cgi/utc.cgi')
             .expect(200)
             .expect('content-type', /html/)

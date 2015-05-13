@@ -18,8 +18,8 @@ module.exports = function handler(req, res, cb) {
         followAllRedirects: true,
     })
     .spread(function(incoming, body) {
-        res.set('Content-Type', 'text/html');
-        res.send(body);
+        res.set('Content-Type', 'text/html').send(body);
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };

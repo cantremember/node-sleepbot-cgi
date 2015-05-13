@@ -23,8 +23,8 @@ module.exports = function handler(req, res, cb) {
         followAllRedirects: true,
     })
     .spread(function(incoming, body) {
-        res.set('Content-Type', 'text/xml');
-        res.send(body);
+        res.set('Content-Type', 'text/xml').send(body);
     })
+    .return(res)
     .catch(theLib.callbackAndThrowError(cb));
 };
