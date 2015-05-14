@@ -29,6 +29,7 @@
     "style": "./run/style",
     "coverage": "./run/coverage",
     "doc": "./run/doc",
+    "gh-pages": "./run/gh-pages",
     "dev": "BLUEBIRD_DEBUG=1 NODE_ENV=dev node app.js"
   },
   "engines": {

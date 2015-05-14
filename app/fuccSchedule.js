@@ -223,6 +223,18 @@ var loadQuips = theLib.willMemoize(function loadQuips() {
 });
 
 
+/**
+ * Renders on-air status for [F.U.C.C Radio](http://sleepbot.com/fucc/cgi/schednow.cgi)
+ *
+ * &nbsp;
+ *
+ * @see http://sleepbot.com/fucc/cgi/schednow.cgi
+ * @function app.fuccSchedule
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise<express.response>} a Promise resolving `res`
+ */
 module.exports = function handler(req, res, cb) {
     var dead, current;
     var quip;

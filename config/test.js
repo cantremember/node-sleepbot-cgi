@@ -1,6 +1,11 @@
 'use strict';
 
 
+/**
+ * Test Suite configuration.
+ *
+ * @member config.test
+ */
 module.exports = {
     wwwRoot: '/mock-fs',
     baseURL: 'http://localhost:3000',

@@ -42,6 +42,18 @@ var loadQuips = theLib.willMemoize(function() {
 });
 
 
+/**
+ * Generates a random page from [Ambience for the Masses](http://sleepbot.com/ambience/cgi/any_f.cgi)
+ *
+ * &nbsp;
+ *
+ * @see http://sleepbot.com/ambience/cgi/any_f.cgi
+ * @function app.ambienceAnySample
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise<express.response>} a Promise resolving `res`
+ */
 function handler(req, res, cb) {
     var quip;
     var sample;
@@ -124,7 +136,12 @@ function handler(req, res, cb) {
     .catch(theLib.callbackAndThrowError(cb));
 }
 
-// cached information
+/**
+ * Flushes the cache
+ *
+ * @memberof app.ambienceAnySample
+ * @function forget
+ */
 handler.forget = function forget() {
     this.cache = {};
 };

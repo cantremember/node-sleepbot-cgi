@@ -3,6 +3,11 @@
 var path = require('path');
 
 
+/**
+ * Default configuration.
+ *
+ * @member config.default
+ */
 module.exports = {
     httpPort: 3000,
     wwwRoot: '/mnt/ec2-http/sleepbot.com',

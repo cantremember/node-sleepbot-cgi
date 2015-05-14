@@ -1,0 +1,40 @@
+#!/bin/bash
+
+source `dirname $0`/common
+
+# https://help.github.com/articles/creating-project-pages-manually/
+#   ```bash
+#   git clone git@github.com:cantremember/node-sleepbot-cgi.git gh-pages
+#   cd gh-pages/
+#   git checkout --orphan gh-pages
+#   git rm -rf .
+#   # ...
+#   git push -u origin gh-pages
+#   ```
+
+pushd . > /dev/null
+cd $ROOT
+
+rm -rf gh-pages
+git clone -b gh-pages git@github.com:cantremember/node-sleepbot-cgi.git gh-pages
+CODE=$?
+
+if [[ "$CODE" == "0" ]]; then
+    $NODE_BIN/jsdoc -c $ROOT/.jsdoc.json --destination gh-pages
+    CODE=$?
+fi
+
+if [[ "$CODE" == "0" ]]; then
+    STAMP=`date '+%Y-%d-%m %H:%M:%S'`
+    cd gh-pages && git add . && git commit --no-verify -m "gh-pages updated $STAMP" && git push
+    CODE=$?
+fi
+
+popd > /dev/null
+
+if [[ "$CODE" != "0" ]]; then
+    FAIL "failed to update gh-pages"
+fi
+
+rm -rf gh-pages
+SUCCEED "gh-pages updated!"

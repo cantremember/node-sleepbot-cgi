@@ -4,7 +4,15 @@ var path = require('path');
 var theLib = require('../lib/index');
 
 
-// capture file-path & optional glob pattern
+/**
+ * Returns an [Express](https://npmjs.com/package/express) handler that
+ * redirects to a random file resource.
+ *
+ * @function app.redirectToRandomFile
+ * @params {String} filepath a physical directory *and* root-relative path
+ * @params {String} glob a glob pattern
+ * @returns {Function} an Express handler
+ */
 module.exports = function(filepath, glob) {
     glob = glob || /* istanbul ignore next */ '*.*';
 

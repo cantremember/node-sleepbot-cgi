@@ -100,6 +100,19 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
 });
 
 
+/**
+ * Proxies a response from a pool of [NTP](https://tools.ietf.org/html/rfc5905) servers
+ * for use in time-aligning a [WRLD.time](http://sleepbot.com/WRLDtime/cgi/utc.cgi) clock
+ *
+ * &nbsp;
+ *
+ * @see http://sleepbot.com/WRLDtime/cgi/utc.cgi
+ * @function app.WRLDtimeUTC
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise<express.response>} a Promise resolving `res`
+ */
 module.exports = function handler(req, res, cb) {
     return willTryServers(res)
     .return(res)

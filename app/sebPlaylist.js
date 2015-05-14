@@ -1,14 +1,25 @@
 'use strict';
 
-// TODO:
-//   support req.params.format, M3U, etc.
-//   is M3U just a single line with a URL?
 
 var theLib = require('../lib/index');
 var sebServers = theLib.config.get('sebServers');
 
 
-// capture the app
+/**
+ * Generates an [M3U-format](https://en.wikipedia.org/wiki/M3U) playlist
+ * for [Sleepbot Environmental Broadcast](http://sleepbot.com/ambience/cgi/listen.pls)
+ *
+ * &nbsp;
+ *
+ * @todo Support req.params.format, M3U, etc.
+ * @todo is M3U just a single line with a URL?
+ *
+ * @see http://sleepbot.com/ambience/cgi/listen.cgi
+ * @function app.sebPlaylist
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ */
 module.exports = function handler(req, res) {
     // http://gonze.com/playlists/playlist-format-survey.html
     //   "A proprietary format used for playing Shoutcast and Icecast streams"

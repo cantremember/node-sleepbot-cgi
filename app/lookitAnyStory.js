@@ -24,7 +24,18 @@ var willGetFile = function(filepath) {
 };
 
 
-// capture file-path & optional glob pattern
+/**
+ * Renders a random story from [The Root of All Things Lookit](http://sleepbot.com/lookit/cgi/anystory.cgi)
+ *
+ * &nbsp;
+ *
+ * @see http://sleepbot.com/lookit/cgi/anystory.cgi
+ * @function app.lookitAnyStory
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise<express.response>} a Promise resolving `res`
+ */
 function handler(req, res, cb) {
     return willGetFilenames()
     .then(function(filenames) {
@@ -45,7 +56,12 @@ function handler(req, res, cb) {
     .catch(theLib.callbackAndThrowError(cb));
 }
 
-// cached information
+/**
+ * Flushes the cache
+ *
+ * @memberof app.lookitAnyStory
+ * @function forget
+ */
 handler.forget = function forget() {
     this.cache = {};
 };

@@ -10,6 +10,18 @@ A Node.js app to replace legacy Perl CGI scripts for [sleepbot.com](http://sleep
 Provided as a code example, since no one in their right might has any need for this besides me.
 
 
+## Documentation
+
+The [JSDoc](https://cantremember.github.io/node-sleepbot-cgi/) is provided via GitHub Pages.
+
+
+## Contributing
+
+[Seriously?](CONTRIBUTING.md)
+
+*Okay `:D`*
+
+
 ## License
 
 [WTFPL][license-url]

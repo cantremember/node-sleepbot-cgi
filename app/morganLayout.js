@@ -41,6 +41,18 @@ var loadCards = theLib.willMemoize(function() {
 });
 
 
+/**
+ * Renders a random card layout from [Morgan's Tarot](http://sleepbot.com/morgan/cgi/morglay.cgi?cards=5)
+ *
+ * &nbsp;
+ *
+ * @see http://sleepbot.com/morgan/cgi/morglay.cgi
+ * @function app.morganLayout
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise<express.response>} a Promise resolving `res`
+ */
 module.exports = function handler(req, res, cb) {
     var quip = theLib.chooseAny(quips);
     var cardIds = [];
