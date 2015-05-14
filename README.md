@@ -1,13 +1,14 @@
 # node-sleepbot-cgi
 
-A Node.js app to replace legacy Perl CGI scripts for [sleepbot.com](http://sleepbot.com)
+A [Node.js](https://nodejs.org) app to replace legacy Perl CGI scripts for [sleepbot.com](http://sleepbot.com)
 
   [![Build status][travis-img]][travis-url]
   [![Test coverage][coveralls-img]][coveralls-url]
   [![Dependency status][david-img]][david-url]
   [![License][license-img]][license-url]
 
-Provided as a code example, since no one in their right might has any need for this besides me.
+Provided as a [GitHub project](https://github.com/cantremember/node-sleepbot-cgi) example,
+since no one in their right might has any need for this code besides me.
 
 
 ## Documentation

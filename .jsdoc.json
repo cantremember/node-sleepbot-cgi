@@ -32,6 +32,10 @@
         "verbose": true
     },
     "templates": {
-        "cleverLinks": true
+        "cleverLinks": true,
+        "default": {
+            "includeDate": false,
+            "layoutFile": "support/jsdoc-layout.tmpl"
+        }
     }
 }
