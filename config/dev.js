@@ -2,8 +2,8 @@
 
 
 module.exports = {
-    // overrides
     wwwRoot: '/Volumes/GrandMasterKashik/archive/http',
+    caching: false,
 
-    baseURL: 'http://localhost:3000',
+    // baseURL: 'http://localhost:3000',
 };

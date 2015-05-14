@@ -3,7 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var httpMocks = require('node-mocks-http');
+var httpMocks = require('@cantremember/node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -20,8 +20,8 @@ describe('lookitAnyStory', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = httpMocks.createRequest(sandbox);
-        res = httpMocks.createResponse(sandbox);
+        req = httpMocks.createRequest();
+        res = httpMocks.createResponse();
 
         sandbox.spy(theLib.wwwRoot, 'willLoadFile');
     });
@@ -82,7 +82,7 @@ describe('lookitAnyStory', function() {
                 assert.equal(Object.keys(willHandle.cache).length, 1);
 
                 // and again
-                res = httpMocks.createResponse(sandbox);
+                res = httpMocks.createResponse();
                 return willHandle(req, res);
             })
             .then(function() {

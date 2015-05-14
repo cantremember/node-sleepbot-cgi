@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # paths
 #   walk up to find package.json @ ROOT
@@ -13,26 +13,27 @@ NODE_BIN=$ROOT/node_modules/.bin
 JS_DIRS="app/ app.js config/ index.js lib/ run/ test/ views/"
 
 # colors
-C_INFO="\033[97;40m"
-C_OK="\033[97;42m"
-C_ERR="\033[97;41m"
-C_WARN="\033[97;43m"
+#   http://www.csc.uvic.ca/~sae/seng265/fall04/tips/s265s047-tips/bash-using-colors.html
+C_INFO="\033[1;37;40m"
+C_OK="\033[1;30;42m"
+C_ERR="\033[1;30;41m"
+C_WARN="\033[1;30;43m"
 C_CLOSE="\033[0m"
 
 # logging and resolution
 function INFO () {
-    echo "$C_INFO INFO $C_CLOSE $1"
+    echo -e "$C_INFO INFO $C_CLOSE $1"
 }
 function WARN () {
-    echo "$C_WARN WARN $C_CLOSE $1"
+    echo -e "$C_WARN WARN $C_CLOSE $1"
 }
 function FAIL () {
-    echo "$C_ERR FAIL $C_CLOSE $1"
+    echo -e "$C_ERR FAIL $C_CLOSE $1"
     cd $PWD
     exit 1
 }
 function SUCCEED () {
-    echo "$C_OK  OK  $C_CLOSE $1"
+    echo -e "$C_OK  OK  $C_CLOSE $1"
     cd $PWD
     exit 0
 }

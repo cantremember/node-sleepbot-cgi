@@ -3,7 +3,7 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var mockfs = require('mock-fs');
-var httpMocks = require('node-mocks-http');
+var httpMocks = require('@cantremember/node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -34,8 +34,8 @@ describe('morganLayout', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = httpMocks.createRequest(sandbox);
-        res = httpMocks.createResponse(sandbox);
+        req = httpMocks.createRequest();
+        res = httpMocks.createResponse();
 
         sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
     });
@@ -73,7 +73,9 @@ describe('morganLayout', function() {
             },
         } });
 
-        req._setParameter('cards', 0);
+        req = httpMocks.createRequest({
+            query: { cards: 0 }
+        });
 
         return willHandle(req, res, cb)
         .then(function() {
@@ -92,7 +94,9 @@ describe('morganLayout', function() {
             },
         } });
 
-        req._setParameter('cards', 99);
+        req = httpMocks.createRequest({
+            query: { cards: 99 }
+        });
 
         return willHandle(req, res, cb)
         .then(function() {
@@ -116,7 +120,9 @@ id\tabbrev\ttitle\n\
             },
         } });
 
-        req._setParameter('cards', 99);
+        req = httpMocks.createRequest({
+            query: { cards: 99 }
+        });
 
         return willHandle(req, res, cb)
         .then(function() {

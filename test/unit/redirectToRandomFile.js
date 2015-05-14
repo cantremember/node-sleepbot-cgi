@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
+var httpMocks = require('@cantremember/node-mocks-http');
 
 var theLib = require('../../lib/index');
 var theHelper = require('../helper');
@@ -18,8 +18,8 @@ describe('redirectToRandomFile', function() {
         sandbox = sinon.sandbox.create();
 
         // mock Request & Response
-        req = httpMocks.createRequest(sandbox);
-        res = httpMocks.createResponse(sandbox);
+        req = httpMocks.createRequest();
+        res = httpMocks.createResponse();
 
         handle = willHandle('path', 'some-glob');
     });

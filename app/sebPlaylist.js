@@ -1,7 +1,7 @@
 'use strict';
 
 // TODO:
-//   support req.params('format'), M3U, etc.
+//   support req.params.format, M3U, etc.
 //   is M3U just a single line with a URL?
 
 var theLib = require('../lib/index');

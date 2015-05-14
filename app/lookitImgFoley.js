@@ -8,8 +8,8 @@ var theLib = require('../lib/index');
 module.exports = function handler(req, res, cb) {
     return Promise.resolve()
     .then(function() {
-        var title = req.param('title') || '(image)';
-        var image = req.param('image');
+        var title = req.query.title || '(image)';
+        var image = req.query.image;
         image = (image
             ? ('/lookit/images/dfoley/' + image)
             : '/images/shim_clear.gif'

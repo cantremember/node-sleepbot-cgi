@@ -48,7 +48,7 @@ module.exports = function handler(req, res, cb) {
 
     // parameters
     //   1..10 cards, assume 3
-    var cardCount = req.param('cards');
+    var cardCount = req.query.cards;
 
     cardCount = ((cardCount === undefined || cardCount === null)
         ? 3

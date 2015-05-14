@@ -2,11 +2,9 @@
 
 
 module.exports = {
-    // overrides
     wwwRoot: '/mock-fs',
-
     baseURL: 'http://localhost:3000',
-    // baseURL: 'http://sleepbot.localhost:8080',
+    caching: false,
 
     viewsRoot: '/mock-fs',
 

@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "0.12"
+  - "0.10"
+  - stable
+
+before_install:
+  - "npm install -g npm@^2.7.x"
+script: "npm run ci"
+
+branches:
+  only:
+    - master
+    - develop
+    # - edge
+
+# http://docs.travis-ci.com/user/build-configuration/
+#   services: []
+#   env: []
+#   before_script: []
+#   after_failure: []
+#   after_script: []

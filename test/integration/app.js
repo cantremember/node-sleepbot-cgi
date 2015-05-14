@@ -30,23 +30,20 @@ function bodyIncludes(string, does) {
     does = does || (does === undefined);
     return function(res) {
         // "If the response is ok, it should return falsy"
-        return (
-            (((res.text || '').indexOf(string) === -1) === does) &&
-            [ 'does not include "', string, '"' ].join('')
-        );
+        if (((res.text || '').indexOf(string) !== -1) === does) {
+            return;
+        }
+        throw new Error([ 'does not include "', string, '"' ].join(''));
     };
 }
 function redirectsTo(route) {
+    var absolute = [ theLib.config.get('baseURL'), route ].join('');
     return function(res) {
         // "If the response is ok, it should return falsy"
-        if (res.statusCode !== 302) {
-            return 'does not redirect';
+        if ((res.headers['location'] || '').indexOf(absolute) === 0) {
+            return;
         }
-        var absolute = [ theLib.config.get('baseURL'), route ].join('');
-        return (
-            ((res.headers['location'] || '').indexOf(absolute) !== 0) &&
-            [ 'does not redirect to "', route, '"' ].join('')
-        );
+        throw new Error([ 'does not redirect to "', route, '"' ].join(''));
     };
 }
 
@@ -151,6 +148,7 @@ describe('app', function() {
         mockGlobFile(sandbox);
 
         return client().get('/cgi/animbot.cgi')
+            .expect(302)
             .expect(redirectsTo('/images/animbot/glob.file'))
             .endAsync()
         ;
@@ -188,6 +186,7 @@ describe('app', function() {
 
     it('GET /ambience/cgi/imgpage.cgi', function() {
         return client().get('/ambience/cgi/imgpage.cgi')
+            .expect(302)
             .expect(redirectsTo('/ambience'))
             .endAsync()
         ;
@@ -231,6 +230,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         mockGlobFile(sandbox);
 
         return client().get('/critturs/cgi/anyaudio.cgi')
+            .expect(302)
             .expect(redirectsTo('/critturs/mp2/glob.file'))
             .endAsync()
         ;
@@ -240,6 +240,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         mockGlobFile(sandbox);
 
         return client().get('/critturs/cgi/critlogo.cgi')
+            .expect(302)
             .expect(redirectsTo('/critturs/images/logo/glob.file'))
             .endAsync()
         ;
@@ -250,6 +251,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         mockGlobFile(sandbox);
 
         return client().get('/fucc/cgi/anyaudio.cgi')
+            .expect(302)
             .expect(redirectsTo('/fucc/mpg/glob.file'))
             .endAsync()
         ;
@@ -368,6 +370,7 @@ show3\n\
         mockGlobFile(sandbox);
 
         return client().get('/lookit/cgi/anyfoley.cgi')
+            .expect(302)
             .expect(redirectsTo('/lookit/etc/glob.file'))
             .endAsync()
         ;
@@ -415,7 +418,8 @@ show3\n\
         });
 
         it('with parameters', function() {
-            return client().get('/lookit/cgi/imgfoley.cgi?title=TITLE&image=IMAGE')
+            return client().get('/lookit/cgi/imgfoley.cgi')
+                .query({ title: 'TITLE', image: 'IMAGE' })
                 .expect(200)
                 .expect('content-type', /html/)
                 .expect(bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: TITLE</title>'))
@@ -454,7 +458,8 @@ id\tabbrev\ttitle\n\
         });
 
         it('with parameters', function() {
-            return client().get('/morgan/cgi/morglay.cgi?cards=23')
+            return client().get('/morgan/cgi/morglay.cgi')
+                .query({ cards: 23 })
                 .expect(200)
                 .expect('content-type', /html/)
                 .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
@@ -473,6 +478,7 @@ id\tabbrev\ttitle\n\
         mockGlobFile(sandbox);
 
         return client().get('/morgan/cgi/morgpick.cgi')
+            .expect(302)
             .expect(redirectsTo('/morgan/card/glob.file'))
             .endAsync()
         ;
@@ -486,6 +492,7 @@ id\tabbrev\ttitle\n\
     ].forEach(function(route) {
         it(('GET ' + route), function() {
             return client().get(route)
+                .expect(302)
                 .expect(redirectsTo('/morgan/index_p.html'))
                 .endAsync()
             ;
@@ -495,6 +502,7 @@ id\tabbrev\ttitle\n\
     it('GET /morgan, with a cookie', function() {
         return client().get('/morgan')
             .set('cookie', 'morgan_config=flat')
+            .expect(302)
             .expect(redirectsTo('/morgan/index_h.html'))
             .endAsync()
         ;
@@ -505,6 +513,7 @@ id\tabbrev\ttitle\n\
         mockGlobFile(sandbox);
 
         return client().get('/WRLDtime/cgi/anyclock.cgi')
+            .expect(302)
             .expect(redirectsTo('/WRLDtime/face/glob.file'))
             .endAsync()
         ;

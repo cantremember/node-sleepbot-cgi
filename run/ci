@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source `dirname $0`/common
+
+# https://github.com/cainus/node-coveralls
+
+pushd . > /dev/null
+cd $ROOT
+
+OUTPUT=./coverage/lcov.info
+rm -f $OUTPUT
+
+NODE_ENV=test $NODE_BIN/istanbul cover $NODE_BIN/_mocha test -- --reporter dot
+if [[ "$?" != "0" ]]; then
+    FAIL "Test Suite failed"
+fi
+
+cat $OUTPUT | $NODE_BIN/coveralls
+
+popd > /dev/null
+
+SUCCEED "CI passed!"

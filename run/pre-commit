@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source `dirname $0`/common
 
@@ -31,7 +31,7 @@ fi
 #
 
 INFO "linting"
-npm run-script lint
+npm run lint
 if [[ "$?" != "0" ]]; then # there were failures
     exit 1 # already reported itself
 fi
@@ -41,7 +41,7 @@ fi
 #
 
 INFO "styling"
-npm run-script style
+npm run style
 if [[ "$?" != "0" ]]; then # there were failures
     exit 1 # already reported itself
 fi

@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
+var httpMocks = require('@cantremember/node-mocks-http');
 var net = require('net');
 var events = require('events');
 var util = require('util');

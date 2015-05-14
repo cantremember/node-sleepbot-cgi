@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var sinon = require('sinon');
-var httpMocks = require('node-mocks-http');
+var httpMocks = require('@cantremember/node-mocks-http');
 
 var theHelper = require('../helper');
 var willHandle = require('../../app/http404');
@@ -18,8 +18,8 @@ describe('http404', function() {
         cb = sandbox.spy();
 
         // mock Request & Response
-        req = httpMocks.createRequest(sandbox);
-        res = httpMocks.createResponse(sandbox);
+        req = httpMocks.createRequest();
+        res = httpMocks.createResponse();
     });
     afterEach(function() {
         sandbox.restore();

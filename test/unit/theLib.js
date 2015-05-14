@@ -369,7 +369,7 @@ A\tB\n\
 
                 return wwwRoot.willGetFilenames('*')
                 .then(function(filenames) {
-                    assert.deepEqual(filenames, [
+                    assert.deepEqual(filenames.sort(), [
                         'ambienceAnySample.js',
                         'config.js',
                         'fuccSchedule.js',
