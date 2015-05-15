@@ -12,17 +12,25 @@ source `dirname $0`/common
 pushd . > /dev/null
 cd $ROOT
 
-# slightly different than `npm test`
-NODE_ENV=test $NODE_BIN/istanbul cover $NODE_BIN/_mocha test -- --reporter nyan
-if [[ "$?" != "0" ]]; then
-    WARN "failed to run coverage"
-fi
 
-$NODE_BIN/istanbul report
-$NODE_BIN/istanbul check-coverage
+npm run compile
 CODE=$?
 
+if [[ "$CODE" == "0" ]]; then
+    # uses `_mocha`, unlike `npm test`
+    NODE_ENV=test $NODE_BIN/istanbul cover $NODE_BIN/_mocha $ES5/test -- --reporter nyan
+    CODE=$?
+fi
+
+if [[ "$CODE" == "0" ]]; then
+    $NODE_BIN/istanbul report
+    $NODE_BIN/istanbul check-coverage
+    CODE=$?
+fi
+
+
 popd > /dev/null
+
 
 if [[ "$CODE" != "0" ]]; then
     FAIL "failed to achieve coverage"

@@ -7,6 +7,7 @@
             "app/",
             "app.js",
             "config/",
+            "gulpfile.js",
             "lib/",
             "index.js",
             "views/",
@@ -26,7 +27,7 @@
     "opts": {
         "recurse": true,
         "template": "templates/default",
-        "destination": "./doc",
+        "destination": "./build/doc",
         "encoding": "utf8",
         "lenient": true,
         "verbose": true

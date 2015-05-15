@@ -1,6 +1,6 @@
 'use strict';
 
-var theLib = require('../lib/index');
+const theLib = require('../lib/index');
 
 
 /**
@@ -12,7 +12,7 @@ var theLib = require('../lib/index');
  * @returns {Function} an Express handler
  */
 module.exports = function redirectTo(route) {
-    return function handler(req, res) {
+    return (req, res) => {
         res.redirect(theLib.baseURL(route));
     };
 };

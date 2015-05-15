@@ -18,17 +18,18 @@
 
 'use strict';
 
-var path = require('path');
-var theLib = require('./lib/index');
+const path = require('path');
+const theLib = require('./lib/index');
 
+const USAGE = ['Usage:  ', path.basename(__filename), ' --port <PORT>'].join('');
 
-// could from the command line
-var params = (function() {
-    var argv = process.argv;
-    var i = argv.indexOf(__filename);
-    var rest = argv.slice(i + 1);
+// values from the command line
+const params = (() => {
+    const argv = process.argv;
+    const i = argv.indexOf(__filename);
+    const rest = argv.slice(i + 1);
 
-    var minimist = require('minimist');
+    const minimist = require('minimist');
     return minimist(rest, {
         alias: { port: 'p' }
     });
@@ -41,7 +42,7 @@ theLib.config.set(
     params.port || process.env['HTTP_PORT'] || theLib.config.get('httpPort')
 );
 if (! theLib.config.get('httpPort')) {
-    console.error(['Usage:  ', path.basename(__filename), ' --port <PORT>'].join(''));
+    console.error(USAGE);
     process.exit(1);
 }
 console.log('http port is:', theLib.config.get('httpPort'));

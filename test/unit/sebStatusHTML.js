@@ -1,21 +1,21 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var httpMocks = require('@cantremember/node-mocks-http');
-var proxyquire = require('proxyquire');
+const assert = require('assert');
+const sinon = require('sinon');
+const httpMocks = require('@cantremember/node-mocks-http');
+const proxyquire = require('proxyquire');
 
-var theLib = require('../../lib/index');
-var theHelper = require('../helper');
-var HANDLER_PATH = '../../app/sebStatusHTML';
+const theLib = require('../../lib/index');
+const theHelper = require('../helper');
+const HANDLER_PATH = '../../app/sebStatusHTML';
 
 
-describe('sebStatusHTML', function() {
-    var sandbox;
-    var cb;
-    var req, res;
+describe('sebStatusHTML', () => {
+    let sandbox;
+    let cb;
+    let req, res;
 
-    beforeEach(function() {
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
@@ -24,14 +24,14 @@ describe('sebStatusHTML', function() {
         req = httpMocks.createRequest();
         res = httpMocks.createResponse();
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
     });
 
 
-    it('proxies from the primary Shoutcast server', function() {
-        var request = sandbox.spy(function(options, cb) {
-            var primary = theLib.config.get('sebServerPrimary');
+    it('proxies from the primary Shoutcast server', () => {
+        const request = sandbox.spy((options, cb) => {
+            const primary = theLib.config.get('sebServerPrimary');
 
             // some basics
             assert.equal(options.uri.indexOf(primary.url), 0);
@@ -44,7 +44,7 @@ describe('sebStatusHTML', function() {
             request: request,
             '@noCallThru': false,
         })(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert(request.calledOnce);
 
@@ -54,15 +54,15 @@ describe('sebStatusHTML', function() {
         });
     });
 
-    it('will fail gracefully', function() {
-        var request = sandbox.stub().throws(new Error('BOOM'));
+    it('will fail gracefully', () => {
+        const request = sandbox.stub().throws(new Error('BOOM'));
         sandbox.spy(res, 'send');
 
         return proxyquire(HANDLER_PATH, {
             request: request,
             '@noCallThru': false,
         })(req, res, cb)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert.equal(err.message, 'BOOM');
 
             assert(request.calledOnce);

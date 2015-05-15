@@ -1,6 +1,6 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
 
 /**
@@ -24,7 +24,7 @@ module.exports = {
         { url: 'http://209.104.5.207:8096/seb' },
     ],
     get sebServerPrimary() {
-        return this.sebServers.reduce(function(prior, current) {
+        return this.sebServers.reduce((prior, current) => {
             return current.primary ? /* istanbul ignore next */ current : prior;
         });
     },

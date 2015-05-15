@@ -1,7 +1,9 @@
 'use strict';
 
-var Promise = require('bluebird');
-var theLib = require('../lib/index');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const theLib = require('../lib/index');
 
 
 /**
@@ -20,9 +22,10 @@ var theLib = require('../lib/index');
  */
 module.exports = function handler(req, res, cb) {
     return Promise.resolve()
-    .then(function() {
-        var title = req.query.title || '(image)';
-        var image = req.query.image;
+    .then(() => {
+        let { title, image } = req.query;
+
+        title = title || '(image)';
         image = (image
             ? ('/lookit/images/dfoley/' + image)
             : '/images/shim_clear.gif'
@@ -30,10 +33,10 @@ module.exports = function handler(req, res, cb) {
 
         return Promise.promisify(res.render, res)('lookitImgFoley.ejs', {
             config: theLib.config,
-            title: title,
-            image: image,
+            title,
+            image,
         })
-        .then(function(body) {
+        .then((body) => {
             res.send(body);
         });
     })

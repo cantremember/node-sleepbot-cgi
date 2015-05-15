@@ -1,25 +1,27 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var mockfs = require('mock-fs');
-var Promise = require('bluebird');
-var supertest = require('supertest');
+const assert = require('assert');
+const sinon = require('sinon');
+const mockfs = require('mock-fs');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const supertest = require('supertest');
 // https://github.com/doug-martin/super-request
 
 supertest.Test.prototype.endAsync = Promise.promisify(supertest.Test.prototype.end);
 
-var theLib = require('../../lib/index');
-var theHelper = require('../helper');
+const theLib = require('../../lib/index');
+const theHelper = require('../helper');
 
-var NO_DATA = new Buffer(0);
-var QUIP_DATA = '\n\
-text\n\
-quip\n\
-';
+const NO_DATA = new Buffer(0);
+const QUIP_DATA = `
+text
+quip
+`;
 
 function mockGlobFile(sandbox) {
-    theHelper.mockGlob(sandbox, function() {
+    theHelper.mockGlob(sandbox, () => {
         return [ 'glob.file' ];
     });
 }
@@ -28,17 +30,18 @@ function client() {
 }
 function bodyIncludes(string, does) {
     does = does || (does === undefined);
-    return function(res) {
+    return (res) => {
         // "If the response is ok, it should return falsy"
-        if (((res.text || '').indexOf(string) !== -1) === does) {
+        const text = (res.text || '');
+        if (text.includes(string) === does) {
             return;
         }
         throw new Error([ 'does not include "', string, '"' ].join(''));
     };
 }
 function redirectsTo(route) {
-    var absolute = [ theLib.config.get('baseURL'), route ].join('');
-    return function(res) {
+    const absolute = [ theLib.config.get('baseURL'), route ].join('');
+    return (res) => {
         // "If the response is ok, it should return falsy"
         if ((res.headers['location'] || '').indexOf(absolute) === 0) {
             return;
@@ -74,38 +77,38 @@ curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
 */
 
 
-describe('app', function() {
-    var sandbox;
-    before(function() {
+describe('app', () => {
+    let sandbox;
+    before(() => {
         // explicity load the App up-front;
         //   it'll take a few moments, even if we let it happen 'naturally',
         //   but we do it manually, to ensure mock-fs will not affect App loading
         console.log('    (registering the Express app ...)');
         return theLib.app;
     });
-    beforeEach(function() {
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
         mockfs.restore();
     });
 
 
-    it('has access to HTTP assets', function() {
+    it('has access to HTTP assets', () => {
         mockfs({ '/mock-fs': {
             'index.html': NO_DATA,
         } });
 
         return theLib.wwwRoot.willDetectFile('index.html')
-        .then(function(exists) {
+        .then((exists) => {
             assert(exists);
         });
     });
 
 
-    it('GET /status.cgi', function() {
+    it('GET /status.cgi', () => {
         return client().get('/status.cgi')
             .expect(200)
             .expect('content-type', /json/)
@@ -113,14 +116,14 @@ describe('app', function() {
         ;
     });
 
-    describe('GET /404.cgi', function() {
-        beforeEach(function() {
+    describe('GET /404.cgi', () => {
+        beforeEach(() => {
             mockfs({ '/mock-fs': {
                 'http404.ejs': theHelper.realEjs('http404.ejs'),
             } });
         });
 
-        it('without headers', function() {
+        it('without headers', () => {
             return client().get('/404.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
@@ -131,7 +134,7 @@ describe('app', function() {
             ;
         });
 
-        it('with headers', function() {
+        it('with headers', () => {
             return client().get('/404.cgi')
                 .set('x-real-uri', 'REAL-URI')
                 .expect(200)
@@ -144,7 +147,7 @@ describe('app', function() {
     });
 
 
-    it('GET /cgi/animbot.cgi', function() {
+    it('GET /cgi/animbot.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/cgi/animbot.cgi')
@@ -155,7 +158,7 @@ describe('app', function() {
     });
 
 
-    it('GET /ambience/cgi/listen.cgi', function() {
+    it('GET /ambience/cgi/listen.cgi', () => {
         return client().get('/ambience/cgi/listen.cgi')
             .expect(200)
             .expect('content-type', /x-scpls/)
@@ -165,7 +168,7 @@ describe('app', function() {
     });
 
     // there's really no good way to mock this in an Integration test
-    it.skip('GET /ambience/cgi/7.cgi', function() {
+    it.skip('GET /ambience/cgi/7.cgi', () => {
         return client().get('/ambience/cgi/7.cgi')
             .expect(200)
             .expect('content-type', /html/)
@@ -175,7 +178,7 @@ describe('app', function() {
     });
 
     // there's really no good way to mock this in an Integration test
-    it.skip('GET /ambience/cgi/viewxml.cgi', function() {
+    it.skip('GET /ambience/cgi/viewxml.cgi', () => {
         return client().get('/ambience/cgi/viewxml.cgi')
             .expect(200)
             .expect('content-type', /xml/)
@@ -184,7 +187,7 @@ describe('app', function() {
         ;
     });
 
-    it('GET /ambience/cgi/imgpage.cgi', function() {
+    it('GET /ambience/cgi/imgpage.cgi', () => {
         return client().get('/ambience/cgi/imgpage.cgi')
             .expect(302)
             .expect(redirectsTo('/ambience'))
@@ -192,8 +195,8 @@ describe('app', function() {
         ;
     });
 
-    describe('GET /ambience/cgi/any_f.cgi', function() {
-        it('without data', function() {
+    describe('GET /ambience/cgi/any_f.cgi', () => {
+        it('without data', () => {
             return client().get('/ambience/cgi/any_f.cgi')
                 .expect(404)
                 .expect('content-type', /html/)
@@ -201,13 +204,13 @@ describe('app', function() {
             ;
         });
 
-        it('with data', function() {
+        it('with data', () => {
             mockfs({ '/mock-fs': {
                 'ambience': {
-                    'any.txt': '\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-',
+                    'any.txt': `
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+`,
                     'anyquip.txt': QUIP_DATA,
                 },
                 'ambienceAnySample.ejs': theHelper.realEjs('ambienceAnySample.ejs'),
@@ -226,7 +229,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
     });
 
 
-    it('GET /critturs/cgi/anyaudio.cgi', function() {
+    it('GET /critturs/cgi/anyaudio.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/critturs/cgi/anyaudio.cgi')
@@ -236,7 +239,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         ;
     });
 
-    it('GET /critturs/cgi/critlogo.cgi', function() {
+    it('GET /critturs/cgi/critlogo.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/critturs/cgi/critlogo.cgi')
@@ -247,7 +250,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
     });
 
 
-    it('GET /fucc/cgi/anyaudio.cgi', function() {
+    it('GET /fucc/cgi/anyaudio.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/fucc/cgi/anyaudio.cgi')
@@ -257,13 +260,13 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         ;
     });
 
-    describe('GET /fucc/cgi/schednow.cgi', function() {
+    describe('GET /fucc/cgi/schednow.cgi', () => {
         var date;
-        beforeEach(function() {
+        beforeEach(() => {
             date = new Date();
         });
 
-        it('without data', function() {
+        it('without data', () => {
             mockfs({ '/mock-fs': {
                 'fucc': { },
                 'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
@@ -279,7 +282,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
             ;
         });
 
-        it('with dead data', function() {
+        it('with dead data', () => {
             mockfs({ '/mock-fs': {
                 'fucc': {
                     'dead.txt': 'DEAD',
@@ -298,21 +301,22 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
             ;
         });
 
-        it('with live data', function() {
+        it('with live data', () => {
             mockfs({ '/mock-fs': {
                 'fucc': {
-                    'live.txt': '\
-file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t' +
-    date.getYear() + '\t' + date.getMonth() + '\t' + date.getDate() + '\t' +
-    date.getHours() + '\t' + (date.getHours() + 1) + '\n\
-',
-                    'live.html': '\
-<A NAME="anchor">\n\
-live1\n\
-live2\n\
-live3\n\
-',
+                    'live.txt': `
+file\tanchor\tyear\tmonth\tday\thourStart\thourEnd
+file\tanchor\t${
+    date.getYear() }\t${ date.getMonth() }\t${ date.getDate() }\t${
+    date.getHours() }\t${ date.getHours() + 1
+}
+`,
+                    'live.html': `
+<A NAME="anchor">
+live1
+live2
+live3
+`,
                     'showquip.txt': QUIP_DATA,
                 },
                 'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
@@ -330,23 +334,22 @@ live3\n\
             ;
         });
 
-        it('with show data', function() {
+        it('with show data', () => {
             mockfs({ '/mock-fs': {
                 'fucc': {
-                    'show.txt': '\
-file\tanchor\tyear\tmonth\tday\thourStart\thourEnd\n\
-file\tanchor\t' +
-    date.getDay() + '\t' + date.getHours() + '\t' + (date.getHours() + 1) + '\n\
-',
-                    'show.html': '\
-<A NAME="anchor">\n\
-show1\n\
-show2\n\
-<!-- start -->\n\
-title\n\
-show3\n\
-<!-- end -->\n\
-',
+                    'show.txt': `
+file\tanchor\tdayOfWeek\thourStart\thourEnd
+file\tanchor\t${ date.getDay() }\t${ date.getHours() }\t${ date.getHours() + 1 }
+`,
+                    'show.html': `
+<A NAME="anchor">
+show1
+show2
+<!-- start -->
+title
+show3
+<!-- end -->
+`,
                     'showquip.txt': QUIP_DATA,
                 },
                 'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
@@ -366,7 +369,7 @@ show3\n\
     });
 
 
-    it('GET /lookit/cgi/anyfoley.cgi', function() {
+    it('GET /lookit/cgi/anyfoley.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/lookit/cgi/anyfoley.cgi')
@@ -376,7 +379,7 @@ show3\n\
         ;
     });
 
-    it('GET /lookit/cgi/anystory.cgi', function() {
+    it('GET /lookit/cgi/anystory.cgi', () => {
         mockGlobFile(sandbox);
 
         mockfs({ '/mock-fs': {
@@ -399,14 +402,14 @@ show3\n\
         ;
     });
 
-    describe('GET /lookit/cgi/imgfoley.cgi', function() {
-        beforeEach(function() {
+    describe('GET /lookit/cgi/imgfoley.cgi', () => {
+        beforeEach(() => {
             mockfs({ '/mock-fs': {
                 'lookitImgFoley.ejs': theHelper.realEjs('lookitImgFoley.ejs'),
             } });
         });
 
-        it('without parameters', function() {
+        it('without parameters', () => {
             return client().get('/lookit/cgi/imgfoley.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
@@ -417,7 +420,7 @@ show3\n\
             ;
         });
 
-        it('with parameters', function() {
+        it('with parameters', () => {
             return client().get('/lookit/cgi/imgfoley.cgi')
                 .query({ title: 'TITLE', image: 'IMAGE' })
                 .expect(200)
@@ -429,24 +432,24 @@ show3\n\
         });
     });
 
-    describe('GET /morgan/cgi/morglay.cgi', function() {
-        beforeEach(function() {
+    describe('GET /morgan/cgi/morglay.cgi', () => {
+        beforeEach(() => {
             mockfs({ '/mock-fs': {
                 'morgan': {
-                    'card.txt': '\
-id\tabbrev\ttitle\n\
-1\tone\tONE\n\
-2\ttwo\tTWO\n\
-3\tthree\tTHREE\n\
-4\tfour\tFOUR\n\
-5\tfive\tFIVE\n\
-',
+                    'card.txt': `
+id\tabbrev\ttitle
+1\tone\tONE
+2\ttwo\tTWO
+3\tthree\tTHREE
+4\tfour\tFOUR
+5\tfive\tFIVE
+`,
                 },
                 'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
             } });
         });
 
-        it('without parameters', function() {
+        it('without parameters', () => {
             return client().get('/morgan/cgi/morglay.cgi')
                 .expect(200)
                 .expect('content-type', /html/)
@@ -457,7 +460,7 @@ id\tabbrev\ttitle\n\
             ;
         });
 
-        it('with parameters', function() {
+        it('with parameters', () => {
             return client().get('/morgan/cgi/morglay.cgi')
                 .query({ cards: 23 })
                 .expect(200)
@@ -474,7 +477,7 @@ id\tabbrev\ttitle\n\
         });
     });
 
-    it('GET /morgan/cgi/morgpick.cgi', function() {
+    it('GET /morgan/cgi/morgpick.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/morgan/cgi/morgpick.cgi')
@@ -490,7 +493,7 @@ id\tabbrev\ttitle\n\
         '/morgan/',
         '/morgan'
     ].forEach(function(route) {
-        it(('GET ' + route), function() {
+        it(('GET ' + route), () => {
             return client().get(route)
                 .expect(302)
                 .expect(redirectsTo('/morgan/index_p.html'))
@@ -499,7 +502,7 @@ id\tabbrev\ttitle\n\
         });
     });
 
-    it('GET /morgan, with a cookie', function() {
+    it('GET /morgan, with a cookie', () => {
         return client().get('/morgan')
             .set('cookie', 'morgan_config=flat')
             .expect(302)
@@ -509,7 +512,7 @@ id\tabbrev\ttitle\n\
     });
 
 
-    it('GET /WRLDtime/cgi/anyclock.cgi', function() {
+    it('GET /WRLDtime/cgi/anyclock.cgi', () => {
         mockGlobFile(sandbox);
 
         return client().get('/WRLDtime/cgi/anyclock.cgi')
@@ -520,7 +523,7 @@ id\tabbrev\ttitle\n\
     });
 
     // there's really no good way to mock this in an Integration test
-    it.skip('GET /WRLDtime/cgi/utc.cgi', function() {
+    it.skip('GET /WRLDtime/cgi/utc.cgi', () => {
         return client().get('/WRLDtime/cgi/utc.cgi')
             .expect(200)
             .expect('content-type', /html/)

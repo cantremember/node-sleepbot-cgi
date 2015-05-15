@@ -1,18 +1,20 @@
 'use strict';
 
-var Promise = require('bluebird');
-var theLib = require('../lib/index');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const theLib = require('../lib/index');
 
 
 // the filenames
-var willGetFilenames = theLib.willMemoize(function() {
+const willGetFilenames = theLib.willMemoize(() => {
     return theLib.wwwRoot.willGetFilenames('lookit/story/*.txt');
 });
 
 // the files themselves
-var willGetFile = function(filepath) {
-    var cache = handler.cache;
-    var will = cache[filepath] || theLib.willMemoize(function() {
+const willGetFile = (filepath) => {
+    const cache = handler.cache;
+    const will = cache[filepath] || theLib.willMemoize(() => {
         return theLib.wwwRoot.willLoadFile(filepath);
     });
     if (theLib.config.get('caching')) {
@@ -38,17 +40,17 @@ var willGetFile = function(filepath) {
  */
 function handler(req, res, cb) {
     return willGetFilenames()
-    .then(function(filenames) {
-        var filepath = theLib.chooseAny(filenames);
+    .then((filenames) => {
+        const filepath = theLib.chooseAny(filenames);
 
         return willGetFile('lookit/story/' + filepath);
     })
-    .then(function(body) {
+    .then((body) => {
         return Promise.promisify(res.render, res)('lookitAnyStory.ejs', {
             config: theLib.config,
-            body: body,
+            body,
         })
-        .then(function(body) {
+        .then((body) => {
             res.send(body);
         });
     })

@@ -1,30 +1,30 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var mockfs = require('mock-fs');
-var httpMocks = require('@cantremember/node-mocks-http');
+const assert = require('assert');
+const sinon = require('sinon');
+const mockfs = require('mock-fs');
+const httpMocks = require('@cantremember/node-mocks-http');
 
-var theLib = require('../../lib/index');
-var theHelper = require('../helper');
-var willHandle = require('../../app/ambienceAnySample');
+const theLib = require('../../lib/index');
+const theHelper = require('../helper');
+const willHandle = require('../../app/ambienceAnySample');
 
-var NO_DATA = new Buffer(0);
-var ANY_DATA = '\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-';
-var QUIP_DATA = '\n\
-text\n\
-text\n\
-';
+const NO_DATA = new Buffer(0);
+const ANY_DATA = `
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+`;
+const QUIP_DATA = `
+text
+text
+`;
 
 
-describe('ambienceAnySample', function() {
-    var sandbox;
-    var cb;
-    var req, res;
-    beforeEach(function() {
+describe('ambienceAnySample', () => {
+    let sandbox;
+    let cb;
+    let req, res;
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
@@ -35,7 +35,7 @@ describe('ambienceAnySample', function() {
 
         sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
         mockfs.restore();
         theHelper.mockConfig();
@@ -45,8 +45,8 @@ describe('ambienceAnySample', function() {
     });
 
 
-    describe('with a sample and quip', function() {
-        beforeEach(function() {
+    describe('with a sample and quip', () => {
+        beforeEach(() => {
             mockfs({ '/mock-fs': {
                 'ambience': {
                     'any.txt': ANY_DATA,
@@ -58,11 +58,11 @@ describe('ambienceAnySample', function() {
             } });
         });
 
-        it('produces a response', function() {
+        it('produces a response', () => {
             assert(! theLib.config.get('caching'));
 
             return willHandle(req, res, cb)
-            .then(function() {
+            .then(() => {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
                 assert(! cb.called);
@@ -72,7 +72,7 @@ describe('ambienceAnySample', function() {
                 // no caching
                 assert.equal(Object.keys(willHandle.cache).length, 0);
 
-                var context = res._getRenderData();
+                const context = res._getRenderData();
 
                 assert.equal(context.sample.file, 'file');
                 assert.equal(context.sample.ext, 'ext');
@@ -92,11 +92,11 @@ describe('ambienceAnySample', function() {
             });
         });
 
-        it('caches a response', function() {
+        it('caches a response', () => {
             theHelper.mockConfig({ caching: true });
 
             return willHandle(req, res, cb)
-            .then(function() {
+            .then(() => {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
                 assert(! cb.called);
@@ -108,7 +108,7 @@ describe('ambienceAnySample', function() {
                 res = httpMocks.createResponse();
                 return willHandle(req, res, cb);
             })
-            .then(function() {
+            .then(() => {
                 assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
                 assert(! cb.called);
@@ -119,19 +119,19 @@ describe('ambienceAnySample', function() {
         });
     });
 
-    it('produces a response with a high-order file having no cover image', function() {
+    it('produces a response with a high-order file having no cover image', () => {
         mockfs({ '/mock-fs': {
             'ambience': {
-                'any.txt': '\n\
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
-',
+                'any.txt': `
+file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
+`,
                 'anyquip.txt': NO_DATA,
             },
         } });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
 
             assert(! cb.called);
@@ -141,7 +141,7 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
             // no caching
             assert.equal(Object.keys(willHandle.cache).length, 0);
 
-            var context = res._getRenderData();
+            const context = res._getRenderData();
 
             assert.equal(context.sample.file, 'zzzz');
 
@@ -150,7 +150,7 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         });
     });
 
-    it('survives no data', function() {
+    it('survives no data', () => {
         mockfs({ '/mock-fs': {
             'ambience': {
                 'any.txt': NO_DATA,
@@ -162,14 +162,14 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(cb.calledOnce);
             assert(! res.render.called);
             assert(! res.send.called);
         });
     });
 
-    it('survives missing data', function() {
+    it('survives missing data', () => {
         mockfs({ '/mock-fs': {
             'ambience': { },
         } });
@@ -178,14 +178,14 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(cb.calledOnce);
             assert(! res.render.called);
             assert(! res.send.called);
         });
     });
 
-    it('will fail gracefully', function() {
+    it('will fail gracefully', () => {
         mockfs({ '/mock-fs': {
             'ambience': {
                 'any.txt': ANY_DATA,
@@ -197,7 +197,7 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize\n\
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert.equal(err.message, 'BOOM');
 
             assert(res.render.calledOnce);

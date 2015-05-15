@@ -51,14 +51,14 @@
     // Environments
     //"es3"         : true,  // if ES3 syntax should be allowed
     //"es5"         : true,  // if ES5 syntax should be allowed (is now set per default)
-    "esnext"      : false, // if es.next specific syntax should be allowed
+    "esnext"      : true,  // if es.next specific syntax should be allowed
 
     "browser"     : false, // if the standard browser globals should be predefined
     "couch"       : false, // if CouchDB globals should be predefined
     "dojo"        : false, // if Dojo Toolkit globals should be predefined
     "gcl"         : false, // if JSHint should be compatible with Google Closure Linter
     "jquery"      : false, // if jQuery globals should be predefined
-    "moz"         : false, // if mozilla specific syntax should be allowed
+    "moz"         : true,  // if mozilla specific syntax should be allowed
     "mootools"    : false, // if MooTools globals should be predefined
     "node"        : true,  // if the Node.js environment globals should be
                            // predefined

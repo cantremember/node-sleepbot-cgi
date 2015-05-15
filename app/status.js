@@ -1,6 +1,6 @@
 'use strict';
 
-var STATUS = Object.freeze({
+const STATUS = Object.freeze({
     ok: true
 });
 

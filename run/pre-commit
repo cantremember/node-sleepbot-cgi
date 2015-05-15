@@ -47,6 +47,16 @@ if [[ "$?" != "0" ]]; then # there were failures
 fi
 
 #
+# compile
+#
+
+INFO "compiling"
+npm run compile
+if [[ "$?" != "0" ]]; then # there were failures
+    FAIL "could not compile"
+fi
+
+#
 # Test Suite
 #
 

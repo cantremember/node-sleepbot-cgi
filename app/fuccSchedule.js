@@ -1,24 +1,26 @@
 'use strict';
 
-var Promise = require('bluebird');
-var theLib = require('../lib/index');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const theLib = require('../lib/index');
 
 // // TODO: timezone support
-// var timeZoneOffset = 0;
+// const timeZoneOffset = 0;
 
 // column -> index mapping
-var liveColumns = theLib.columnToIndexMap('file anchor year month day hourStart hourEnd');
-var showColumns = theLib.columnToIndexMap('file anchor dayOfWeek hourStart hourEnd');
-var quipColumns = theLib.columnToIndexMap('text');
-var dayOfWeekNames = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(/\s/); // 0-based
-var dayOfWeekAnchors = 'SUN MON TUE WED THU FRI SAT'.split(/\s/); // 0-based
+const liveColumns = theLib.columnToIndexMap('file anchor year month day hourStart hourEnd');
+const showColumns = theLib.columnToIndexMap('file anchor dayOfWeek hourStart hourEnd');
+const quipColumns = theLib.columnToIndexMap('text');
+const dayOfWeekNames = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(/\s/); // 0-based
+const dayOfWeekAnchors = 'SUN MON TUE WED THU FRI SAT'.split(/\s/); // 0-based
 
-var NO_QUIPS = Object.freeze([ [] ]);
-var FAKE_QUIP = Object.freeze({ text: '' });
+const NO_QUIPS = Object.freeze([ [] ]);
+const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 function coerceData(data) {
-    Object.keys(data).forEach(function(key) {
+    for (let key of Object.keys(data)) {
         switch (key) {
             case 'file':
             case 'anchor':
@@ -26,20 +28,19 @@ function coerceData(data) {
             default: // numeric properties
                 data[key] = parseInt(data[key], 10);
         }
-    });
+    }
     return data;
 }
 
 function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
     if (end === undefined) {
-        end = titleStart;
-        titleStart = undefined;
+        [ end, titleStart ] = [ titleStart, undefined ];
     }
 
-    var phase = 0;
-    var body = [];
+    const body = [];
+    let phase = 0;
 
-    lines.forEach(function(line) {
+    for (let line of lines) {
         switch (phase) {
             case 0: // searching
                 if (start.test(line)) {
@@ -76,7 +77,7 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
                 }
                 break;
         }
-    });
+    }
 
     // stringify
     data.body = body.join('\n');
@@ -87,9 +88,9 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
 /*
    the dead file
 */
-var loadDead = theLib.willMemoize(function loadDead() {
+const loadDead = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadFile('fucc/dead.txt')
-    .catch(/* istanbul ignore next */ function() {
+    .catch(/* istanbul ignore next */ () => {
         // not present
         return undefined;
     });
@@ -105,22 +106,21 @@ function isLiveNow(data, date) {
         return false;
     }
     // and within the hour range
-    var hour = date.getHours();
+    const hour = date.getHours();
     return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
-var loadLives = theLib.willMemoize(function loadLives() {
-    var datas;
+const loadLives = theLib.willMemoize(() => {
+    let datas;
 
     return theLib.wwwRoot.willLoadTSV('fucc/live.txt')
-    .then(function(rows) {
+    .then((rows) => {
         // coerce
-        datas = rows.map(function(row) {
-            var data = theLib.dataColumnMap(row, liveColumns);
-            data = coerceData(data);
+        datas = rows.map((row) => {
+            const data = coerceData(theLib.dataColumnMap(row, liveColumns));
             data.type = 'live';
 
             // 2-digit year
-            var yy = parseInt(data.year, 10);
+            const yy = parseInt(data.year, 10);
             data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
 
             return data;
@@ -129,10 +129,10 @@ var loadLives = theLib.willMemoize(function loadLives() {
         // the live schedule, for scrape-age
         return theLib.wwwRoot.willLoadFile('fucc/live.html');
     })
-    .then(function(page) {
-        var lines = (page || '').split('\n');
+    .then((page) => {
+        const lines = (page || '').split('\n');
 
-        return datas.map(function(data) {
+        return datas.map((data) => {
             return scrapeBodyTitle(data, lines,
                 new RegExp('^<A NAME="' + data.anchor + '">'),
                 /^<A NAME=/
@@ -143,13 +143,13 @@ var loadLives = theLib.willMemoize(function loadLives() {
 function checkLive(date) {
     // load up the rows
     return loadLives()
-    .then(function(datas) {
+    .then((datas) => {
         // the first one that's live
-        return datas && datas.filter(function(data) {
+        return datas && datas.filter((data) => {
             return isLiveNow(data, date);
         })[0];
     })
-    .catch(function() {
+    .catch(() => {
         // treat as no match
         return undefined;
     });
@@ -164,18 +164,17 @@ function isShowNow(data, date) {
         return false;
     }
     // and within the hour range
-    var hour = date.getHours();
+    const hour = date.getHours();
     return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
-var loadShows = theLib.willMemoize(function loadShows() {
-    var datas;
+const loadShows = theLib.willMemoize(() => {
+    let datas;
 
     return theLib.wwwRoot.willLoadTSV('fucc/show.txt')
-    .then(function(rows) {
+    .then((rows) => {
         // coerce
-        datas = rows.map(function(row) {
-            var data = theLib.dataColumnMap(row, showColumns);
-            data = coerceData(data);
+        datas = rows.map((row) => {
+            const data = coerceData(theLib.dataColumnMap(row, showColumns));
             data.type = 'show';
 
             return data;
@@ -184,10 +183,10 @@ var loadShows = theLib.willMemoize(function loadShows() {
         // the show schedule, for scrape-age
         return theLib.wwwRoot.willLoadFile('fucc/show.html');
     })
-    .then(function(page) {
-        var lines = (page || '').split('\n');
+    .then((page) => {
+        const lines = (page || '').split('\n');
 
-        return datas.map(function(data) {
+        return datas.map((data) => {
             return scrapeBodyTitle(data, lines,
                 new RegExp('^<A NAME="' + data.anchor + '">'),
                 /^<!-- start -->/,
@@ -199,13 +198,13 @@ var loadShows = theLib.willMemoize(function loadShows() {
 function checkShow(date) {
     // load up the rows
     return loadShows()
-    .then(function(datas) {
+    .then((datas) => {
         // the first one that's live
-        return datas && datas.filter(function(data) {
+        return datas && datas.filter((data) => {
             return isShowNow(data, date);
         })[0];
     })
-    .catch(function() {
+    .catch(() => {
         // treat as no match
         return undefined;
     });
@@ -215,9 +214,9 @@ function checkShow(date) {
 /*
    the quip file
 */
-var loadQuips = theLib.willMemoize(function loadQuips() {
+const loadQuips = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadTSV('fucc/showquip.txt')
-    .catch(function() {
+    .catch(() => {
         return NO_QUIPS;
     });
 });
@@ -236,12 +235,12 @@ var loadQuips = theLib.willMemoize(function loadQuips() {
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
 module.exports = function handler(req, res, cb) {
-    var dead, current;
-    var quip;
-    var date = new Date(), day = date.getDay();
+    const date = new Date(), day = date.getDay();
+    let dead, current;
+    let quip;
 
     return loadDead()
-    .then(function(_dead) {
+    .then((_dead) => {
         dead = _dead;
         if (dead || current) {
             // we're done
@@ -250,7 +249,7 @@ module.exports = function handler(req, res, cb) {
 
         return checkLive(date);
     })
-    .then(function(_live) {
+    .then((_live) => {
         current = current || _live;
         if (dead || current) {
             // we're done
@@ -259,25 +258,25 @@ module.exports = function handler(req, res, cb) {
 
         return checkShow(date);
     })
-    .then(function(_show) {
+    .then((_show) => {
         current = current || _show;
 
         return loadQuips();
     })
-    .then(function(rows) {
+    .then((rows) => {
         // choose a random quip
         quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
 
         return Promise.promisify(res.render, res)('fuccSchedule.ejs', {
             config: theLib.config,
-            dead: dead,
-            current: current,
-            quip: quip,
-            date: date,
+            dead,
+            current,
+            quip,
+            date,
             dayOfWeekName: dayOfWeekNames[day],
             dayOfWeekAnchor: dayOfWeekAnchors[day],
         })
-        .then(function(body) {
+        .then((body) => {
             res.send(body);
         });
     })

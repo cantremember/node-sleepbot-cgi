@@ -8,7 +8,7 @@ source `dirname $0`/common
 pushd . > /dev/null
 cd $ROOT
 
-$NODE_BIN/jscs --config .jscs.json $JS_DIRS
+$NODE_BIN/jscs --esnext --config .jscs.json $JS_DIRS
 CODE=$?
 
 popd > /dev/null

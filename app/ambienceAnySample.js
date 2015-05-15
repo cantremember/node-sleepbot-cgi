@@ -1,41 +1,43 @@
 'use strict';
 
-var Promise = require('bluebird');
-var lodash = require('lodash');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const lodash = require('lodash');
 
-var theLib = require('../lib/index');
+const theLib = require('../lib/index');
 
 // column -> index mapping
-var sampleColumns = theLib.columnToIndexMap('file ext page stub artist album track size');
-var quipColumns = theLib.columnToIndexMap('text');
+const sampleColumns = theLib.columnToIndexMap('file ext page stub artist album track size');
+const quipColumns = theLib.columnToIndexMap('text');
 
-var NO_ROWS = Object.freeze([]);
-var FAKE_QUIP = Object.freeze({ text: '' });
+const NO_ROWS = Object.freeze([]);
+const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 // load the samples file
-var loadSamples = theLib.willMemoize(function() {
+const loadSamples = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadTSV('ambience/any.txt')
-    .then(function(rows) {
-        return rows.map(function(row) {
+    .then((rows) => {
+        return rows.map((row) => {
             return theLib.dataColumnMap(row, sampleColumns);
         });
     })
-    .catch(function() {
+    .catch(() => {
         // treat as no match
         return NO_ROWS;
     });
 });
 
 // load the quips file
-var loadQuips = theLib.willMemoize(function() {
+const loadQuips = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadTSV('ambience/anyquip.txt')
-    .then(function(rows) {
-        return rows.map(function(row) {
+    .then((rows) => {
+        return rows.map((row) => {
             return theLib.dataColumnMap(row, quipColumns);
         });
     })
-    .catch(function() {
+    .catch(() => {
         // treat as no match
         return NO_ROWS;
     });
@@ -55,13 +57,13 @@ var loadQuips = theLib.willMemoize(function() {
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
 function handler(req, res, cb) {
-    var quip;
-    var sample;
+    let quip;
+    let sample;
 
     return Promise.all([
         // (1) the sample
         loadSamples()
-        .then(function(datas) {
+        .then((datas) => {
             // choose a random sample
             sample = theLib.chooseAny(datas);
             if (sample === undefined) {
@@ -72,23 +74,24 @@ function handler(req, res, cb) {
             sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
 
             // things about the album
-            var stub = sample.stub;
-            var album = handler.cache[stub];
+            const stub = sample.stub;
+            let album = handler.cache[stub];
 
             if (album) {
                 // already cached
-                sample = lodash.defaults(sample, album);
+                // TODO: sample = Object.assign({}, album, sample);
+                sample = lodash.extend({}, album, sample);
                 return;
             }
 
             // populate the cache
-            var albumFile = stub.toLowerCase();
-            var coverImage = [ '/ambience/covergif/', albumFile, '.gif'].join('');
+            const albumFile = stub.toLowerCase();
+            const coverImage = [ '/ambience/covergif/', albumFile, '.gif'].join('');
             album = {
-                albumFile:   albumFile,
+                albumFile,
                 albumAnchor: stub.toUpperCase(),
                 // has a cover image?
-                coverImage:  coverImage,
+                coverImage,
                 coverExists: false,
             };
 
@@ -98,21 +101,22 @@ function handler(req, res, cb) {
             }
 
             return theLib.wwwRoot.willDetectFile(coverImage)
-            .then(function(exists) {
+            .then((exists) => {
                 album.coverExists = exists;
 
-                sample = lodash.defaults(sample, album);
+                // TODO: sample = Object.assign({}, album, sample);
+                sample = lodash.extend({}, album, sample);
             });
         }),
 
         // (2) the quip
         loadQuips()
-        .then(function(datas) {
+        .then((datas) => {
             // choose a random quip
             quip = theLib.chooseAny(datas);
         })
     ])
-    .then(function() {
+    .then(() => {
         if (sample === undefined) {
             // we cannot provide a response
             //   nor are we releasing Zalgo
@@ -125,10 +129,10 @@ function handler(req, res, cb) {
 
         return Promise.promisify(res.render, res)('ambienceAnySample.ejs', {
             config: theLib.config,
-            sample: sample,
-            quip: quip,
+            sample,
+            quip,
         })
-        .then(function(body) {
+        .then((body) => {
             res.send(body);
         });
     })

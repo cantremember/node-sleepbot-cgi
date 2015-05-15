@@ -2,21 +2,33 @@
 
 source `dirname $0`/common
 
-# https://github.com/cainus/node-coveralls
-
 pushd . > /dev/null
 cd $ROOT
 
-OUTPUT=./coverage/lcov.info
-rm -f $OUTPUT
 
-NODE_ENV=test $NODE_BIN/istanbul cover $NODE_BIN/_mocha test -- --reporter dot
-if [[ "$?" != "0" ]]; then
-    FAIL "Test Suite failed"
+npm run compile
+CODE=$?
+
+if [[ "$CODE" == "0" ]]; then
+    OUTPUT=./build/coverage/lcov.info
+    mkdir -p build
+    rm -f $OUTPUT
+
+    NODE_ENV=test $NODE_BIN/istanbul cover $NODE_BIN/_mocha $ES5/test -- --reporter dot
+    CODE=$?
 fi
 
-cat $OUTPUT | $NODE_BIN/coveralls
+if [[ "$CODE" == "0" ]]; then
+    # https://github.com/cainus/node-coveralls
+    cat $OUTPUT | $NODE_BIN/coveralls
+    CODE=$?
+fi
+
 
 popd > /dev/null
+
+if [[ "$CODE" == "0" ]]; then
+    FAIL "CI failed"
+fi
 
 SUCCEED "CI passed!"

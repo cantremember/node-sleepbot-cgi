@@ -1,27 +1,27 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var httpMocks = require('@cantremember/node-mocks-http');
-var net = require('net');
-var events = require('events');
-var util = require('util');
+const assert = require('assert');
+const sinon = require('sinon');
+const httpMocks = require('@cantremember/node-mocks-http');
+const net = require('net');
+const events = require('events');
+const util = require('util');
 
-var theHelper = require('../helper');
-var willHandle = require('../../app/WRLDtimeUTC');
+const theHelper = require('../helper');
+const willHandle = require('../../app/WRLDtimeUTC');
 
 
 // mock net.Connection
 function Connection(story) {
     events.EventEmitter.call(this);
 
-    var self = this;
-    setImmediate(function() {
+    const self = this;
+    setImmediate(() => {
         story.call(self);
     });
 }
 util.inherits(Connection, events.EventEmitter);
-Connection.prototype.setTimeout = function setTimeout(t) {
+Connection.prototype.setTimeout = function(t) {
     this.timeout = t;
 };
 
@@ -53,12 +53,12 @@ function CONNECTION_ERROR_TIMEOUT() {
 }
 
 
-describe('WRLDtimeUTC', function() {
-    var sandbox;
-    var cb;
-    var req, res;
+describe('WRLDtimeUTC', () => {
+    let sandbox;
+    let cb;
+    let req, res;
 
-    beforeEach(function() {
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
@@ -67,17 +67,17 @@ describe('WRLDtimeUTC', function() {
         req = httpMocks.createRequest();
         res = httpMocks.createResponse();
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
         theHelper.mockConfig();
     });
 
 
-    it('responds when the Connection provides data and closes', function() {
+    it('responds when the Connection provides data and closes', () => {
         theHelper.mockConfig({ ntpServers: [ 'ntp-good' ] });
 
-        var connection;
-        sandbox.stub(net, 'connect', function(port, host) {
+        let connection;
+        sandbox.stub(net, 'connect', (port, host) => {
             assert.equal(host, 'ntp-good');
             assert.equal(port, 13); // ntp
 
@@ -86,7 +86,7 @@ describe('WRLDtimeUTC', function() {
         });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert(net.connect.calledOnce);
 
@@ -95,17 +95,17 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('responds when the Connection provides data and ends', function() {
+    it('responds when the Connection provides data and ends', () => {
         theHelper.mockConfig({ ntpServers: [ 'ntp-good' ] });
 
-        var connection;
-        sandbox.stub(net, 'connect', function() {
+        let connection;
+        sandbox.stub(net, 'connect', () => {
             connection = new Connection(CONNECTION_END);
             return connection;
         });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert(net.connect.calledOnce);
 
@@ -114,13 +114,13 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('does nothing without servers', function() {
+    it('does nothing without servers', () => {
         theHelper.mockConfig({ ntpServers: [] });
 
         sandbox.spy(net, 'connect');
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert(! net.connect.called);
 
@@ -129,17 +129,17 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('does nothing without a Connection response', function() {
+    it('does nothing without a Connection response', () => {
         theHelper.mockConfig({ ntpServers: [ 'ntp-bad' ] });
 
-        var connection;
-        sandbox.stub(net, 'connect', function() {
+        let connection;
+        sandbox.stub(net, 'connect', () => {
             connection = new Connection(CONNECTION_EMPTY);
             return connection;
         });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert(net.connect.calledOnce);
 
@@ -148,12 +148,12 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('does nothing with a series of bad Connections', function() {
+    it('does nothing with a series of bad Connections', () => {
         theHelper.mockConfig({ ntpServers: [ 'ntp-1', 'ntp-2', 'ntp-3' ] });
 
-        var connections = [];
-        sandbox.stub(net, 'connect', function() {
-            var index = connections.length;
+        const connections = [];
+        sandbox.stub(net, 'connect', () => {
+            let index = connections.length;
             switch (index) {
                 case 0:  connections.push(new Connection(CONNECTION_ERROR));         break;
                 case 1:  connections.push(new Connection(CONNECTION_TIMEOUT));       break;
@@ -163,7 +163,7 @@ describe('WRLDtimeUTC', function() {
         });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert.equal(net.connect.callCount, 3);
             assert.equal(connections.length, 3);
@@ -173,12 +173,12 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('falls back to an alternate server', function() {
+    it('falls back to an alternate server', () => {
         theHelper.mockConfig({ ntpServers: [ 'ntp-1', 'ntp-2', 'ntp-3' ] });
 
-        var connections = [];
-        sandbox.stub(net, 'connect', function() {
-            var index = connections.length;
+        const connections = [];
+        sandbox.stub(net, 'connect', () => {
+            let index = connections.length;
             switch (index) {
                 case 0:  connections.push(new Connection(CONNECTION_ERROR));  break;
                 case 1:  connections.push(new Connection(CONNECTION_EMPTY));  break;
@@ -188,7 +188,7 @@ describe('WRLDtimeUTC', function() {
         });
 
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
             assert.equal(net.connect.callCount, 3);
             assert.equal(connections.length, 3);
@@ -198,12 +198,12 @@ describe('WRLDtimeUTC', function() {
         });
     });
 
-    it('will fail gracefully', function() {
+    it('will fail gracefully', () => {
         sandbox.stub(net, 'connect').throws(new Error('BOOM'));
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert.equal(err.message, 'BOOM');
 
             assert(net.connect.calledOnce);

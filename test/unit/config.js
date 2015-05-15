@@ -1,29 +1,29 @@
 'use strict';
 
-var assert = require('assert');
-var proxyquire = require('proxyquire');
+const assert = require('assert');
+const proxyquire = require('proxyquire');
 
-var CONFIG_PATH = '../../lib/config';
-var STUBS = Object.freeze({ '@noCallThru': false });
-var theHelper = require('../helper');
-var configTest = require('../../config/test');
-var configDefault = require('../../config/default');
+const CONFIG_PATH = '../../lib/config';
+const STUBS = Object.freeze({ '@noCallThru': false });
+const theHelper = require('../helper');
+const configTest = require('../../config/test');
+const configDefault = require('../../config/default');
 
 
-describe('lib/config', function() {
-    var config;
-    var env;
-    beforeEach(function() {
+describe('lib/config', () => {
+    let config;
+    let env;
+    beforeEach(() => {
         env = process.env['NODE_ENV'];
     });
-    afterEach(function() {
+    afterEach(() => {
         process.env['NODE_ENV'] = env;
 
         theHelper.mockConfig();
     });
 
 
-    it('provides a test environment', function() {
+    it('provides a test environment', () => {
         assert.equal(process.env['NODE_ENV'], 'test');
 
         config = proxyquire(CONFIG_PATH, STUBS);
@@ -37,7 +37,7 @@ describe('lib/config', function() {
         assert.equal(config.get('httpPort'), configDefault.httpPort);
     });
 
-    it('provides no environment', function() {
+    it('provides no environment', () => {
         delete process.env['NODE_ENV'];
 
         config = proxyquire(CONFIG_PATH, STUBS);
@@ -51,7 +51,7 @@ describe('lib/config', function() {
         assert.equal(config.get('httpPort'), configDefault.httpPort);
     });
 
-    it('survives an invalid environment', function() {
+    it('survives an invalid environment', () => {
         process.env['NODE_ENV'] = 'BOGUS';
 
         config = proxyquire(CONFIG_PATH, STUBS);
@@ -65,7 +65,7 @@ describe('lib/config', function() {
         assert.equal(config.get('httpPort'), configDefault.httpPort);
     });
 
-    it('can be overridden with mock values', function() {
+    it('can be overridden with mock values', () => {
         config = proxyquire(CONFIG_PATH, STUBS);
         theHelper.mockConfig({ wwwRoot: 'mock' }, config);
 

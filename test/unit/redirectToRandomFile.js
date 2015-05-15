@@ -1,19 +1,19 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var httpMocks = require('@cantremember/node-mocks-http');
+const assert = require('assert');
+const sinon = require('sinon');
+const httpMocks = require('@cantremember/node-mocks-http');
 
-var theLib = require('../../lib/index');
-var theHelper = require('../helper');
-var willHandle = require('../../app/redirectToRandomFile');
+const theLib = require('../../lib/index');
+const theHelper = require('../helper');
+const willHandle = require('../../app/redirectToRandomFile');
 
 
-describe('redirectToRandomFile', function() {
-    var sandbox;
-    var req, res;
-    var handle;
-    beforeEach(function() {
+describe('redirectToRandomFile', () => {
+    let sandbox;
+    let req, res;
+    let handle;
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
 
@@ -23,41 +23,41 @@ describe('redirectToRandomFile', function() {
 
         handle = willHandle('path', 'some-glob');
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
     });
 
 
-    it('will redirect to a route relative to baseURL', function() {
-        theHelper.mockGlob(sandbox, function() {
+    it('will redirect to a route relative to baseURL', () => {
+        theHelper.mockGlob(sandbox, () => {
             return [ 'glob.file' ];
         });
 
         return handle(req, res)
-        .then(function() {
+        .then(() => {
             assert.equal(res._getRedirectUrl(), theLib.baseURL('path/glob.file'));
         });
     });
 
-    it('fails without any files', function() {
-        theHelper.mockGlob(sandbox, function() {
+    it('fails without any files', () => {
+        theHelper.mockGlob(sandbox, () => {
             return [];
         });
 
         return handle(req, res)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert(err.message.match(/no glob results/));
         });
     });
 
-    it('will fail gracefully', function() {
-        theHelper.mockGlob(sandbox, function() {
+    it('will fail gracefully', () => {
+        theHelper.mockGlob(sandbox, () => {
             throw new Error('BOOM');
         });
         sandbox.stub(res, 'send');
 
         return handle(req, res)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert.equal('BOOM', err.message);
 
             assert(! res.send.called);

@@ -1,15 +1,17 @@
 'use strict';
 
-var Promise = require('bluebird');
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
 
-var theLib = require('../lib/index');
+const theLib = require('../lib/index');
 
 
 // column -> index mapping
-var cardColumns = theLib.columnToIndexMap('id abbrev title');
+const cardColumns = theLib.columnToIndexMap('id abbrev title');
 
-var quipColumns = theLib.columnToIndexMap('text');
-var quips = [
+const quipColumns = theLib.columnToIndexMap('text');
+const quips = [
     [ 'THE PURPLE BEAM, AND YOUR FOREHEAD' ],
     [ 'PEARLS WITHIN SWINE'                ],
     [ 'EFFORTLESS'                         ],
@@ -17,24 +19,24 @@ var quips = [
     [ 'LIGHT WITHOUT, LIGHT WITHIN'        ],
     [ '(The Kite Eating Tree)'             ],
     [ 'THE WALLS ARE NOT MELTING'          ],
-].map(function(row) {
+].map((row) => {
     return theLib.dataColumnMap(row, quipColumns);
 });
 
-var NO_CARDS = Object.freeze([]);
+const NO_CARDS = Object.freeze([]);
 
 // load the cards file
-var loadCards = theLib.willMemoize(function() {
+const loadCards = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadTSV('morgan/card.txt')
-    .then(function(rows) {
-        return rows.map(function(row) {
-            var data = theLib.dataColumnMap(row, cardColumns);
+    .then((rows) => {
+        return rows.map((row) => {
+            const data = theLib.dataColumnMap(row, cardColumns);
             data.id = parseInt(data.id, 10);
 
             return data;
         });
     })
-    .catch(function() {
+    .catch(() => {
         // treat as no match
         return NO_CARDS;
     });
@@ -54,13 +56,13 @@ var loadCards = theLib.willMemoize(function() {
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
 module.exports = function handler(req, res, cb) {
-    var quip = theLib.chooseAny(quips);
-    var cardIds = [];
-    var cards = [];
+    const quip = theLib.chooseAny(quips);
+    const cardIds = [];
+    const cards = [];
 
     // parameters
     //   1..10 cards, assume 3
-    var cardCount = req.query.cards;
+    let cardCount = req.query.cards;
 
     cardCount = ((cardCount === undefined || cardCount === null)
         ? 3
@@ -70,7 +72,7 @@ module.exports = function handler(req, res, cb) {
     cardCount = Math.min(Math.max(cardCount, 1), 10);
 
     return loadCards()
-    .then(function(datas) {
+    .then((datas) => {
         // choose N unique cards
         while (cards.length < cardCount) {
             if (cards.length >= datas.length) {
@@ -78,9 +80,9 @@ module.exports = function handler(req, res, cb) {
                 break;
             }
 
-            var card = theLib.chooseAny(datas);
-            var id = card.id;
-            if (cardIds.indexOf(id) !== -1) {
+            const card = theLib.chooseAny(datas);
+            const id = card.id;
+            if (cardIds.includes(id)) {
                 // we've already chosen you
                 continue;
             }
@@ -92,10 +94,10 @@ module.exports = function handler(req, res, cb) {
 
         return Promise.promisify(res.render, res)('morganLayout.ejs', {
             config: theLib.config,
-            cards: cards,
-            quip: quip,
+            cards,
+            quip,
         })
-        .then(function(body) {
+        .then((body) => {
             res.send(body);
         });
     })

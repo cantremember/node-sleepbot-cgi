@@ -1,10 +1,12 @@
 'use strict';
 
-var Promise = require('bluebird');
-var request = Promise.promisify(require('request'));
+// jshint -W079
+const Promise = require('bluebird');
+// jshint +W079
+const request = Promise.promisify(require('request'));
 
-var theLib = require('../lib/index');
-var sebServerPrimary = theLib.config.get('sebServerPrimary');
+const theLib = require('../lib/index');
+const sebServerPrimary = theLib.config.get('sebServerPrimary');
 
 
 /**
@@ -35,7 +37,7 @@ module.exports = function handler(req, res, cb) {
         },
         followAllRedirects: true,
     })
-    .spread(function(incoming, body) {
+    .spread((incoming, body) => {
         res.set('Content-Type', 'text/xml').send(body);
     })
     .return(res)

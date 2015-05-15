@@ -117,8 +117,7 @@
 
 
     "excludeFiles": [
-        "doc/**",
-        "coverage/**",
+        "build/**",
         "node_modules/**"
     ]
 }

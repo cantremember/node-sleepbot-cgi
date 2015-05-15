@@ -1,7 +1,7 @@
 'use strict';
 
-var path = require('path');
-var theLib = require('../lib/index');
+const path = require('path');
+const theLib = require('../lib/index');
 
 
 /**
@@ -13,19 +13,17 @@ var theLib = require('../lib/index');
  * @params {String} glob a glob pattern
  * @returns {Function} an Express handler
  */
-module.exports = function(filepath, glob) {
-    glob = glob || /* istanbul ignore next */ '*.*';
-
+module.exports = function(filepath, glob = '*.*') {
     // a Promise
-    var globpath = path.join(filepath, glob);
-    var willGetFilenames = theLib.willMemoize(function() {
+    const globpath = path.join(filepath, glob);
+    const willGetFilenames = theLib.willMemoize(() => {
         return theLib.wwwRoot.willGetFilenames(globpath);
     });
 
-    return function handler(req, res, cb) {
+    return (req, res, cb) => {
         return willGetFilenames()
-        .then(function(filenames) {
-            var choice = theLib.chooseAny(filenames);
+        .then((filenames) => {
+            const choice = theLib.chooseAny(filenames);
             if (choice === undefined) {
                 throw new Error('no glob results: ' + globpath);
             }

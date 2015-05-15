@@ -1,8 +1,7 @@
 'use strict';
 
-
-var theLib = require('../lib/index');
-var sebServers = theLib.config.get('sebServers');
+const theLib = require('../lib/index');
+const sebServers = theLib.config.get('sebServers');
 
 
 /**
@@ -31,8 +30,8 @@ module.exports = function handler(req, res) {
         '[playlist]',
         'numberofentries=' + sebServers.length,
         'Version=2',
-    ].concat(sebServers.map(function(server, index) {
-        var n = index + 1;
+    ].concat(sebServers.map((server, index) => {
+        const n = index + 1;
         return [
             'File' +   n + '=' + server.url,
             'Title' +  n + '=Sleepbot Environmental Broadcast',

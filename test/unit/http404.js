@@ -1,18 +1,18 @@
 'use strict';
 
-var assert = require('assert');
-var sinon = require('sinon');
-var httpMocks = require('@cantremember/node-mocks-http');
+const assert = require('assert');
+const sinon = require('sinon');
+const httpMocks = require('@cantremember/node-mocks-http');
 
-var theHelper = require('../helper');
-var willHandle = require('../../app/http404');
+const theHelper = require('../helper');
+const willHandle = require('../../app/http404');
 
 
-describe('http404', function() {
-    var sandbox;
-    var cb;
-    var req, res;
-    beforeEach(function() {
+describe('http404', () => {
+    let sandbox;
+    let cb;
+    let req, res;
+    beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
@@ -21,14 +21,14 @@ describe('http404', function() {
         req = httpMocks.createRequest();
         res = httpMocks.createResponse();
     });
-    afterEach(function() {
+    afterEach(() => {
         sandbox.restore();
     });
 
 
-    it('will render its page', function() {
+    it('will render its page', () => {
         return willHandle(req, res, cb)
-        .then(function() {
+        .then(() => {
             assert(! cb.called);
 
             assert.equal(res._getRenderView(), 'http404.ejs');
@@ -37,12 +37,12 @@ describe('http404', function() {
         });
     });
 
-    it('will fail gracefully', function() {
+    it('will fail gracefully', () => {
         sandbox.stub(res, 'render').throws(new Error('BOOM'));
         sandbox.spy(res, 'send');
 
         willHandle(req, res, cb)
-        .then(theHelper.notCalled, function(err) {
+        .then(theHelper.notCalled, (err) => {
             assert.equal('BOOM', err.message);
 
             assert(res.render.calledOnce);

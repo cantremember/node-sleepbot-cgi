@@ -22,15 +22,16 @@
   "readmeFilename": "README.md",
   "scripts": {
     "postinstall": "./run/post-install",
-    "test": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha test",
-    "test-debug": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha debug test",
+    "test": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha build/es5/test",
+    "test-debug": "BLUEBIRD_DEBUG=1 NODE_ENV=test ./node_modules/.bin/mocha debug build/es5/test",
+    "compile": "./node_modules/.bin/gulp compile",
     "ci": "./run/ci",
     "lint": "./run/lint",
     "style": "./run/style",
     "coverage": "./run/coverage",
     "doc": "./run/doc",
     "gh-pages": "./run/gh-pages",
-    "dev": "BLUEBIRD_DEBUG=1 NODE_ENV=dev node app.js"
+    "dev": "BLUEBIRD_DEBUG=1 NODE_ENV=dev node build/es5/app.js"
   },
   "engines": {
     "node": ">= 0.10.0"
@@ -43,6 +44,11 @@
     "express": "^4.12.0",
     "forever": "~0.14.0",
     "glob": "^5.0.0",
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-symlink": "^2.1.0",
     "lodash": "^3.8.0",
     "marked-engine": "~0.1.0",
     "minimist": "~1.1.0",
@@ -51,6 +57,7 @@
   },
   "devDependencies": {
     "@cantremember/node-mocks-http": "^1.5.0",
+    "babel": "^5.3.3",
     "coveralls": "^2.11.2",
     "istanbul": "~0.3.14",
     "jscs": "^1.12.0",

@@ -10,6 +10,7 @@ source `dirname $0`/common
 pushd . > /dev/null
 cd $ROOT
 
+mkdir -p build
 $NODE_BIN/jsdoc -c $ROOT/.jsdoc.json
 CODE=$?
 
