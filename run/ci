@@ -27,7 +27,7 @@ fi
 
 popd > /dev/null
 
-if [[ "$CODE" == "0" ]]; then
+if [[ "$CODE" != "0" ]]; then
     FAIL "CI failed"
 fi
 

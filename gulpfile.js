@@ -49,19 +49,7 @@ function es5CompileSource() {
         .pipe(gulp.dest('build/es5'))
     ;
 }
-
-
-gulp.task('default', [ 'compile' ]);
-
-// cannot do a "clean, then compile" in sequence, so don't clean
-gulp.task('compile', [ 'es5-views', 'es5-babel' ]);
-gulp.task('clean', cleanBuild);
-
-gulp.task('es5-views', es5SymlinkViews);
-gulp.task('es5-babel', es5CompileSource);
-
-
-gulp.task('watch', function() {
+function sourceWatch() {
     var globs = GLOBS.source.concat(GLOBS.test).concat(GLOBS.config);
     var watcher = gulp.watch(globs, {
         interval: 1000,
@@ -78,4 +66,17 @@ gulp.task('watch', function() {
     });
 
     return watcher;
-});
+}
+
+
+gulp.task('default', [ 'compile' ]);
+
+// cannot do a "clean, then compile" in sequence, so don't clean
+gulp.task('compile', [ 'es5-views', 'es5-babel' ]);
+gulp.task('clean', cleanBuild);
+
+gulp.task('es5-views', es5SymlinkViews);
+gulp.task('es5-babel', es5CompileSource);
+
+gulp.task('watch', sourceWatch);
+gulp.task('rewatch', [ 'compile', 'watch' ]);

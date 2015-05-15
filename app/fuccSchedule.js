@@ -20,7 +20,12 @@ const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 function coerceData(data) {
-    for (let key of Object.keys(data)) {
+    // FIXME:  TypeError: Property '@@iterator' of object"
+    //   for (let key of Object.keys(data)) {
+    const keys = Object.keys(data);
+    for (let i = 0, key; i < keys.length; ++i) {
+        key = keys[i];
+
         switch (key) {
             case 'file':
             case 'anchor':
@@ -40,7 +45,11 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
     const body = [];
     let phase = 0;
 
-    for (let line of lines) {
+    // FIXME:  TypeError: Property '@@iterator' of object"
+    //   for (let line of lines) {
+    for (let i = 0, line; i < lines.length; ++i) {
+        line = lines[i];
+
         switch (phase) {
             case 0: // searching
                 if (start.test(line)) {
