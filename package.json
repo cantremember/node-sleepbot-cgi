@@ -1,6 +1,6 @@
 {
   "name": "node-sleepbot-cgi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Node.js app to replace legacy Perl CGI scripts for sleepbot.com",
   "author": "Daniel M Foley <webmaster@sleepbot.com>",
   "repository": {
