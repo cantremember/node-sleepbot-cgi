@@ -1,6 +1,6 @@
 --require test/beforeAll.js
 --ui bdd
 --reporter spec
---timeout 3000
+--timeout 10000
 --globals ""
 --recursive
