@@ -45,7 +45,7 @@ function es5CompileSource() {
             stage: 2,
             compact: false,
         }))
-        .pipe(sourcemaps.write('build/sourcemaps', { debug: true }))
+        .pipe(sourcemaps.write('../sourcemaps', { debug: true }))
         .pipe(gulp.dest('build/es5'))
     ;
 }
@@ -79,4 +79,3 @@ gulp.task('es5-views', es5SymlinkViews);
 gulp.task('es5-babel', es5CompileSource);
 
 gulp.task('watch', sourceWatch);
-gulp.task('rewatch', [ 'compile', 'watch' ]);

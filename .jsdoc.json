@@ -4,13 +4,12 @@
     },
     "source": {
         "include": [
-            "app/",
-            "app.js",
-            "config/",
-            "gulpfile.js",
-            "lib/",
-            "index.js",
-            "views/",
+            "build/es5/app/",
+            "build/es5/app.js",
+            "build/es5/config/",
+            "build/es5/lib/",
+            "build/es5/index.js",
+            "build/es5/views/",
             "README.md"
         ],
         "exclude": []

@@ -15,10 +15,10 @@ JS_DIRS="app/ app.js config/ gulpfile.js index.js lib/ run/ test/ views/"
 
 # colors
 #   http://www.csc.uvic.ca/~sae/seng265/fall04/tips/s265s047-tips/bash-using-colors.html
-C_INFO="\033[1;37;40m"
-C_OK="\033[1;30;42m"
-C_ERR="\033[1;37;41m"
-C_WARN="\033[1;30;43m"
+C_INFO="\033[1;97;44m"
+C_OK="\033[1;97;42m"
+C_ERR="\033[1;97;41m"
+C_WARN="\033[1;97;43m"
 C_CLOSE="\033[0m"
 
 # logging and resolution
