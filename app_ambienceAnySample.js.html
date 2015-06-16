@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -34,7 +34,9 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
+// jshint -W079
 var Promise = require('bluebird');
+// jshint +W079
 var lodash = require('lodash');
 
 var theLib = require('../lib/index');
@@ -46,35 +48,29 @@ var quipColumns = theLib.columnToIndexMap('text');
 var NO_ROWS = Object.freeze([]);
 var FAKE_QUIP = Object.freeze({ text: '' });
 
-
 // load the samples file
-var loadSamples = theLib.willMemoize(function() {
-    return theLib.wwwRoot.willLoadTSV('ambience/any.txt')
-    .then(function(rows) {
-        return rows.map(function(row) {
+var loadSamples = theLib.willMemoize(function () {
+    return theLib.wwwRoot.willLoadTSV('ambience/any.txt').then(function (rows) {
+        return rows.map(function (row) {
             return theLib.dataColumnMap(row, sampleColumns);
         });
-    })
-    .catch(function() {
+    })['catch'](function () {
         // treat as no match
         return NO_ROWS;
     });
 });
 
 // load the quips file
-var loadQuips = theLib.willMemoize(function() {
-    return theLib.wwwRoot.willLoadTSV('ambience/anyquip.txt')
-    .then(function(rows) {
-        return rows.map(function(row) {
+var loadQuips = theLib.willMemoize(function () {
+    return theLib.wwwRoot.willLoadTSV('ambience/anyquip.txt').then(function (rows) {
+        return rows.map(function (row) {
             return theLib.dataColumnMap(row, quipColumns);
         });
-    })
-    .catch(function() {
+    })['catch'](function () {
         // treat as no match
         return NO_ROWS;
     });
 });
-
 
 /**
  * Generates a random page from [Ambience for the Masses](http://sleepbot.com/ambience/cgi/any_f.cgi)
@@ -89,64 +85,60 @@ var loadQuips = theLib.willMemoize(function() {
  * @returns {Promise&lt;express.response>} a Promise resolving `res`
  */
 function handler(req, res, cb) {
-    var quip;
-    var sample;
+    var quip = undefined;
+    var sample = undefined;
 
     return Promise.all([
-        // (1) the sample
-        loadSamples()
-        .then(function(datas) {
-            // choose a random sample
-            sample = theLib.chooseAny(datas);
-            if (sample === undefined) {
-                return;
-            }
+    // (1) the sample
+    loadSamples().then(function (datas) {
+        // choose a random sample
+        sample = theLib.chooseAny(datas);
+        if (sample === undefined) {
+            return;
+        }
 
-            // we split sample storage into two subdirectories
-            sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
+        // we split sample storage into two subdirectories
+        sample.dirNum = /^[m-z]/.test(sample.file) ? 2 : 1;
 
-            // things about the album
-            var stub = sample.stub;
-            var album = handler.cache[stub];
+        // things about the album
+        var stub = sample.stub;
+        var album = handler.cache[stub];
 
-            if (album) {
-                // already cached
-                sample = lodash.defaults(sample, album);
-                return;
-            }
+        if (album) {
+            // already cached
+            // TODO: sample = Object.assign({}, album, sample);
+            sample = lodash.extend({}, album, sample);
+            return;
+        }
 
-            // populate the cache
-            var albumFile = stub.toLowerCase();
-            var coverImage = [ '/ambience/covergif/', albumFile, '.gif'].join('');
-            album = {
-                albumFile:   albumFile,
-                albumAnchor: stub.toUpperCase(),
-                // has a cover image?
-                coverImage:  coverImage,
-                coverExists: false,
-            };
+        // populate the cache
+        var albumFile = stub.toLowerCase();
+        var coverImage = ['/ambience/covergif/', albumFile, '.gif'].join('');
+        album = {
+            albumFile: albumFile,
+            albumAnchor: stub.toUpperCase(),
+            // has a cover image?
+            coverImage: coverImage,
+            coverExists: false };
 
-            if (theLib.config.get('caching')) {
-                // cache
-                handler.cache[stub] = album;
-            }
+        if (theLib.config.get('caching')) {
+            // cache
+            handler.cache[stub] = album;
+        }
 
-            return theLib.wwwRoot.willDetectFile(coverImage)
-            .then(function(exists) {
-                album.coverExists = exists;
+        return theLib.wwwRoot.willDetectFile(coverImage).then(function (exists) {
+            album.coverExists = exists;
 
-                sample = lodash.defaults(sample, album);
-            });
-        }),
+            // TODO: sample = Object.assign({}, album, sample);
+            sample = lodash.extend({}, album, sample);
+        });
+    }),
 
-        // (2) the quip
-        loadQuips()
-        .then(function(datas) {
-            // choose a random quip
-            quip = theLib.chooseAny(datas);
-        })
-    ])
-    .then(function() {
+    // (2) the quip
+    loadQuips().then(function (datas) {
+        // choose a random quip
+        quip = theLib.chooseAny(datas);
+    })]).then(function () {
         if (sample === undefined) {
             // we cannot provide a response
             //   nor are we releasing Zalgo
@@ -160,14 +152,10 @@ function handler(req, res, cb) {
         return Promise.promisify(res.render, res)('ambienceAnySample.ejs', {
             config: theLib.config,
             sample: sample,
-            quip: quip,
-        })
-        .then(function(body) {
+            quip: quip }).then(function (body) {
             res.send(body);
         });
-    })
-    .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    })['return'](res)['catch'](theLib.callbackAndThrowError(cb));
 }
 
 /**
@@ -181,9 +169,8 @@ handler.forget = function forget() {
 };
 handler.forget();
 
-
 module.exports = handler;
-</code></pre>
+//# sourceMappingURL=../../sourcemaps/app/ambienceAnySample.js.map</code></pre>
         </article>
     </section>
 
@@ -193,7 +180,7 @@ module.exports = handler;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">

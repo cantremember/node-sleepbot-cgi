@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -34,17 +34,17 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
+// jshint -W079
 var Promise = require('bluebird');
+// jshint +W079
 var net = require('net');
 var theLib = require('../lib/index');
 
-
 // keeps Promising to try another one ...
-var willTryServers = Promise.method(function willTryServers(res, tried) {
-    var servers = theLib.config.get('ntpServers');
+var willTryServers = Promise.method(function (res) {
+    var tried = arguments[1] === undefined ? [] : arguments[1];
 
-    // state
-    tried = tried || [];
+    var servers = theLib.config.get('ntpServers');
 
     // it's a multi-step Promise,
     //   1) choose a server
@@ -58,10 +58,10 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
     }
 
     // okay, any server we haven't tried yet ...
-    var server;
+    var server = undefined;
     while (true) {
         server = theLib.chooseAny(servers);
-        if (tried.indexOf(server) === -1) {
+        if (!tried.includes(server)) {
             break;
         }
     }
@@ -73,17 +73,16 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
     connection.setTimeout(theLib.config.get('ntpTimeout'));
 
     // fail
-    var failOn = function(topic) {
-        connection.on(topic, function(err) {
-            if (! connection) {
+    function failOn(topic) {
+        connection.on(topic, function (err) {
+            if (!connection) {
                 return;
             }
             connection = null;
 
             if (err instanceof Error) {
                 console.error('Daytime Protocol ERROR:', server, err);
-            }
-            else {
+            } else {
                 console.error('Daytime Protocol FAIL:', server);
             }
 
@@ -93,24 +92,24 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
             // keep on trying
             return deferred.resolve(willTryServers(res, tried));
         });
-    };
+    }
     failOn('error');
     failOn('timeout');
 
     // accumulate
     var parts = [];
 
-    connection.on('data', function(data) {
-        if (! connection) {
+    connection.on('data', function (data) {
+        if (!connection) {
             return;
         }
         parts.push(data.toString());
     });
 
     // succeed
-    var succeedOn = function(topic) {
-        connection.on(topic, function() {
-            if (! connection) {
+    function succeedOn(topic) {
+        connection.on(topic, function () {
+            if (!connection) {
                 return;
             }
             connection = null;
@@ -125,14 +124,13 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
             // keep on trying
             return deferred.resolve(willTryServers(res, tried));
         });
-    };
+    }
     succeedOn('close');
     succeedOn('end');
 
     // otherwise, we'll get back to you on that
     return deferred.promise;
 });
-
 
 /**
  * Proxies a response from a pool of [NTP](https://tools.ietf.org/html/rfc5905) servers
@@ -148,11 +146,9 @@ var willTryServers = Promise.method(function willTryServers(res, tried) {
  * @returns {Promise&lt;express.response>} a Promise resolving `res`
  */
 module.exports = function handler(req, res, cb) {
-    return willTryServers(res)
-    .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    return willTryServers(res)['return'](res)['catch'](theLib.callbackAndThrowError(cb));
 };
-</code></pre>
+//# sourceMappingURL=../../sourcemaps/app/WRLDtimeUTC.js.map</code></pre>
         </article>
     </section>
 
@@ -162,7 +158,7 @@ module.exports = function handler(req, res, cb) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">

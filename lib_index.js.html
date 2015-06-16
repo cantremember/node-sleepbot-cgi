@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -34,7 +34,12 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
+// execute our temporary polyfills
+require('./polyfill');
+
+// jshint -W079
 var Promise = require('bluebird');
+// jshint +W079
 var path = require('path');
 var fs = require('fs');
 var willReadFile = Promise.promisify(fs.readFile);
@@ -42,18 +47,19 @@ var willStat = Promise.promisify(fs.stat);
 var glob = Promise.promisify(require('glob'));
 var csv = require('csv');
 
-
-var FS_READ_OPTIONS = {
+var FS_READ_OPTIONS = Object.freeze({
     encoding: 'utf8'
-};
-var CSV_PARSE_OPTIONS = {
-    delimiter:        '\t', // TSV
-    trim:             true,
-    comment:          '#',
+});
+var CSV_PARSE_OPTIONS = Object.freeze({
+    delimiter: '\t', // TSV
+    trim: true,
+    comment: '#',
     skip_empty_lines: true,
-};
+    // a magic option that `csv-parse` injects;
+    //   without it, we can't Object#freeze
+    //   "TypeError: Invalid non-string/buffer chunk"
+    objectMode: true });
 var forgetMemoize = [];
-
 
 /**
  * #### A Library of Functions and Singletons
@@ -62,7 +68,7 @@ var forgetMemoize = [];
  *
  * @namespace lib
  */
-var theLib = {
+var theLib = Object.defineProperties({
     /**
      * @memberof lib
      * @see config
@@ -71,38 +77,29 @@ var theLib = {
 
     /**
      * @memberof lib
-     * @see app
-     */
-    get app() {
-        // avoid circular dependency hell with a getter
-        return require('./app');
-    },
-
-
-    /**
-     * @memberof lib
      * @param {Function} will a Function executing a Promise whose result will be memoized
      * @returns {Function} a Function returning a Promise which memomizes the result of `will`
      */
     willMemoize: function willMemoize(will) {
-        var result;
-        forgetMemoize.push(function() {
+        var result = undefined;
+        forgetMemoize.push(function () {
             result = undefined;
         });
 
-        return function() {
+        // leave as a Function;
+        //   the scope of `this` &amp; `arguments` are bound to where
+        //   the `() => { }` is defined, vs. decoupled, as we need it to be
+        return function () {
             if (result !== undefined) {
                 return Promise.resolve(result);
             }
 
             var self = this;
             var args = arguments;
-            return Promise.resolve()
-            .then(function() {
+            return Promise.resolve().then(function () {
                 // from within an established Promise
                 return will.apply(self, args);
-            })
-            .then(function(_result) {
+            }).then(function (_result) {
                 if (theLib.config.get('caching')) {
                     // cache
                     result = _result;
@@ -118,9 +115,11 @@ var theLib = {
      * @memberof lib
      */
     forget: function forget() {
-        forgetMemoize.forEach(function(f) {
-            f();
-        });
+        // FIXME:  TypeError: Property '@@iterator' of object"
+        //   for (let f of forgetMemoize) {
+        for (var i = 0; i &lt; forgetMemoize.length; ++i) {
+            forgetMemoize[i]();
+        }
     },
 
     /**
@@ -144,7 +143,7 @@ var theLib = {
      *   - throws the Error, assumably to reject by the Promise chain in which the Error was caught
      */
     callbackAndThrowError: function callbackAndThrowError(cb) {
-        return function(err) {
+        return function (err) {
             if (typeof cb === 'function') {
                 cb(err);
             }
@@ -158,7 +157,7 @@ var theLib = {
      * @returns {Object} a random value from `array`
      */
     chooseAny: function chooseAny(array) {
-        if (! Array.isArray(array)) {
+        if (!Array.isArray(array)) {
             return undefined;
         }
         var choice = Math.floor(Math.random() * array.length);
@@ -170,10 +169,11 @@ var theLib = {
      * @param {String} route a root-relative path
      * @returns {String} an absolute URL relative to `baseURL` from {@link config}
      */
-    baseURL: function baseURL(route) {
-        return this.config.get('baseURL') + (route || /* istanbul ignore next */ '');
-    },
+    baseURL: function baseURL() {
+        var route = arguments[0] === undefined ? '' : arguments[0];
 
+        return this.config.get('baseURL') + route;
+    },
 
     /**
      * @example
@@ -187,7 +187,7 @@ var theLib = {
      * @returns {Object&lt;Integer>} a property Object mapping each column name to its column index
      */
     columnToIndexMap: function columnToIndexMap(spaceDelimited) {
-        return (spaceDelimited || '').split(/\s/).reduce(function(total, column, index) {
+        return (spaceDelimited || '').split(/\s/).reduce(function (total, column, index) {
             if (column !== '') {
                 total[column] = index;
             }
@@ -208,12 +208,11 @@ var theLib = {
      * @returns {Object&lt;Object>} a property Object mapping each column name to its `row` value
      */
     dataColumnMap: function dataColumnMap(row, columnToIndex) {
-        return Object.keys(columnToIndex || {}).reduce(function(map, key) {
+        return Object.keys(columnToIndex || {}).reduce(function (map, key) {
             map[key] = row[columnToIndex[key]];
             return map;
         }, {});
     },
-
 
     /**
      * #### A Library of Functions relating to `wwwRoot` from {@link config}
@@ -230,34 +229,37 @@ var theLib = {
          * @param {Object&lt;Integer>} [options] options for a [csv](https://www.npmjs.com/package/csv) parser
          * @returns {Promise&lt;Array>} a Promise resolving the rows of the TSV file at `relativePath`
          */
-        willLoadTSV: function willLoadTSV(relativePath, options) {
-            return new Promise(function(resolve, reject) {
-                try {
-                    var filepath = path.join(theLib.config.get('wwwRoot'), relativePath);
-                    var reader = fs.createReadStream(filepath, FS_READ_OPTIONS);
-                    var parser = csv.parse(options || CSV_PARSE_OPTIONS);
-                    var buffer = [];
+        willLoadTSV: function willLoadTSV(relativePath) {
+            var options = arguments[1] === undefined ? CSV_PARSE_OPTIONS : arguments[1];
 
-                    reader.on('error', reject);
-                    parser.on('error', reject);
-                    parser.on('readable', function() {
-                        var data;
-                        while (data = parser.read()) {
-                            buffer.push(data);
-                        }
-                    });
-                    parser.on('end', function() {
-                        setImmediate(function() {
-                            resolve(buffer);
+            return new Promise(function (resolve, reject) {
+                try {
+                    (function () {
+                        var filepath = path.join(theLib.config.get('wwwRoot'), relativePath);
+                        var reader = fs.createReadStream(filepath, FS_READ_OPTIONS);
+                        var parser = csv.parse(options);
+                        var buffer = [];
+
+                        reader.on('error', reject);
+                        parser.on('error', reject);
+                        parser.on('readable', function () {
+                            var data = undefined;
+                            while (data = parser.read()) {
+                                buffer.push(data);
+                            }
                         });
-                    });
-                    reader.pipe(parser);
-                }
-                catch (err) {
+                        parser.on('end', function () {
+                            // do not release Zalgo
+                            setImmediate(function () {
+                                resolve(buffer);
+                            });
+                        });
+                        reader.pipe(parser);
+                    })();
+                } catch (err) {
                     reject(err);
                 }
-            })
-            .then(function(result) {
+            }).then(function (result) {
                 // drop the first line -- the headers
                 return result.slice(1);
             });
@@ -269,9 +271,8 @@ var theLib = {
          * @returns {Promise&lt;String>} a Promise resolving the contents of the file at `relativePath`
          */
         willLoadFile: function willLoadFile(relativePath) {
-            return this.willDetectFile(relativePath)
-            .then(function(exists) {
-                if (! exists) {
+            return this.willDetectFile(relativePath).then(function (exists) {
+                if (!exists) {
                     return '';
                 }
 
@@ -286,11 +287,9 @@ var theLib = {
          * @returns {Promise&lt;Array>} a Promise resolving the filenames matching `fileglob`
          */
         willGetFilenames: function willGetFilenames(fileglob) {
-            return glob(
-                path.join(theLib.config.get('wwwRoot'), fileglob)
-            ).then(function(files) {
+            return glob(path.join(theLib.config.get('wwwRoot'), fileglob)).then(function (files) {
                 // just the filename, please
-                return files.map(function(file) {
+                return files.map(function (file) {
                     return path.basename(file);
                 });
             });
@@ -302,13 +301,11 @@ var theLib = {
          * @returns {Promise&lt;Array>} a Promise resolving true if a file exists at `relativePath`
          */
         willDetectFile: function willDetectFile(relativePath) {
-            return willStat(path.join(theLib.config.get('wwwRoot'), relativePath))
-            .then(function(stat) {
+            return willStat(path.join(theLib.config.get('wwwRoot'), relativePath)).then(function (stat) {
                 return stat.isFile();
-            })
-            .catch(function(err) {
+            })['catch'](function (err) {
                 // traverse the cause chain, eg. `OperationalError`
-                var cause;
+                var cause = undefined;
                 while (cause = err.cause) {
                     err = cause;
                 }
@@ -318,13 +315,25 @@ var theLib = {
                 }
                 throw err;
             });
-        },
-    },
-};
+        } } }, {
+    app: {
 
+        /**
+         * @memberof lib
+         * @see app
+         */
+
+        get: function () {
+            // avoid circular dependency hell with a getter
+            return require('./app');
+        },
+        configurable: true,
+        enumerable: true
+    }
+});
 
 module.exports = theLib;
-</code></pre>
+//# sourceMappingURL=../../sourcemaps/lib/index.js.map</code></pre>
         </article>
     </section>
 
@@ -334,7 +343,7 @@ module.exports = theLib;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">

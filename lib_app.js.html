@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -40,7 +40,6 @@ var config = require('../lib/config');
 var redirectToRandomFile = require('../app/redirectToRandomFile');
 var redirectTo = require('../app/redirectTo');
 
-
 /**
  * #### Perl CGI scripts, re-written as [Express](https://npmjs.com/package/express) handlers under Node.js
  *
@@ -56,7 +55,6 @@ app.disable('strict routing');
 app.set('view engine', 'ejs');
 app.set('views', config.get('viewsRoot'));
 
-
 function setupEJS(ejs) {
     // ejs.filters.escapeQuote = function(value) {
     //     return (value || '').gsub('"', '&amp;quot;');
@@ -69,12 +67,10 @@ app.engine('markdown', require('marked-engine').__express);
 
 app.use(require('cookie-parser')());
 
-
 // the CGI routes
 
 app.route('/status.cgi').all(require('../app/status'));
 app.route('/404.cgi').all(require('../app/http404'));
-
 
 //   /cgi
 /**
@@ -84,10 +80,7 @@ app.route('/404.cgi').all(require('../app/http404'));
  * @see app.redirectToRandomFile
  * @member app.anyAnimBot
  */
-app.route('/cgi/animbot.cgi').all(redirectToRandomFile(
-    '/images/animbot', '*.gif'
-));
-
+app.route('/cgi/animbot.cgi').all(redirectToRandomFile('/images/animbot', '*.gif'));
 
 //   /ambience
 //   /ambience/cgi/listen.cgi/listen.pls
@@ -97,11 +90,8 @@ app.route('/cgi/animbot.cgi').all(redirectToRandomFile(
 app.route('/ambience/cgi/listen.*').all(require('../app/sebPlaylist'));
 app.route('/ambience/cgi/7.:format').all(require('../app/sebStatusHTML'));
 app.route('/ambience/cgi/viewxml.:format').all(require('../app/sebStatusXML'));
-app.route('/ambience/cgi/imgpage.cgi').all(redirectTo(
-    '/ambience'
-));
+app.route('/ambience/cgi/imgpage.cgi').all(redirectTo('/ambience'));
 app.route('/ambience/cgi/any_f.cgi').all(require('../app/ambienceAnySample'));
-
 
 //   /critturs
 /**
@@ -112,9 +102,7 @@ app.route('/ambience/cgi/any_f.cgi').all(require('../app/ambienceAnySample'));
  * @see app.redirectToRandomFile
  * @member app.anyCritturAudio
  */
-app.route('/critturs/cgi/anyaudio.cgi').all(redirectToRandomFile(
-    '/critturs/mp2', '*.mp2'
-));
+app.route('/critturs/cgi/anyaudio.cgi').all(redirectToRandomFile('/critturs/mp2', '*.mp2'));
 /**
  * Redirects to a random logo image
  * for [The Senseless Existence of Critturs](http://sleepbot.com/critturs/cgi/critlogo.cgi)
@@ -123,10 +111,7 @@ app.route('/critturs/cgi/anyaudio.cgi').all(redirectToRandomFile(
  * @see app.redirectToRandomFile
  * @member app.anyCritturLogo
  */
-app.route('/critturs/cgi/critlogo.cgi').all(redirectToRandomFile(
-    '/critturs/images/logo', '*.gif'
-));
-
+app.route('/critturs/cgi/critlogo.cgi').all(redirectToRandomFile('/critturs/images/logo', '*.gif'));
 
 //   /fucc
 /**
@@ -137,11 +122,8 @@ app.route('/critturs/cgi/critlogo.cgi').all(redirectToRandomFile(
  * @see app.redirectToRandomFile
  * @member app.anyFuccAudio
  */
-app.route('/fucc/cgi/anyaudio.cgi').all(redirectToRandomFile(
-    '/fucc/mpg', '*.mp2'
-));
+app.route('/fucc/cgi/anyaudio.cgi').all(redirectToRandomFile('/fucc/mpg', '*.mp2'));
 app.route('/fucc/cgi/schednow.cgi').all(require('../app/fuccSchedule'));
-
 
 //   /lookit
 /**
@@ -152,12 +134,9 @@ app.route('/fucc/cgi/schednow.cgi').all(require('../app/fuccSchedule'));
  * @see app.redirectToRandomFile
  * @member app.anyFoley
  */
-app.route('/lookit/cgi/anyfoley.cgi').all(redirectToRandomFile(
-    '/lookit/etc', '*.mp2'
-));
+app.route('/lookit/cgi/anyfoley.cgi').all(redirectToRandomFile('/lookit/etc', '*.mp2'));
 app.route('/lookit/cgi/anystory.cgi').all(require('../app/lookitAnyStory'));
 app.route('/lookit/cgi/imgfoley.cgi').all(require('../app/lookitImgFoley'));
-
 
 //   /morgan
 app.route('/morgan/cgi/morglay.cgi').all(require('../app/morganLayout'));
@@ -168,12 +147,9 @@ app.route('/morgan/cgi/morglay.cgi').all(require('../app/morganLayout'));
  * @see app.redirectToRandomFile
  * @member app.anyMorgan
  */
-app.route('/morgan/cgi/morgpick.cgi').all(redirectToRandomFile(
-    '/morgan/card', '*.html'
-));
+app.route('/morgan/cgi/morgpick.cgi').all(redirectToRandomFile('/morgan/card', '*.html'));
 app.route('/morgan/index.:format').all(require('../app/morganIndex'));
 app.route('/morgan').all(require('../app/morganIndex'));
-
 
 //   /WRLDtime
 /**
@@ -183,17 +159,14 @@ app.route('/morgan').all(require('../app/morganIndex'));
  * @see app.redirectToRandomFile
  * @member app.anyWRLDtimeClock
  */
-app.route('/WRLDtime/cgi/anyclock.cgi').all(redirectToRandomFile(
-    '/WRLDtime/face', '*.html'
-));
+app.route('/WRLDtime/cgi/anyclock.cgi').all(redirectToRandomFile('/WRLDtime/face', '*.html'));
 app.route('/WRLDtime/cgi/utc.cgi').all(require('../app/WRLDtimeUTC'));
 
 // all *real* misses get HTTP 404s
 //   re-route them to 404.cgi in your httpd config
 
-
 module.exports = app;
-</code></pre>
+//# sourceMappingURL=../../sourcemaps/lib/app.js.map</code></pre>
         </article>
     </section>
 
@@ -203,7 +176,7 @@ module.exports = app;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">

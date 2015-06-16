@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -37,12 +37,8 @@
 var path = require('path');
 var nconf = require('nconf');
 
-var config = (new nconf.Provider())
-    .add('mock', { type: 'literal', store: {} }) // @see test/helper#mockConfig
-    .add('memory')
-    .argv()
-    .env()
-;
+var config = new nconf.Provider().add('mock', { type: 'literal', store: {} }) // @see test/helper#mockConfig
+.add('memory').argv().env();
 
 // ENV-driven defaults
 var env = config.get('NODE_ENV');
@@ -54,8 +50,7 @@ try {
         });
         console.log('environment is:', env);
     }
-}
-catch (err) {
+} catch (err) {
     console.log('invalid environment:', env, ':', err);
 }
 
@@ -65,7 +60,6 @@ config.add('file/defaults', {
     store: require(path.join('../config/default'))
 });
 
-
 /**
  * #### Hierarchical configuration, using [nconf](https://www.npmjs.com/package/nconf)
  *
@@ -74,7 +68,7 @@ config.add('file/defaults', {
  * @namespace config
  */
 module.exports = config;
-</code></pre>
+//# sourceMappingURL=../../sourcemaps/lib/config.js.map</code></pre>
         </article>
     </section>
 
@@ -84,7 +78,7 @@ module.exports = config;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">

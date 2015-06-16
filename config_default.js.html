@@ -16,7 +16,7 @@
 <body>
 
 <a href="https://github.com/cantremember/node-sleepbot-cgi"><img
-    style="position: absolute; top: 0; right: 0; border: 0;"
+    style="position: fixed; top: 0; right: 0; border: 0;"
     src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
     alt="Fork me on GitHub"
     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
@@ -36,65 +36,50 @@
 
 var path = require('path');
 
-
 /**
  * Default configuration.
  *
  * @member config.default
  */
-module.exports = {
+module.exports = Object.defineProperties({
     httpPort: 3000,
     wwwRoot: '/mnt/ec2-http/sleepbot.com',
     baseURL: 'http://www.sleepbot.com',
     caching: false,
 
-    viewsRoot: path.resolve(
-        path.join(__dirname, '../views') // relative to *me*
+    viewsRoot: path.resolve(path.join(__dirname, '../views') // relative to *me*
     ),
 
-    sebServers: [
-        { url: 'http://sc13.shoutcaststreaming.us:8194', primary: true, user: 'admin', pass: 'deepDeepSleep' },
-        { url: 'http://sc7.shoutcaststreaming.us:8044' },
-        { url: 'http://209.104.5.207:8096/seb' },
-    ],
-    get sebServerPrimary() {
-        return this.sebServers.reduce(function(prior, current) {
-            return current.primary ? /* istanbul ignore next */ current : prior;
-        });
-    },
+    sebServers: [{ url: 'http://sc13.shoutcaststreaming.us:8194', primary: true, user: 'admin', pass: 'deepDeepSleep' }, { url: 'http://sc7.shoutcaststreaming.us:8044' }, { url: 'http://209.104.5.207:8096/seb' }],
 
     // http://tf.nist.gov/tf-cgi/servers.cgi
-    ntpServers: [
-        'nist.netservicesgroup.com',
-        'nist1-lv.ustiming.org',
-        'nist1-macon.macon.ga.us',
-        'nist1-pa.ustiming.org',
-        'nisttime.carsoncity.k12.mi.us',
-        'ntp-nist.ldsbc.edu',
-        'time-a.nist.gov',
-        'time-a.timefreq.bldrdoc.gov',
-        'time-b.nist.gov',
-        'time-b.timefreq.bldrdoc.gov',
-        'time-c.nist.gov',
-        'time-c.timefreq.bldrdoc.gov',
-        'time-d.nist.gov',
-        'utcnist.colorado.edu',
-        // 'nist-time-server.eoni.com',
-        // 'nist.time.nosc.us',
-        // 'nist1-chi.ustiming.org',
-        // 'nist1-lnk.binary.net',
-        // 'nist1-nj2.ustiming.org',
-        // 'nist1-ny2.ustiming.org',
-        // 'nist1.symmetricom.com',
-        // 'time-nw.nist.gov',
-        // 'time.nist.gov',
-        // 'utcnist2.colorado.edu',
-        // 'wolfnisttime.com',
-        // 'wwv.nist.gov',
-    ],
-    ntpTimeout: 3000, // 3s
-};
-</code></pre>
+    ntpServers: ['nist.netservicesgroup.com', 'nist1-lv.ustiming.org', 'nist1-macon.macon.ga.us', 'nist1-pa.ustiming.org', 'nisttime.carsoncity.k12.mi.us', 'ntp-nist.ldsbc.edu', 'time-a.nist.gov', 'time-a.timefreq.bldrdoc.gov', 'time-b.nist.gov', 'time-b.timefreq.bldrdoc.gov', 'time-c.nist.gov', 'time-c.timefreq.bldrdoc.gov', 'time-d.nist.gov', 'utcnist.colorado.edu'],
+    ntpTimeout: 3000 }, {
+    sebServerPrimary: {
+        get: function () {
+            return this.sebServers.reduce(function (prior, current) {
+                return current.primary ? /* istanbul ignore next */current : prior;
+            });
+        },
+        configurable: true,
+        enumerable: true
+    }
+});
+
+// 'nist-time-server.eoni.com',
+// 'nist.time.nosc.us',
+// 'nist1-chi.ustiming.org',
+// 'nist1-lnk.binary.net',
+// 'nist1-nj2.ustiming.org',
+// 'nist1-ny2.ustiming.org',
+// 'nist1.symmetricom.com',
+// 'time-nw.nist.gov',
+// 'time.nist.gov',
+// 'utcnist2.colorado.edu',
+// 'wolfnisttime.com',
+// 'wwv.nist.gov',
+// 3s
+//# sourceMappingURL=../../sourcemaps/config/default.js.map</code></pre>
         </article>
     </section>
 
@@ -104,7 +89,7 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="lib.wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Array_includes">Array_includes</a></li><li><a href="global.html#String_includes">String_includes</a></li></ul>
 </nav>
 
 <br class="clear">
