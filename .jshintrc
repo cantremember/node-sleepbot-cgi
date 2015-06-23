@@ -35,9 +35,9 @@
     "proto"       : false, // if the `__proto__` property should be allowed
     "typed"       : true,  // if typed array globals should be predefined
     "undef"       : true,  // if variables should be declared before used
-    "scripturl"   : true,  // if script-targeted URLs should be tolerated
+    "scripturl"   : false, // if script-targeted URLs should be tolerated
     "shadow"      : false, // if variable shadowing should be tolerated
-    "smarttabs"   : true,  // if smarttabs should be tolerated
+    "smarttabs"   : false, // if smarttabs should be tolerated
                            // (http:// www.emacswiki.org/emacs/SmartTabs)
     "strict"      : true,  // require the "use strict"; pragma
     "sub"         : true,  // if all forms of subscript notation are tolerated
@@ -82,15 +82,13 @@
     //"indent"       : 4,
     "maxerr"       : false,
     "predef"       : [     // Custom globals.
+        // Mocha
         "describe",
-        "it",
         "before",
         "beforeEach",
         "after",
         "afterEach",
-        "expect",
-        "test",
-        "suite"
+        "it"
     ],
     //"quotmark"     : "single",  //'single'|'double'|true
     "maxstatements": false,  // {int} max statements per function
