@@ -2,7 +2,9 @@ language: node_js
 node_js:
   - "0.12"
   - "0.10"
-  - stable
+  # "Error: Unsupported Node version: 4.0.0"
+  #   at Object.<anonymous> (/home/travis/build/cantremember/node-sleepbot-cgi/node_modules/mock-fs/lib/index.js:32:9
+  # - stable
 
 before_install:
   - "npm install -g npm@^2.7.x"
