@@ -3,6 +3,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const mockfs = require('mock-fs');
+// TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
 const httpMocks = require('@cantremember/node-mocks-http');
 
 const theLib = require('../../lib/index');

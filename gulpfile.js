@@ -19,7 +19,12 @@ var babel = require('gulp-babel');
 //   https://www.npmjs.com/package/streamqueue
 
 var GLOBS = Object.freeze({
-    source: [ 'app/**/*.js', 'app.js', 'index.js', 'lib/**/*.js' ],
+    source: [
+        'app/**/*.js',
+        'bin/**/*.js',
+        'index.js',
+        'lib/**/*.js',
+    ],
     test:   [ 'test/**/*.js' ],
     config: [ 'config/**/*.js' ],
     views:  [ 'views/**' ],
@@ -36,15 +41,16 @@ function es5SymlinkViews() {
     ;
 }
 function es5CompileSource() {
-    var globs = GLOBS.source.concat(GLOBS.test).concat(GLOBS.config).map(function(glob) {
-        return './' + glob;
-    });
+    var globs = GLOBS.source
+        .concat(GLOBS.test)
+        .concat(GLOBS.config)
+        .map(function(glob) {
+            return './' + glob;
+        })
+    ;
     return gulp.src(globs, { base: './' })
         .pipe(sourcemaps.init({ debug: true }))
-        .pipe(babel({
-            stage: 2,
-            compact: false,
-        }))
+        .pipe(babel({ babelrc: true }))
         .pipe(sourcemaps.write('../sourcemaps', { debug: true }))
         .pipe(gulp.dest('build/es5'))
     ;

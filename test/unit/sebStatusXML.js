@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
+// TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
 const httpMocks = require('@cantremember/node-mocks-http');
 const proxyquire = require('proxyquire');
 

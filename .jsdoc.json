@@ -5,7 +5,7 @@
     "source": {
         "include": [
             "build/es5/app/",
-            "build/es5/app.js",
+            "build/es5/bin/",
             "build/es5/config/",
             "build/es5/lib/",
             "build/es5/index.js",

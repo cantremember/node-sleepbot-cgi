@@ -3,7 +3,9 @@
 // jshint -W079
 const Promise = require('bluebird');
 // jshint +W079
-const request = Promise.promisify(require('request'));
+const request = Promise.promisify(require('request'), {
+    multiArgs: true,
+});
 
 const theLib = require('../lib/index');
 const sebServerPrimary = theLib.config.get('sebServerPrimary');

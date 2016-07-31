@@ -46,7 +46,9 @@ function handler(req, res, cb) {
         return willGetFile('lookit/story/' + filepath);
     })
     .then((body) => {
-        return Promise.promisify(res.render, res)('lookitAnyStory.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('lookitAnyStory.ejs', {
             config: theLib.config,
             body,
         })

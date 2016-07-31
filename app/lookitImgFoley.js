@@ -31,7 +31,9 @@ module.exports = function handler(req, res, cb) {
             : '/images/shim_clear.gif'
         );
 
-        return Promise.promisify(res.render, res)('lookitImgFoley.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('lookitImgFoley.ejs', {
             config: theLib.config,
             title,
             image,

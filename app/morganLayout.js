@@ -92,7 +92,9 @@ module.exports = function handler(req, res, cb) {
             cardIds.push(id);
         }
 
-        return Promise.promisify(res.render, res)('morganLayout.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('morganLayout.ejs', {
             config: theLib.config,
             cards,
             quip,

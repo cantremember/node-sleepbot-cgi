@@ -13,7 +13,7 @@
     "expr"        : false, // if ExpressionStatement should be allowed as Programs
     "forin"       : true,  // if for in statements must filter
     "funcscope"   : false, // if only function scope should be used for scope tests
-    "globalstrict": true,  // if global "use strict"; should be allowed (also enables 'strict')
+    // "globalstrict": true,  // if global "use strict"; should be allowed (also enables 'strict')
     "immed"       : true,  // if immediate invocations must be wrapped in parens
     "iterator"    : false, // if the `__iterator__` property should be allowed
     "lastsemic"   : false, // if semicolons may be ommitted for the trailing

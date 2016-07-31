@@ -3,7 +3,6 @@
 // jshint -W079
 const Promise = require('bluebird');
 // jshint +W079
-const lodash = require('lodash');
 
 const theLib = require('../lib/index');
 
@@ -79,8 +78,7 @@ function handler(req, res, cb) {
 
             if (album) {
                 // already cached
-                // TODO: sample = Object.assign({}, album, sample);
-                sample = lodash.extend({}, album, sample);
+                sample = Object.assign({}, album, sample);
                 return;
             }
 
@@ -104,8 +102,7 @@ function handler(req, res, cb) {
             .then((exists) => {
                 album.coverExists = exists;
 
-                // TODO: sample = Object.assign({}, album, sample);
-                sample = lodash.extend({}, album, sample);
+                sample = Object.assign({}, album, sample);
             });
         }),
 
@@ -127,7 +124,9 @@ function handler(req, res, cb) {
             quip = FAKE_QUIP;
         }
 
-        return Promise.promisify(res.render, res)('ambienceAnySample.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('ambienceAnySample.ejs', {
             config: theLib.config,
             sample,
             quip,

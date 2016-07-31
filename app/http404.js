@@ -22,7 +22,9 @@ module.exports = function handler(req, res, cb) {
     return Promise.resolve()
     .then(() => {
         // from within an established Promise
-        return Promise.promisify(res.render, res)('http404.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('http404.ejs', {
             config: theLib.config,
             real_uri: req.headers['x-real-uri'],
         })

@@ -276,7 +276,9 @@ module.exports = function handler(req, res, cb) {
         // choose a random quip
         quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
 
-        return Promise.promisify(res.render, res)('fuccSchedule.ejs', {
+        return Promise.promisify(res.render, {
+            context: res,
+        })('fuccSchedule.ejs', {
             config: theLib.config,
             dead,
             current,

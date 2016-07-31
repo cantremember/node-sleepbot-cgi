@@ -1,10 +1,10 @@
 # ignore Node.js
-node_modules/
+node_modules
 .node_modules
 npm-debug.log
 
 # ignore build results
-/build
+build
 tmp
 
 # ignore Apple DS Store
@@ -12,7 +12,7 @@ tmp
 Thumbs.db
 
 # ignore log files
-/logs
+logs
 *.log
 
 # ignore swap files
@@ -22,8 +22,14 @@ Thumbs.db
 *~
 
 # pid files
-/pids
 *.pid
 
 # Vagrant project files
 .vagrant
+
+# hide Sublime settings
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+sftp-config.json
+sftp-settings.json

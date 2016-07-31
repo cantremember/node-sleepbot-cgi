@@ -6,7 +6,7 @@ ES5 = $(ROOT)/build/es5
 NODE_BIN = $(ROOT)/node_modules/.bin
 COVERAGE_INFO = $(ROOT)/build/coverage/lcov.info
 
-JS_DIRS = app/ app.js config/ gulpfile.js index.js lib/ test/ views/
+JS_DIRS = app/ bin/ config/ gulpfile.js index.js lib/ test/ views/
 JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | grep ".js$")
 
 
@@ -29,57 +29,55 @@ CODE_FAIL=echo $$? > $(CODE_FILE)
 CODE_GET=cat $(CODE_FILE)
 
 
-.PHONY: build style clean init
+.PHONY: \
+	init clean build \
+	server server-debug \
+	compile watch rewatch \
+	test test-debug \
+	quality lint style only-check coverage quality ci \
+	doc gh-pages \
+	post-install pre-commit \
 
 .DEFAULT_GOAL: build
 
-build:  style lint compile
+
+# Build steps
+
+clean:
+	@$(NODE_BIN)/gulp clean
+
+build:  compile
 
 init:
 	@mkdir -p build
 
 
-clean:  init
-	@$(NODE_BIN)/gulp clean
+# Run the thing
+
+server:
+	BLUEBIRD_DEBUG=1 NODE_ENV=dev node $(ES5)/bin/app.js
+
+server-debug:
+	BLUEBIRD_DEBUG=1 NODE_ENV=dev node debug $(ES5)/bin/app.js
+
+
+# Language support
 
 compile:  init
 	@$(NODE_BIN)/gulp compile
 
-run-dev:  init
-	BLUEBIRD_DEBUG=1 NODE_ENV=dev node $(ES5)/app.js
-
-run-watch:  init
+watch:
 	$(NODE_BIN)/gulp watch
 
-# https://github.com/jshint/jshint
-#   http://jshint.com/docs/options/
-# https://github.com/eslint/eslint
-#   http://eslint.org/docs/user-guide/configuring
-#   http://eslint.org/docs/rules/
-lint:  init
-	@$(NODE_BIN)/jshint --config .jshintrc $(JS_DIRS) \
-		&& $(CODE_OK) || $(CODE_FAIL)
+rewatch:  clean build  watch
 
-	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
-		$(call E_ERR,"failed to lint"); exit 1; \
-	else \
-		$(call E_OK,"it has linted!"); \
-	fi
 
-# https://github.com/jscs-dev/node-jscs
-#   http://jscs.info/rules.html
-style:  init
-	@$(NODE_BIN)/jscs --esnext --config .jscs.json $(JS_DIRS) \
-		&& $(CODE_OK) || $(CODE_FAIL)
+# Test Suite
 
-	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
-		$(call E_ERR,"poor style"); exit 1; \
-	else \
-		$(call E_OK,"has the style!"); \
-	fi
-
-test:  init
-	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha $(ES5)/test \
+test:
+	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
+		--recursive --ui bdd --reporter spec --timeout 5000 \
+		$(ES5)/test/bootstrap.js $(ES5)/test \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -88,9 +86,53 @@ test:  init
 		$(call E_OK,"Test Suite passed!"); \
 	fi
 
-test-debug:  init
+test-debug:
 	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha debug $(ES5)/test
 
+
+# Code Quality
+
+# TODO: https://github.com/eslint/eslint
+#   http://eslint.org/docs/user-guide/configuring
+#   http://eslint.org/docs/rules/
+#
+# https://github.com/jshint/jshint
+#   http://jshint.com/docs/options/
+lint:
+	@$(NODE_BIN)/jshint --config .jshintrc $(JS_DIRS) \
+		&& $(CODE_OK) || $(CODE_FAIL)
+
+	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
+		$(call E_ERR,"Lint failed"); exit 1; \
+	else \
+		$(call E_OK,"Lint passed!"); \
+	fi
+
+# https://github.com/jscs-dev/node-jscs
+#   http://jscs.info/rules.html
+style:
+	@$(NODE_BIN)/jscs --esnext --config .jscs.json $(JS_DIRS) \
+		&& $(CODE_OK) || $(CODE_FAIL)
+
+	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
+		$(call E_ERR,"Style failed"); exit 1; \
+	else \
+		$(call E_OK,"Style passed!"); \
+	fi
+
+# https://github.com/stephenb/node-notes
+notes:
+	@$(NODE_BIN)/notes $(JS_DIRS)
+
+# leftover Mocha `describe.only`s, etc.
+only-check:
+	@git grep -Eq '\.only\(' -- test \
+		&& $(CODE_OK) || $(CODE_FAIL)
+
+	@# inverted logic; no find = success
+	@if [[ "`$(CODE_GET)`" == "0" ]]; then \
+		$(call E_ERR,"please remove '.only' calls from the Test Suite"); exit 1; \
+	fi
 
 # https://github.com/gotwarlost/istanbul#configuring
 #   `istanbul help`
@@ -98,39 +140,49 @@ test-debug:  init
 #   /* istanbul ignore if */
 #   /* istanbul ignore else */
 #   /* istanbul ignore next */
-coverage:  compile
+coverage:
 	@# uses `_mocha`, unlike `npm test`
-	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha $(ES5)/test -- --reporter nyan
+	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
+		$(ES5)/test/bootstrap.js $(ES5)/test -- \
+		--recursive --ui bdd --reporter nyan --timeout 5000
 	@$(NODE_BIN)/istanbul report
 	@$(NODE_BIN)/istanbul check-coverage \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
-		$(call E_ERR,"failed to achieve coverage"); exit 1; \
+		$(call E_ERR,"Coverage failed"); exit 1; \
 	else \
-		$(call E_OK,"coverage achieved!"); \
+		$(call E_OK,"Coverage passed!"); \
 	fi
+
+# (1) from source
+# (2) from build
+quality:  only-check lint style  build coverage
 
 # https://github.com/cainus/node-coveralls
 # FIXME:  Bad response: 422 {"message":"Couldn't find a repository matching this job.","error":true}
 #   we are not gonna make CI success dependent upon Coveralls.io
 #   CODE=$?
-ci:  compile
+ci:  only-check lint style  clean build
 	@rm -f $(COVERAGE_INFO)
 
 	@# uses `_mocha`, unlike `npm test`
-	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha $(ES5)/test -- --reporter dot
+	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
+		$(ES5)/test/bootstrap.js $(ES5)/test -- \
+		--recursive --ui bdd --reporter dot --timeout 5000
 
 	cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
 		$(call E_WARN,"Coveralls.io failure ignored")
 	@$(call E_OK,"CI passed!")
 
 
+# Documentation
+
 # https://github.com/jsdoc3/jsdoc
 #   http://usejsdoc.org/
 #   "jsdoc": "3.3.0-beta1"
 #   .jsdoc.json
-doc:  compile
+doc:  build
 	@$(NODE_BIN)/jsdoc -c $(ROOT)/.jsdoc.json \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
@@ -175,9 +227,9 @@ gh-pages:  init
 	@rm -rf build/gh-pages
 
 
-# `npm run-script`
+# `npm run <TARGET>`
 
-post-install:  init
+post-install:
 	@# ensure Git directory
 	@if [[ -d $(ROOT)/.git ]]; then \
 	    $(call E_INFO,"ensuring .git/hooks"); \
@@ -188,28 +240,16 @@ post-install:  init
 	    chmod 755 $(ROOT)/.git/hooks/pre-commit; \
 	fi
 
-	@# initial compilation
-	$(MAKE) compile
+	@# initial build
+	$(MAKE) build
 
 
 # https://git-scm.com/docs/githooks
 
-pre-commit:  init
+pre-commit:
 	@if [[ "$(JS_STAGED)" == "" ]]; then \
 	    $(call E_INFO,"no JavaScript changes"); \
 	fi
 
 	@# work from source
-	@$(MAKE) only-check lint style
-
-	@# work from compiled
-	@$(MAKE) compile test
-
-only-check:
-	@git grep -Eq '\.only\(' -- test \
-		&& $(CODE_OK) || $(CODE_FAIL)
-
-	@# inverted logic; no find = success
-	@if [[ "`$(CODE_GET)`" == "0" ]]; then \
-		$(call E_ERR,"please remove '.only' calls from the Test Suite"); exit 1; \
-	fi
+	@$(MAKE) quality

@@ -19,7 +19,9 @@
 'use strict';
 
 const path = require('path');
-const theLib = require('./lib/index');
+
+const theLib = require('../lib/index');
+
 
 const USAGE = ['Usage:  ', path.basename(__filename), ' --port <PORT>'].join('');
 
