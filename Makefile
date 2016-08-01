@@ -76,7 +76,7 @@ rewatch:  clean build  watch
 
 test:
 	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
-		--recursive --ui bdd --reporter spec --timeout 5000 \
+		--recursive --ui bdd --reporter spec --timeout 3000 \
 		$(ES5)/test/bootstrap.js $(ES5)/test \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
@@ -92,14 +92,13 @@ test-debug:
 
 # Code Quality
 
-# TODO: https://github.com/eslint/eslint
+# https://github.com/eslint/eslint
 #   http://eslint.org/docs/user-guide/configuring
 #   http://eslint.org/docs/rules/
-#
-# https://github.com/jshint/jshint
-#   http://jshint.com/docs/options/
 lint:
-	@$(NODE_BIN)/jshint --config .jshintrc $(JS_DIRS) \
+	@$(NODE_BIN)/eslint --config .eslintrc \
+		--color \
+		$(JS_DIRS) \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -169,7 +168,7 @@ ci:  only-check lint style  clean build
 	@# uses `_mocha`, unlike `npm test`
 	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
 		$(ES5)/test/bootstrap.js $(ES5)/test -- \
-		--recursive --ui bdd --reporter dot --timeout 5000
+		--recursive --ui bdd --reporter dot --timeout 10000
 
 	cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
 		$(call E_WARN,"Coveralls.io failure ignored")

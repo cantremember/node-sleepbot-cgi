@@ -1,8 +1,5 @@
-'use strict';
-
-// jshint -W079
 const Promise = require('bluebird');
-// jshint +W079
+
 const theLib = require('../lib/index');
 
 // // TODO: timezone support
@@ -37,9 +34,20 @@ function coerceData(data) {
     return data;
 }
 
-function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
+function scrapeBodyTitle( // eslint-disable-line max-params
+    data,
+    lines,
+    start,
+    titleStartArg /* optional */,
+    endArg
+) {
+    // call signature: (..., titleStart, end)
+    let titleStart = titleStartArg;
+    let end = endArg;
     if (end === undefined) {
-        [ end, titleStart ] = [ titleStart, undefined ];
+        // call signature: (..., end)
+        end = titleStartArg;
+        titleStart = undefined;
     }
 
     const body = [];
@@ -85,6 +93,8 @@ function scrapeBodyTitle(data, lines, start, titleStart /* optional */, end) {
                     body.push(line);
                 }
                 break;
+            default:
+                // that's the end of it
         }
     }
 
@@ -244,8 +254,10 @@ const loadQuips = theLib.willMemoize(() => {
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
 module.exports = function handler(req, res, cb) {
-    const date = new Date(), day = date.getDay();
-    let dead, current;
+    const date = new Date();
+    const day = date.getDay();
+    let dead;
+    let current;
     let quip;
 
     return loadDead()
@@ -253,7 +265,7 @@ module.exports = function handler(req, res, cb) {
         dead = _dead;
         if (dead || current) {
             // we're done
-            return;
+            return undefined;
         }
 
         return checkLive(date);
@@ -262,7 +274,7 @@ module.exports = function handler(req, res, cb) {
         current = current || _live;
         if (dead || current) {
             // we're done
-            return;
+            return undefined;
         }
 
         return checkShow(date);

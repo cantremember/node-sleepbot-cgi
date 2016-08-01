@@ -1,5 +1,3 @@
-'use strict';
-
 const theLib = require('../lib/index');
 
 

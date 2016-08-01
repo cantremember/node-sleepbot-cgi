@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const proxyquire = require('proxyquire');
 
@@ -13,18 +11,19 @@ const configDefault = require('../../config/default');
 describe('lib/config', () => {
     let config;
     let env;
+
     beforeEach(() => {
-        env = process.env['NODE_ENV'];
+        env = process.env.NODE_ENV;
     });
     afterEach(() => {
-        process.env['NODE_ENV'] = env;
+        process.env.NODE_ENV = env;
 
         theHelper.mockConfig();
     });
 
 
     it('provides a test environment', () => {
-        assert.equal(process.env['NODE_ENV'], 'test');
+        assert.equal(process.env.NODE_ENV, 'test');
 
         config = proxyquire(CONFIG_PATH, STUBS);
         assert.deepEqual(
@@ -38,7 +37,7 @@ describe('lib/config', () => {
     });
 
     it('provides no environment', () => {
-        delete process.env['NODE_ENV'];
+        delete process.env.NODE_ENV;
 
         config = proxyquire(CONFIG_PATH, STUBS);
         assert.deepEqual(
@@ -52,7 +51,7 @@ describe('lib/config', () => {
     });
 
     it('survives an invalid environment', () => {
-        process.env['NODE_ENV'] = 'BOGUS';
+        process.env.NODE_ENV = 'BOGUS';
 
         config = proxyquire(CONFIG_PATH, STUBS);
         assert.deepEqual(

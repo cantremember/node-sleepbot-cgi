@@ -1,13 +1,11 @@
-'use strict';
+/* eslint max-nested-callbacks: [ 1, 5 ] */
 
+const Promise = require('bluebird');
 const assert = require('assert');
 const sinon = require('sinon');
 const mockfs = require('mock-fs');
 const fs = require('fs');
 const path = require('path');
-// jshint -W079
-const Promise = require('bluebird');
-// jshint +W079
 
 const theLib = require('../../lib/index');
 const theHelper = require('../helper');
@@ -97,7 +95,7 @@ describe('lib/index', () => {
     });
 
     describe('forget', () => {
-        var willHaveMemoized;
+        let willHaveMemoized;
         beforeEach(() => {
             willHaveMemoized = theLib.willMemoize((value) => {
                 return Promise.resolve(value);

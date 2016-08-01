@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const sinon = require('sinon');
 // TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
@@ -12,7 +10,9 @@ const willHandle = require('../../app/http404');
 describe('http404', () => {
     let sandbox;
     let cb;
-    let req, res;
+    let req;
+    let res;
+
     beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();

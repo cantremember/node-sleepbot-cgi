@@ -1,8 +1,4 @@
-'use strict';
-
-// jshint -W079
 const Promise = require('bluebird');
-// jshint +W079
 const request = Promise.promisify(require('request'), {
     multiArgs: true,
 });

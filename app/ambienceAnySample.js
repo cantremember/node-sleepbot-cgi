@@ -1,8 +1,4 @@
-'use strict';
-
-// jshint -W079
 const Promise = require('bluebird');
-// jshint +W079
 
 const theLib = require('../lib/index');
 
@@ -66,7 +62,7 @@ function handler(req, res, cb) {
             // choose a random sample
             sample = theLib.chooseAny(datas);
             if (sample === undefined) {
-                return;
+                return undefined;
             }
 
             // we split sample storage into two subdirectories
@@ -79,7 +75,7 @@ function handler(req, res, cb) {
             if (album) {
                 // already cached
                 sample = Object.assign({}, album, sample);
-                return;
+                return undefined;
             }
 
             // populate the cache

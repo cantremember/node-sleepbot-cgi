@@ -1,6 +1,3 @@
-'use strict';
-
-
 /**
  * Development configuration.
  *

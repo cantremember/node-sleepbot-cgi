@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 
 // apply the polyfill
@@ -29,6 +27,18 @@ describe('String', () => {
             assert(! str.includes('nonexistant'));
             assert(! str.includes('To be', 1));
             assert(! str.includes('TO BE'));
+        });
+    });
+});
+
+
+describe('Object', () => {
+    describe('assign', () => {
+        it('is polyfilled', () => {
+            assert.deepEqual(
+                Object.assign({ a: 1, b: 99 }, { b: 2, c: 3 }),
+                { a: 1, b: 2, c: 3 }
+            );
         });
     });
 });

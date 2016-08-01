@@ -16,9 +16,10 @@
     https://github.com/trentm/node-bunyan
 */
 
-'use strict';
+/* eslint-disable no-console */
 
 const path = require('path');
+const minimist = require('minimist');
 
 const theLib = require('../lib/index');
 
@@ -31,7 +32,6 @@ const params = (() => {
     const i = argv.indexOf(__filename);
     const rest = argv.slice(i + 1);
 
-    const minimist = require('minimist');
     return minimist(rest, {
         alias: { port: 'p' }
     });
@@ -41,7 +41,7 @@ const params = (() => {
 // specify the httpPort
 theLib.config.set(
     'httpPort',
-    params.port || process.env['HTTP_PORT'] || theLib.config.get('httpPort')
+    params.port || process.env.HTTP_PORT || theLib.config.get('httpPort')
 );
 if (! theLib.config.get('httpPort')) {
     console.error(USAGE);
@@ -52,7 +52,7 @@ console.log('http port is:', theLib.config.get('httpPort'));
 // specify the wwwRoot
 theLib.config.set(
     'wwwRoot',
-    process.env['WWW_ROOT'] || theLib.config.get('wwwRoot')
+    process.env.WWW_ROOT || theLib.config.get('wwwRoot')
 );
 console.log('WWW root is:', theLib.config.get('wwwRoot'));
 

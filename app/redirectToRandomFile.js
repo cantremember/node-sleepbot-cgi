@@ -1,6 +1,5 @@
-'use strict';
-
 const path = require('path');
+
 const theLib = require('../lib/index');
 
 

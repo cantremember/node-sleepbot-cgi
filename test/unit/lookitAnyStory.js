@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const sinon = require('sinon');
 const mockfs = require('mock-fs');
@@ -14,7 +12,9 @@ const willHandle = require('../../app/lookitAnyStory');
 describe('lookitAnyStory', () => {
     let sandbox;
     let cb;
-    let req, res;
+    let req;
+    let res;
+
     beforeEach(() => {
         // own own private sandbox
         sandbox = sinon.sandbox.create();

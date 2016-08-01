@@ -1,6 +1,7 @@
-'use strict';
-
 const theLib = require('../lib/index');
+
+const COOKIE_NAME = 'morgan_config';
+const ROUTE_FLAT = 'flat';
 
 
 /**
@@ -19,8 +20,8 @@ const theLib = require('../lib/index');
  */
 module.exports = function handler(req, res) {
     // the appropriate index file
-    const config = req.cookies['morgan_config'];
-    const route = ((config === 'flat')
+    const config = req.cookies[COOKIE_NAME];
+    const route = ((config === ROUTE_FLAT)
         ? '/morgan/index_h.html'
         : '/morgan/index_p.html'
     );

@@ -1,5 +1,3 @@
-'use strict';
-
 const STATUS = Object.freeze({
     ok: true
 });

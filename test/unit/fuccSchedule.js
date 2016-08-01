@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const sinon = require('sinon');
 const mockfs = require('mock-fs');
@@ -32,7 +30,8 @@ text
 describe('fuccSchedule', () => {
     let sandbox;
     let cb;
-    let req, res;
+    let req;
+    let res;
     let date;
     let SHOW_DATA;
 

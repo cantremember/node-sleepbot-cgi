@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const sinon = require('sinon');
 // TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
@@ -14,7 +12,8 @@ const HANDLER_PATH = '../../app/sebStatusHTML';
 describe('sebStatusHTML', () => {
     let sandbox;
     let cb;
-    let req, res;
+    let req;
+    let res;
 
     beforeEach(() => {
         // own own private sandbox
@@ -31,18 +30,18 @@ describe('sebStatusHTML', () => {
 
 
     it('proxies from the primary Shoutcast server', () => {
-        const request = sandbox.spy((options, cb) => {
+        const request = sandbox.spy((options, _cb) => {
             const primary = theLib.config.get('sebServerPrimary');
 
             // some basics
             assert.equal(options.uri.indexOf(primary.url), 0);
             assert(options.uri.match(/7.html$/));
 
-            cb(null, options, 'BODY');
+            _cb(null, options, 'BODY');
         });
 
         return proxyquire(HANDLER_PATH, {
-            request: request,
+            request,
             '@noCallThru': false,
         })(req, res, cb)
         .then(() => {
@@ -60,7 +59,7 @@ describe('sebStatusHTML', () => {
         sandbox.spy(res, 'send');
 
         return proxyquire(HANDLER_PATH, {
-            request: request,
+            request,
             '@noCallThru': false,
         })(req, res, cb)
         .then(theHelper.notCalled, (err) => {

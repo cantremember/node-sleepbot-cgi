@@ -1,13 +1,8 @@
-'use strict';
-
+const Promise = require('bluebird');
 const assert = require('assert');
 const sinon = require('sinon');
 const mockfs = require('mock-fs');
-// jshint -W079
-const Promise = require('bluebird');
-// jshint +W079
 const supertest = require('supertest');
-// https://github.com/doug-martin/super-request
 
 supertest.Test.prototype.endAsync = Promise.promisify(supertest.Test.prototype.end);
 
@@ -28,8 +23,8 @@ function mockGlobFile(sandbox) {
 function client() {
     return supertest(theLib.app);
 }
-function bodyIncludes(string, does) {
-    does = does || (does === undefined);
+function bodyIncludes(string, doesArg) {
+    const does = doesArg || (doesArg === undefined);
     return (res) => {
         // "If the response is ok, it should return falsy"
         const text = (res.text || '');
@@ -43,7 +38,7 @@ function redirectsTo(route) {
     const absolute = [ theLib.config.get('baseURL'), route ].join('');
     return (res) => {
         // "If the response is ok, it should return falsy"
-        if ((res.headers['location'] || '').indexOf(absolute) === 0) {
+        if ((res.headers.location || '').indexOf(absolute) === 0) {
             return;
         }
         throw new Error([ 'does not redirect to "', route, '"' ].join(''));
@@ -83,7 +78,7 @@ describe('app', () => {
         // explicity load the App up-front;
         //   it'll take a few moments, even if we let it happen 'naturally',
         //   but we do it manually, to ensure mock-fs will not affect App loading
-        console.log('    (registering the Express app ...)');
+        console.log('    (registering the Express app ...)'); // eslint-disable-line no-console
         return theLib.app;
     });
     beforeEach(() => {
@@ -261,7 +256,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
     });
 
     describe('GET /fucc/cgi/schednow.cgi', () => {
-        var date;
+        let date;
         beforeEach(() => {
             date = new Date();
         });
@@ -492,7 +487,7 @@ id\tabbrev\ttitle
         '/morgan/index.derp',
         '/morgan/',
         '/morgan'
-    ].forEach(function(route) {
+    ].forEach((route) => {
         it(('GET ' + route), () => {
             return client().get(route)
                 .expect(302)

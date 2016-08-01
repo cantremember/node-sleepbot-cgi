@@ -1,5 +1,3 @@
-'use strict';
-
 const theLib = require('../lib/index');
 const sebServers = theLib.config.get('sebServers');
 
@@ -36,10 +34,11 @@ module.exports = function handler(req, res) {
             'File' +   n + '=' + server.url,
             'Title' +  n + '=Sleepbot Environmental Broadcast',
             'Length' + n + '=-1',
-            // jscs:disable maximumLineLength
-            // jshint maxlen: false
+            /* eslint-disable max-len */
+            /* jscs:disable maximumLineLength */
             // Browser1=http://www.winamp.com/bin/sc/sccontext.php?title=Sleepbot+Environmental+Broadcast&genre=Ambient+Downtempo&url=http%3A%2F%2Fsleepbot.com%2Fseb
-            // jscs:enable
+            /* jscs:enable */
+            /* eslint-enable max-len */
         ].join('\n');
     })).join('\n') + '\n');
 };

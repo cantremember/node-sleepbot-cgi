@@ -290,7 +290,7 @@
         "id-match": 0,
         "indent": [
             1,
-            2,
+            4,
             {
                 "SwitchCase": 1,
                 "VariableDeclarator": 1

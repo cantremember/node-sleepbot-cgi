@@ -1,9 +1,7 @@
-'use strict';
+/* eslint-disable  no-var, prefer-arrow-callback, no-console */
+/* istanbul ignore next */
 
 // https://github.com/gulpjs/gulp
-
-
-/* istanbul ignore next */
 
 var path = require('path');
 
@@ -64,9 +62,10 @@ function sourceWatch() {
 
     watcher.on('change', function(event) {
         var filepath = (event && event.path);
+        var parts;
         if (filepath) {
             // the last segment
-            var parts = filepath.split(path.sep);
+            parts = filepath.split(path.sep);
             console.log('   ', parts[parts.length - 1]);
         }
     });

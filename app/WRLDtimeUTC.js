@@ -1,9 +1,6 @@
-'use strict';
-
-// jshint -W079
 const Promise = require('bluebird');
-// jshint +W079
 const net = require('net');
+
 const theLib = require('../lib/index');
 
 
@@ -19,7 +16,7 @@ const willTryServers = Promise.method((res, tried=[]) => {
     if (tried.length >= servers.length) {
         // they're ALL down?  we are Service Unavailable
         res.set('Content-Type', 'text/plain').status(503).end();
-        return;
+        return Promise.resolve();
     }
 
     // okay, any server we haven't tried yet ...
@@ -45,18 +42,21 @@ const willTryServers = Promise.method((res, tried=[]) => {
             }
             connection = null;
 
+            /* eslint-disable no-console */
             if (err instanceof Error) {
                 console.error('Daytime Protocol ERROR:', server, err);
             }
             else {
                 console.error('Daytime Protocol FAIL:', server);
             }
+            /* eslint-enable no-console */
 
             // // assume it'll come back
             // delete servers[server];
 
             // keep on trying
-            return deferred.resolve(willTryServers(res, tried));
+            deferred.resolve(willTryServers(res, tried));
+            return;
         });
     }
     failOn('error');
@@ -84,11 +84,13 @@ const willTryServers = Promise.method((res, tried=[]) => {
             if (parts.length !== 0) {
                 const result = parts.join('\n');
                 res.send(result);
-                return deferred.resolve(result);
+                deferred.resolve(result);
+                return;
             }
 
             // keep on trying
-            return deferred.resolve(willTryServers(res, tried));
+            deferred.resolve(willTryServers(res, tried));
+            return;
         });
     }
     succeedOn('close');

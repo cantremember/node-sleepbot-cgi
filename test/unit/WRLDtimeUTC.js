@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const sinon = require('sinon');
 // TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
@@ -57,7 +55,8 @@ function CONNECTION_ERROR_TIMEOUT() {
 describe('WRLDtimeUTC', () => {
     let sandbox;
     let cb;
-    let req, res;
+    let req;
+    let res;
 
     beforeEach(() => {
         // own own private sandbox
@@ -154,11 +153,12 @@ describe('WRLDtimeUTC', () => {
 
         const connections = [];
         sandbox.stub(net, 'connect', () => {
-            let index = connections.length;
+            const index = connections.length;
             switch (index) {
                 case 0:  connections.push(new Connection(CONNECTION_ERROR));         break;
                 case 1:  connections.push(new Connection(CONNECTION_TIMEOUT));       break;
                 case 2:  connections.push(new Connection(CONNECTION_ERROR_TIMEOUT)); break;
+                default:
             }
             return connections[index];
         });
@@ -179,11 +179,12 @@ describe('WRLDtimeUTC', () => {
 
         const connections = [];
         sandbox.stub(net, 'connect', () => {
-            let index = connections.length;
+            const index = connections.length;
             switch (index) {
                 case 0:  connections.push(new Connection(CONNECTION_ERROR));  break;
                 case 1:  connections.push(new Connection(CONNECTION_EMPTY));  break;
                 case 2:  connections.push(new Connection(CONNECTION_CLOSE));  break;
+                default:
             }
             return connections[index];
         });

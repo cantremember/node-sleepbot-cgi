@@ -1,8 +1,5 @@
-'use strict';
-
-// jshint -W079
 const Promise = require('bluebird');
-// jshint +W079
+
 const theLib = require('../lib/index');
 
 
@@ -13,7 +10,7 @@ const willGetFilenames = theLib.willMemoize(() => {
 
 // the files themselves
 const willGetFile = (filepath) => {
-    const cache = handler.cache;
+    const cache = handler.cache; // eslint-disable-line no-use-before-define
     const will = cache[filepath] || theLib.willMemoize(() => {
         return theLib.wwwRoot.willLoadFile(filepath);
     });
@@ -52,8 +49,8 @@ function handler(req, res, cb) {
             config: theLib.config,
             body,
         })
-        .then((body) => {
-            res.send(body);
+        .then((rendered) => {
+            res.send(rendered);
         });
     })
     .return(res)
