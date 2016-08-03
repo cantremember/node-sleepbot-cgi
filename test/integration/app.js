@@ -74,11 +74,13 @@ curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
 
 describe('app', () => {
     let sandbox;
-    before(() => {
+    before(function() { // no => capturing of `this`
         // explicity load the App up-front;
         //   it'll take a few moments, even if we let it happen 'naturally',
         //   but we do it manually, to ensure mock-fs will not affect App loading
         console.log('    (registering the Express app ...)'); // eslint-disable-line no-console
+        this.timeout(30000); // eslint-disable-line no-invalid-this
+
         return theLib.app;
     });
     beforeEach(() => {

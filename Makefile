@@ -76,7 +76,7 @@ rewatch:  clean build  watch
 
 test:
 	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
-		--recursive --ui bdd --reporter spec --timeout 3000 \
+		--recursive --ui bdd --reporter spec --timeout 2000 \
 		$(ES5)/test/bootstrap.js $(ES5)/test \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
@@ -168,7 +168,7 @@ ci:  only-check lint style  clean build
 	@# uses `_mocha`, unlike `npm test`
 	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
 		$(ES5)/test/bootstrap.js $(ES5)/test -- \
-		--recursive --ui bdd --reporter dot --timeout 10000
+		--recursive --ui bdd --reporter dot --timeout 5000
 
 	cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
 		$(call E_WARN,"Coveralls.io failure ignored")
