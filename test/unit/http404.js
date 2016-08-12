@@ -3,19 +3,16 @@ const sinon = require('sinon');
 // TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
 const httpMocks = require('@cantremember/node-mocks-http');
 
-const theHelper = require('../helper');
 const willHandle = require('../../app/http404');
 
 
 describe('http404', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -43,15 +40,15 @@ describe('http404', () => {
         sandbox.spy(res, 'send');
 
         willHandle(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal('BOOM', err.message);
-
+        .then(() => {
             assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

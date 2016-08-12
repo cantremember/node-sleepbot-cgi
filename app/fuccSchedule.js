@@ -12,7 +12,6 @@ const quipColumns = theLib.columnToIndexMap('text');
 const dayOfWeekNames = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(/\s/); // 0-based
 const dayOfWeekAnchors = 'SUN MON TUE WED THU FRI SAT'.split(/\s/); // 0-based
 
-const NO_QUIPS = Object.freeze([ [] ]);
 const FAKE_QUIP = Object.freeze({ text: '' });
 
 
@@ -234,10 +233,7 @@ function checkShow(date) {
    the quip file
 */
 const loadQuips = theLib.willMemoize(() => {
-    return theLib.wwwRoot.willLoadTSV('fucc/showquip.txt')
-    .catch(() => {
-        return NO_QUIPS;
-    });
+    return theLib.wwwRoot.willLoadTSV('fucc/showquip.txt');
 });
 
 
@@ -304,5 +300,5 @@ module.exports = function handler(req, res, cb) {
         });
     })
     .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    .catch(cb);
 };

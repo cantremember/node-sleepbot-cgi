@@ -12,11 +12,8 @@ const theHelper = require('../helper');
 
 
 describe('lib/index', () => {
-    let sandbox;
-    beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
-    });
+    const sandbox = sinon.sandbox.create();
+
     afterEach(() => {
         sandbox.restore();
         mockfs.restore();
@@ -126,39 +123,6 @@ describe('lib/index', () => {
         });
     });
 
-    describe('callbackAndThrowError', () => {
-        const BOOM = new Error('BOOM');
-        let handler;
-
-        it('dispatches an Error to its Promise chain without a callback', () => {
-            handler = sandbox.spy(theLib.callbackAndThrowError());
-
-            return Promise.reject(BOOM)
-            .then(theHelper.notCalled, handler)
-            .then(theHelper.notCalled, (err) => {
-                assert.strictEqual(err, BOOM);
-
-                assert(handler.calledOnce);
-            });
-        });
-
-        it('dispatches an Error to a callback and its Promise chain', () => {
-            const cb = sinon.spy((err) => {
-                assert.equal(err.message, 'BOOM');
-            });
-            handler = sandbox.spy(theLib.callbackAndThrowError(cb));
-
-            return Promise.reject(BOOM)
-            .then(theHelper.notCalled, handler)
-            .then(theHelper.notCalled, (err) => {
-                assert.equal(err.message, 'BOOM');
-
-                assert(handler.calledOnce);
-                assert(cb.calledOnce);
-            });
-        });
-    });
-
     describe('chooseAny', () => {
         it('ignores a non-Array', () => {
             assert.strictEqual(theLib.chooseAny(), undefined);
@@ -221,7 +185,6 @@ describe('lib/index', () => {
         // make sure header is on the 1st line
         const TSV_CONTENT = `A\tB
 
-# comments and blank lines ignored
 1 \t2
 
  ä\t 🐝
@@ -246,6 +209,21 @@ describe('lib/index', () => {
                 });
             });
 
+            it('cannot handle comment lines', () => {
+                mockfs({ '/mock-fs': {
+                    // make sure header is on the 1st line
+                    'test.tsv': `A\tB
+1\t2
+# Error: Number of columns is inconsistent on line 3
+`
+                } });
+
+                return wwwRoot.willLoadTSV('/test.tsv')
+                .then(theHelper.notCalled, (err) => {
+                    assert(err.message.match(/Number of columns is inconsistent/));
+                });
+            });
+
             it('can take CSV parsing options', () => {
                 mockfs({ '/mock-fs': {
                     'test.tsv': TSV_CONTENT
@@ -255,7 +233,6 @@ describe('lib/index', () => {
                 .then((rows) => {
                     assert.deepEqual(rows, [
                         [ '' ],
-                        [ '# comments and blank lines ignored' ],
                         [ '1 \t2' ],
                         [ '' ],
                         [ ' ä\t 🐝' ]
@@ -365,12 +342,14 @@ describe('lib/index', () => {
             });
 
             it('returns filenames from a physical file-system', () => {
+                // specifically, the `test/unit` directory
                 theHelper.mockConfig({ wwwRoot: __dirname });
 
                 return wwwRoot.willGetFilenames('*')
                 .then((filenames) => {
                     assert.deepEqual(filenames.sort(), [
                         'ambienceAnySample.js',
+                        'app.js',
                         'config.js',
                         'fuccSchedule.js',
                         'http404.js',

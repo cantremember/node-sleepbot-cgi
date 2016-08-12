@@ -57,5 +57,14 @@ theLib.config.set(
 console.log('WWW root is:', theLib.config.get('wwwRoot'));
 
 
+// long-lived
+process.on('uncaughtException', (err) => {
+    console.error('uncaughtException:', (err.stack || err));
+});
+process.on('unhandledRejection', (err) => {
+    console.error('unhandledRejection:', (err.stack || err));
+});
+
+
 // ready to listen!
 theLib.app.listen(theLib.config.get('httpPort'));

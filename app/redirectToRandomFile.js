@@ -32,6 +32,6 @@ module.exports = function(filepath, glob = '*.*') {
             ));
         })
         .return(res)
-        .catch(theLib.callbackAndThrowError(cb));
+        .catch(cb);
     };
 };

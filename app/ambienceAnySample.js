@@ -6,7 +6,6 @@ const theLib = require('../lib/index');
 const sampleColumns = theLib.columnToIndexMap('file ext page stub artist album track size');
 const quipColumns = theLib.columnToIndexMap('text');
 
-const NO_ROWS = Object.freeze([]);
 const FAKE_QUIP = Object.freeze({ text: '' });
 
 
@@ -17,10 +16,6 @@ const loadSamples = theLib.willMemoize(() => {
         return rows.map((row) => {
             return theLib.dataColumnMap(row, sampleColumns);
         });
-    })
-    .catch(() => {
-        // treat as no match
-        return NO_ROWS;
     });
 });
 
@@ -31,10 +26,6 @@ const loadQuips = theLib.willMemoize(() => {
         return rows.map((row) => {
             return theLib.dataColumnMap(row, quipColumns);
         });
-    })
-    .catch(() => {
-        // treat as no match
-        return NO_ROWS;
     });
 });
 
@@ -132,7 +123,7 @@ function handler(req, res, cb) {
         });
     })
     .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    .catch(cb);
 }
 
 /**

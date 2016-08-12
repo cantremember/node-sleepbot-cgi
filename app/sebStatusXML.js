@@ -39,5 +39,5 @@ module.exports = function handler(req, res, cb) {
         res.set('Content-Type', 'text/xml').send(body);
     })
     .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    .catch(cb);
 };

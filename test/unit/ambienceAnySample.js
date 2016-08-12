@@ -20,14 +20,12 @@ text
 
 
 describe('ambienceAnySample', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -124,7 +122,7 @@ describe('ambienceAnySample', () => {
         mockfs({ '/mock-fs': {
             'ambience': {
                 'any.txt': `
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+FILE\tEXT\tPAGE\tSTUB\tARTIST\tALBUM\tTRACK\tSIZE
 zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
 `,
                 'anyquip.txt': NO_DATA,
@@ -170,7 +168,7 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
         });
     });
 
-    it('survives missing data', () => {
+    it('fails on missing data', () => {
         mockfs({ '/mock-fs': {
             'ambience': { },
         } });
@@ -180,9 +178,10 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
 
         return willHandle(req, res, cb)
         .then(() => {
-            assert(cb.calledOnce);
-            assert(! res.render.called);
-            assert(! res.send.called);
+            const err = cb.args[0][0];
+            assert(err.message.match(/ENOENT/));
+
+            // it('will fail gracefully')
         });
     });
 
@@ -198,15 +197,15 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal(err.message, 'BOOM');
-
+        .then(() => {
             assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

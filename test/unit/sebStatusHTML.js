@@ -5,19 +5,16 @@ const httpMocks = require('@cantremember/node-mocks-http');
 const proxyquire = require('proxyquire');
 
 const theLib = require('../../lib/index');
-const theHelper = require('../helper');
 const HANDLER_PATH = '../../app/sebStatusHTML';
 
 
 describe('sebStatusHTML', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -62,15 +59,15 @@ describe('sebStatusHTML', () => {
             request,
             '@noCallThru': false,
         })(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal(err.message, 'BOOM');
-
+        .then(() => {
             assert(request.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

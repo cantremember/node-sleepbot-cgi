@@ -5,7 +5,6 @@ const mockfs = require('mock-fs');
 const httpMocks = require('@cantremember/node-mocks-http');
 
 const theLib = require('../../lib/index');
-const theHelper = require('../helper');
 const willHandle = require('../../app/fuccSchedule');
 
 const NO_DATA = new Buffer(0);
@@ -28,7 +27,7 @@ text
 
 
 describe('fuccSchedule', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
@@ -36,8 +35,6 @@ describe('fuccSchedule', () => {
     let SHOW_DATA;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -46,7 +43,7 @@ describe('fuccSchedule', () => {
 
         date = new Date();
         SHOW_DATA = `
-file\tanchor\tdayOfWeek\thourStart\thourEnd
+FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
 file\tanchor\t${ date.getDay() }\t${ date.getHours() }\t${ date.getHours() + 1 }
 `;
 
@@ -87,7 +84,7 @@ file\tanchor\t${ date.getDay() }\t${ date.getHours() }\t${ date.getHours() + 1 }
         mockfs({ '/mock-fs': {
             'fucc': {
                 'live.txt': `
-file\tanchor\tyear\tmonth\tday\thourStart\thourEnd
+FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
 file\tanchor\t${
     date.getYear() }\t${ date.getMonth() }\t${ date.getDate() }\t${
     date.getHours() }\t${ date.getHours() + 1
@@ -130,7 +127,7 @@ after
             'fucc': {
                 // not live
                 'live.txt': `
-file\tanchor\tyear\tmonth\tday\thourStart\thourEnd
+FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
 file\tanchor\t1970\t0\t1\t0\t0
 `,
                 'live.html': NO_DATA,
@@ -166,7 +163,7 @@ file\tanchor\t1970\t0\t1\t0\t0
                 'live.html': NO_DATA,
                 // no show
                 'show.txt': `
-file\tanchor\tdayOfWeek\thourStart\thourEnd
+FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
 file\tanchor\t0\t0\t0
 `,
                 'show.html': NO_DATA,
@@ -189,7 +186,7 @@ file\tanchor\t0\t0\t0
         });
     });
 
-    it('survives missing quips', () => {
+    it('fails on missing quips', () => {
         mockfs({ '/mock-fs': {
             'fucc': {
                 'show.txt': SHOW_DATA,
@@ -199,11 +196,10 @@ file\tanchor\t0\t0\t0
 
         return willHandle(req, res, cb)
         .then(() => {
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
+            const err = cb.args[0][0];
+            assert(err.message.match(/ENOENT/));
 
-            const context = res._getRenderData();
-            assert.strictEqual(context.quip.text, undefined);
+            // it('will fail gracefully')
         });
     });
 
@@ -228,6 +224,7 @@ file\tanchor\t0\t0\t0
     it('will fail gracefully', () => {
         mockfs({ '/mock-fs': {
             'fucc': {
+                'showquip.txt': QUIP_DATA,
                 'show.txt': SHOW_DATA,
                 'show.html': SHOW_HTML,
             }
@@ -237,15 +234,15 @@ file\tanchor\t0\t0\t0
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal(err.message, 'BOOM');
-
+        .then(() => {
             assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

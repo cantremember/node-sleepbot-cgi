@@ -54,7 +54,7 @@ function handler(req, res, cb) {
         });
     })
     .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    .catch(cb);
 }
 
 /**

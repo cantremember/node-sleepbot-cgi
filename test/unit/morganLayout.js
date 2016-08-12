@@ -5,11 +5,10 @@ const mockfs = require('mock-fs');
 const httpMocks = require('@cantremember/node-mocks-http');
 
 const theLib = require('../../lib/index');
-const theHelper = require('../helper');
 const willHandle = require('../../app/morganLayout');
 
 const CARD_DATA = `
-id\tabbrev\ttitle
+ID\tABBREV\tTITLE
 1\tone\tONE
 2\ttwo\tTWO
 3\tthree\tTHREE
@@ -24,14 +23,12 @@ id\tabbrev\ttitle
 
 
 describe('morganLayout', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -135,35 +132,40 @@ id\tabbrev\ttitle
         });
     });
 
-    it('survives missing cards', () => {
+    it('fails on missing cards', () => {
         mockfs({ '/mock-fs': {
             'morgan': { }
         } });
 
         return willHandle(req, res, cb)
         .then(() => {
-            assert(! cb.called);
-            assert.equal(res._getData(), 'morganLayout.ejs');
+            const err = cb.args[0][0];
+            assert(err.message.match(/ENOENT/));
 
-            const context = res._getRenderData();
-            assert.equal(context.cards.length, 0);
+            // it('will fail gracefully')
         });
     });
 
     it('will fail gracefully', () => {
+        mockfs({ '/mock-fs': {
+            'morgan': {
+                'card.txt': CARD_DATA,
+            },
+        } });
+
         sandbox.stub(res, 'render').throws(new Error('BOOM'));
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal(err.message, 'BOOM');
-
+        .then(() => {
             assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

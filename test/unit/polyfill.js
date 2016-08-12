@@ -1,17 +1,27 @@
 const assert = require('assert');
 
+/* eslint-disable camelcase */
 // apply the polyfill
-require('../../lib/polyfill');
+import {
+    Array_includes,
+    String_includes,
+    Object_assign,
+} from '../../lib/polyfill';
+/* eslint-enable camelcase */
 
 
 describe('Array', () => {
     describe('#includes', () => {
+        it('is implemented', () => {
+            assert(Array_includes.call([ 1, 2, 3 ], 2));
+            assert(! Array_includes.call([ 1, 2, 3 ], 4));
+            assert(! Array_includes.call([ 1, 2, 3 ], 3, 3));
+            assert(Array_includes.call([ 1, 2, 3 ], 3, -1));
+            // assert(Array_includes.call([ 1, 2, NaN ], NaN));
+        });
+
         it('is polyfilled', () => {
-            assert([ 1, 2, 3 ].includes(2));
-            assert(! [ 1, 2, 3 ].includes(4));
-            assert(! [ 1, 2, 3 ].includes(3, 3));
-            assert([ 1, 2, 3 ].includes(3, -1));
-            // assert([ 1, 2, NaN ].includes(NaN));
+            assert([ 1 ].includes(1));
         });
     });
 });
@@ -19,14 +29,18 @@ describe('Array', () => {
 
 describe('String', () => {
     describe('#includes', () => {
-        it('is polyfilled', () => {
-            const str = 'To be, or not to be, that is the question.';
+        const STR = 'To be, or not to be, that is the question.';
 
-            assert(str.includes('To be'));
-            assert(str.includes('question'));
-            assert(! str.includes('nonexistant'));
-            assert(! str.includes('To be', 1));
-            assert(! str.includes('TO BE'));
+        it('is implemented', () => {
+            assert(String_includes.call(STR, 'To be'));
+            assert(String_includes.call(STR, 'question'));
+            assert(! String_includes.call(STR, 'nonexistant'));
+            assert(! String_includes.call(STR, 'To be', 1));
+            assert(! String_includes.call(STR, 'TO BE'));
+        });
+
+        it('is polyfilled', () => {
+            assert(STR.includes('To be'));
         });
     });
 });
@@ -34,6 +48,13 @@ describe('String', () => {
 
 describe('Object', () => {
     describe('assign', () => {
+        it('is implemented', () => {
+            assert.deepEqual(
+                Object_assign({ a: 1, b: 99 }, { b: 2, c: 3 }), // eslint-disable-line new-cap
+                { a: 1, b: 2, c: 3 }
+            );
+        });
+
         it('is polyfilled', () => {
             assert.deepEqual(
                 Object.assign({ a: 1, b: 99 }, { b: 2, c: 3 }),

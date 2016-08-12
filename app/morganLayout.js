@@ -19,8 +19,6 @@ const quips = [
     return theLib.dataColumnMap(row, quipColumns);
 });
 
-const NO_CARDS = Object.freeze([]);
-
 // load the cards file
 const loadCards = theLib.willMemoize(() => {
     return theLib.wwwRoot.willLoadTSV('morgan/card.txt')
@@ -31,10 +29,6 @@ const loadCards = theLib.willMemoize(() => {
 
             return data;
         });
-    })
-    .catch(() => {
-        // treat as no match
-        return NO_CARDS;
     });
 });
 
@@ -100,5 +94,5 @@ module.exports = function handler(req, res, cb) {
         });
     })
     .return(res)
-    .catch(theLib.callbackAndThrowError(cb));
+    .catch(cb);
 };

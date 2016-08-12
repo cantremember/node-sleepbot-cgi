@@ -9,14 +9,14 @@ const willHandle = require('../../app/redirectToRandomFile');
 
 
 describe('redirectToRandomFile', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
+    let cb;
     let req;
     let res;
     let handle;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
+        cb = sandbox.spy();
 
         // mock Request & Response
         req = httpMocks.createRequest();
@@ -34,8 +34,9 @@ describe('redirectToRandomFile', () => {
             return [ 'glob.file' ];
         });
 
-        return handle(req, res)
+        return handle(req, res, cb)
         .then(() => {
+            assert(! cb.called);
             assert.equal(res._getRedirectUrl(), theLib.baseURL('path/glob.file'));
         });
     });
@@ -45,8 +46,9 @@ describe('redirectToRandomFile', () => {
             return [];
         });
 
-        return handle(req, res)
-        .then(theHelper.notCalled, (err) => {
+        return handle(req, res, cb)
+        .then(() => {
+            const err = cb.args[0][0];
             assert(err.message.match(/no glob results/));
         });
     });
@@ -57,11 +59,15 @@ describe('redirectToRandomFile', () => {
         });
         sandbox.stub(res, 'send');
 
-        return handle(req, res)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal('BOOM', err.message);
-
+        return handle(req, res, cb)
+        .then(() => {
             assert(! res.send.called);
+
+            // Express gets informed
+            assert(cb.called);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

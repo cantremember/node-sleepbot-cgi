@@ -10,14 +10,12 @@ const willHandle = require('../../app/lookitAnyStory');
 
 
 describe('lookitAnyStory', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
     let cb;
     let req;
     let res;
 
     beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
         cb = sandbox.spy();
 
         // mock Request & Response
@@ -117,15 +115,15 @@ describe('lookitAnyStory', () => {
         sandbox.spy(res, 'send');
 
         return willHandle(req, res, cb)
-        .then(theHelper.notCalled, (err) => {
-            assert.equal(err.message, 'BOOM');
-
+        .then(() => {
             assert(res.render.calledOnce);
             assert(! res.send.called);
 
             // Express gets informed
             assert(cb.called);
-            assert.strictEqual(cb.args[0][0], err);
+
+            const err = cb.args[0][0];
+            assert.equal(err.message, 'BOOM');
         });
     });
 });

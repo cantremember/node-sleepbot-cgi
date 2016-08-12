@@ -73,7 +73,8 @@ curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
 
 
 describe('app', () => {
-    let sandbox;
+    const sandbox = sinon.sandbox.create();
+
     before(function() { // no => capturing of `this`
         // explicity load the App up-front;
         //   it'll take a few moments, even if we let it happen 'naturally',
@@ -82,10 +83,6 @@ describe('app', () => {
         this.timeout(30000); // eslint-disable-line no-invalid-this
 
         return theLib.app;
-    });
-    beforeEach(() => {
-        // own own private sandbox
-        sandbox = sinon.sandbox.create();
     });
     afterEach(() => {
         sandbox.restore();
@@ -194,9 +191,17 @@ describe('app', () => {
 
     describe('GET /ambience/cgi/any_f.cgi', () => {
         it('without data', () => {
+            mockfs({ '/mock-fs': {
+                'ambience': { },
+                'ambienceAnySample.ejs': theHelper.realEjs('ambienceAnySample.ejs'),
+            } });
+
             return client().get('/ambience/cgi/any_f.cgi')
-                .expect(404)
-                .expect('content-type', /html/)
+                .expect(500, JSON.stringify({
+                    name: 'Error',
+                    message: 'ENOENT, no such file or directory \'/mock-fs/ambience/any.txt\'',
+                }))
+                .expect('content-type', /json/)
                 .endAsync()
             ;
         });
@@ -205,7 +210,7 @@ describe('app', () => {
             mockfs({ '/mock-fs': {
                 'ambience': {
                     'any.txt': `
-file\text\tpage\tstub\tartist\talbum\ttrack\tsize
+FILE\tEXT\tPAGE\tSTUB\tARTIST\tALBUM\tTRACK\tSIZE
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize
 `,
                     'anyquip.txt': QUIP_DATA,
@@ -270,11 +275,11 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
             } });
 
             return client().get('/fucc/cgi/schednow.cgi')
-                .expect(200)
-                .expect('content-type', /html/)
-                .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
-                .expect(bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
-                .expect(bodyIncludes('<!-- OFF -->'))
+                .expect(500, JSON.stringify({
+                    name: 'Error',
+                    message: 'ENOENT, no such file or directory \'/mock-fs/fucc/showquip.txt\'',
+                }))
+                .expect('content-type', /json/)
                 .endAsync()
             ;
         });
@@ -430,10 +435,27 @@ show3
     });
 
     describe('GET /morgan/cgi/morglay.cgi', () => {
-        beforeEach(() => {
+        it('without data', () => {
             mockfs({ '/mock-fs': {
-                'morgan': {
-                    'card.txt': `
+                'morgan': { },
+                'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
+            } });
+
+            return client().get('/morgan/cgi/morglay.cgi')
+                .expect(500, JSON.stringify({
+                    name: 'Error',
+                    message: 'ENOENT, no such file or directory \'/mock-fs/morgan/card.txt\'',
+                }))
+                .expect('content-type', /json/)
+                .endAsync()
+            ;
+        });
+
+        describe('with data', () => {
+            beforeEach(() => {
+                mockfs({ '/mock-fs': {
+                    'morgan': {
+                        'card.txt': `
 id\tabbrev\ttitle
 1\tone\tONE
 2\ttwo\tTWO
@@ -441,36 +463,37 @@ id\tabbrev\ttitle
 4\tfour\tFOUR
 5\tfive\tFIVE
 `,
-                },
-                'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
-            } });
-        });
+                    },
+                    'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
+                } });
+            });
 
-        it('without parameters', () => {
-            return client().get('/morgan/cgi/morglay.cgi')
-                .expect(200)
-                .expect('content-type', /html/)
-                .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
-                .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
-                .expect(bodyIncludes('Your 3 cards'))
-                .endAsync()
-            ;
-        });
+            it('without parameters', () => {
+                return client().get('/morgan/cgi/morglay.cgi')
+                    .expect(200)
+                    .expect('content-type', /html/)
+                    .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
+                    .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
+                    .expect(bodyIncludes('Your 3 cards'))
+                    .endAsync()
+                ;
+            });
 
-        it('with parameters', () => {
-            return client().get('/morgan/cgi/morglay.cgi')
-                .query({ cards: 23 })
-                .expect(200)
-                .expect('content-type', /html/)
-                .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
-                .expect(bodyIncludes('Your 5 cards')) // all we have is 5
-                .expect(bodyIncludes('<A HREF="/morgan/card/one.html'))
-                .expect(bodyIncludes('TITLE="TWO"'))
-                .expect(bodyIncludes('ALT="THREE"'))
-                .expect(bodyIncludes('window.status=\'FOUR\''))
-                .expect(bodyIncludes('/morgan/images/card/five.gif'))
-                .endAsync()
-            ;
+            it('with parameters', () => {
+                return client().get('/morgan/cgi/morglay.cgi')
+                    .query({ cards: 23 })
+                    .expect(200)
+                    .expect('content-type', /html/)
+                    .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
+                    .expect(bodyIncludes('Your 5 cards')) // all we have is 5
+                    .expect(bodyIncludes('<A HREF="/morgan/card/one.html'))
+                    .expect(bodyIncludes('TITLE="TWO"'))
+                    .expect(bodyIncludes('ALT="THREE"'))
+                    .expect(bodyIncludes('window.status=\'FOUR\''))
+                    .expect(bodyIncludes('/morgan/images/card/five.gif'))
+                    .endAsync()
+                ;
+            });
         });
     });
 
