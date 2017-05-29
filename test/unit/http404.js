@@ -31,7 +31,7 @@ describe('http404', () => {
 
             assert.equal(res._getRenderView(), 'http404.ejs');
             assert.equal(res._getData(), 'http404.ejs');
-            assert.equal(res.statusCode, 200);
+            assert.equal(res.statusCode, 404);
         });
     });
 

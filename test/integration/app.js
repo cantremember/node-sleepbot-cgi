@@ -1,3 +1,33 @@
+/*
+    ```sh
+    # Coverage
+
+    curl -v http://localhost:3000/status.cgi
+    curl -v http://localhost:3000/404.cgi
+    curl -v http://localhost:3000/cgi/animbot.cgi
+    curl -v http://localhost:3000/ambience/cgi/listen.cgi
+    curl -v http://localhost:3000/ambience/cgi/7.cgi
+    curl -v http://localhost:3000/ambience/cgi/viewxml.cgi
+    curl -v http://localhost:3000/ambience/cgi/imgpage.cgi
+    curl -v http://localhost:3000/ambience/cgi/any_f.cgi
+    curl -v http://localhost:3000/critturs/cgi/anyaudio.cgi
+    curl -v http://localhost:3000/critturs/cgi/critlogo.cgi
+    curl -v http://localhost:3000/fucc/cgi/anyaudio.cgi
+    curl -v http://localhost:3000/fucc/cgi/schednow.cgi
+    curl -v http://localhost:3000/lookit/cgi/anyfoley.cgi
+    curl -v http://localhost:3000/lookit/cgi/anystory.cgi
+    curl -v http://localhost:3000/lookit/cgi/imgfoley.cgi
+    curl -v http://localhost:3000/morgan/cgi/morglay.cgi
+    curl -v http://localhost:3000/morgan/cgi/morgpick.cgi
+    curl -v http://localhost:3000/morgan/index.cgi
+    curl -v http://localhost:3000/morgan/index.derp
+    curl -v http://localhost:3000/morgan/
+    curl -v http://localhost:3000/morgan
+    curl -v http://localhost:3000/WRLDtime/cgi/anyclock.cgi
+    curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
+    ```
+*/
+
 const Promise = require('bluebird');
 const assert = require('assert');
 const sinon = require('sinon');
@@ -44,32 +74,6 @@ function redirectsTo(route) {
         throw new Error([ 'does not redirect to "', route, '"' ].join(''));
     };
 }
-
-/*
-curl -v http://localhost:3000/status.cgi
-curl -v http://localhost:3000/404.cgi
-curl -v http://localhost:3000/cgi/animbot.cgi
-curl -v http://localhost:3000/ambience/cgi/listen.cgi
-curl -v http://localhost:3000/ambience/cgi/7.cgi
-curl -v http://localhost:3000/ambience/cgi/viewxml.cgi
-curl -v http://localhost:3000/ambience/cgi/imgpage.cgi
-curl -v http://localhost:3000/ambience/cgi/any_f.cgi
-curl -v http://localhost:3000/critturs/cgi/anyaudio.cgi
-curl -v http://localhost:3000/critturs/cgi/critlogo.cgi
-curl -v http://localhost:3000/fucc/cgi/anyaudio.cgi
-curl -v http://localhost:3000/fucc/cgi/schednow.cgi
-curl -v http://localhost:3000/lookit/cgi/anyfoley.cgi
-curl -v http://localhost:3000/lookit/cgi/anystory.cgi
-curl -v http://localhost:3000/lookit/cgi/imgfoley.cgi
-curl -v http://localhost:3000/morgan/cgi/morglay.cgi
-curl -v http://localhost:3000/morgan/cgi/morgpick.cgi
-curl -v http://localhost:3000/morgan/index.cgi
-curl -v http://localhost:3000/morgan/index.derp
-curl -v http://localhost:3000/morgan/
-curl -v http://localhost:3000/morgan
-curl -v http://localhost:3000/WRLDtime/cgi/anyclock.cgi
-curl -v http://localhost:3000/WRLDtime/cgi/utc.cgi
-*/
 
 
 describe('app', () => {
@@ -119,7 +123,7 @@ describe('app', () => {
 
         it('without headers', () => {
             return client().get('/404.cgi')
-                .expect(200)
+                .expect(404)
                 .expect('content-type', /html/)
                 .expect(bodyIncludes('<base href="http://localhost:3000">'))
                 .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
@@ -131,7 +135,7 @@ describe('app', () => {
         it('with headers', () => {
             return client().get('/404.cgi')
                 .set('x-real-uri', 'REAL-URI')
-                .expect(200)
+                .expect(404)
                 .expect('content-type', /html/)
                 .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
                 .expect(bodyIncludes('REAL-URI'))

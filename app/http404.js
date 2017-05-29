@@ -27,7 +27,7 @@ module.exports = function handler(req, res, cb) {
         })
         .then((body) => {
             // send and resolve
-            res.send(body);
+            res.send(body, 404);
         });
     })
     .return(res)
