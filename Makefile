@@ -12,7 +12,7 @@ DOC_DIR = $(ROOT)/build/doc
 #   @see bin/gulp.js
 JS_FILES = gulpfile.js index.js index.mjs
 JS_DIRS = app/ bin/ config/ lib/ test/ views/
-JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | grep ".js$")
+JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | egrep "\.(js|mjs)$")
 
 TEST_FILES = $(ROOT)/test/bootstrap.mjs $(ROOT)/test/**/*.js $(ROOT)/test/**/*.mjs
 
@@ -69,10 +69,10 @@ edit:
 # Run the thing
 
 server:
-	BLUEBIRD_DEBUG=1 node $(ROOT)/bin/app.js
+	@BLUEBIRD_DEBUG=1 node -r esm $(ROOT)/bin/app.mjs
 
 server-debug:
-	BLUEBIRD_DEBUG=1 node debug $(ROOT)/bin/app.js
+	@BLUEBIRD_DEBUG=1 node debug -r esm $(ROOT)/bin/app.mjs
 
 
 # Test Suite
@@ -252,5 +252,5 @@ pre-commit:
 	@if [[ "$(JS_STAGED)" == "" ]]; then \
 	    $(call E_INFO,"no JavaScript changes"); \
 	else \
-		@$(MAKE) quality \
+		$(MAKE) quality; \
 	fi

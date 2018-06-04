@@ -19,7 +19,6 @@
     https://github.com/trentm/node-bunyan
 */
 
-import path from 'path';
 import minimist from 'minimist';
 
 import wwwRoot from '../lib/wwwRoot';
@@ -27,18 +26,24 @@ import theLib from '../lib/index';
 import theApp from '../lib/app';
 
 
-const USAGE = ['Usage:  ', path.basename(__filename), ' --port <PORT>'].join('');
+// TODO:  make this work with ESModules
+//   specifically, `import('path').basename( import('url').parse( import.meta.url ).path )`
+const FILENAME = 'app.mjs';
+const USAGE = `Usage:  ${ FILENAME } --port <PORT>`;
 
 // values from the command line
-const params = (() => {
-  const argv = process.argv;
-  const i = argv.indexOf(__filename);
-  const rest = argv.slice(i + 1);
+const params = (function(argv) {
+  const i = argv.findIndex((arg) => arg.endsWith(FILENAME));
+  if (i === -1) {
+    console.error(USAGE);
+    process.exit(1);
+  }
 
+  const rest = argv.slice(i + 1);
   return minimist(rest, {
     alias: { port: 'p' }
   });
-})();
+})(process.argv);
 
 
 // specify the httpPort
