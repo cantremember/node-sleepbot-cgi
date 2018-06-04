@@ -1,41 +1,43 @@
 {
-    "tags": {
-        "allowUnknownTags": true
-    },
-    "source": {
-        "include": [
-            "build/es5/app/",
-            "build/es5/bin/",
-            "build/es5/config/",
-            "build/es5/lib/",
-            "build/es5/index.js",
-            "build/es5/views/",
-            "README.md"
-        ],
-        "exclude": []
-    },
-    "plugins": [
-        "plugins/markdown",
-        "plugins/partial",
-        "plugins/sourcetag"
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": [
+      "app/",
+      "bin/",
+      "config/",
+      "lib/",
+      "index.js",
+      "index.mjs",
+      "views/",
+      "README.md"
     ],
-    "markdown": {
-        "parser": "gfm",
-        "hardwrap": true
-    },
-    "opts": {
-        "recurse": true,
-        "template": "templates/default",
-        "destination": "./build/doc",
-        "encoding": "utf8",
-        "lenient": true,
-        "verbose": true
-    },
-    "templates": {
-        "cleverLinks": true,
-        "default": {
-            "includeDate": false,
-            "layoutFile": "support/jsdoc-layout.tmpl"
-        }
+    "includePattern": ".+\\.(m|)js(doc|x)?$",
+    "exclude": []
+  },
+  "plugins": [
+    "plugins/markdown",
+    "plugins/partial",
+    "plugins/sourcetag"
+  ],
+  "markdown": {
+    "parser": "gfm",
+    "hardwrap": true
+  },
+  "opts": {
+    "recurse": true,
+    "template": "templates/default",
+    "destination": "./build/doc",
+    "encoding": "utf8",
+    "lenient": true,
+    "verbose": true
+  },
+  "templates": {
+    "cleverLinks": true,
+    "default": {
+      "includeDate": false,
+      "layoutFile": "support/jsdoc-layout.tmpl"
     }
+  }
 }

@@ -1,86 +1,86 @@
-/* eslint-disable  no-var, prefer-arrow-callback, no-console */
-/* istanbul ignore next */
+/* istanbul ignore file */
 
-// https://github.com/gulpjs/gulp
+import gulp from 'gulp';
+import clean from 'gulp-clean';
+import eslint from 'gulp-eslint';
+import jsdoc from 'gulp-jsdoc3';
 
-var path = require('path');
+import JSDOC_CONFIG from '../.jsdoc.json';
 
-var gulp = require('gulp');
-var clean = require('gulp-clean');
-var sourcemaps = require('gulp-sourcemaps');
-var symlink = require('gulp-symlink');
-var babel = require('gulp-babel');
+// also @see Makefile
+import PACKAGE_JSON from '../package.json';
+const SOURCE_GLOBS = PACKAGE_JSON.nyc.include;
 
-// parallel only, can't create
-//   https://github.com/gulpjs/gulp/issues/96
-//   https://github.com/dominictarr/event-stream
-//   https://www.npmjs.com/package/streamqueue
 
-var GLOBS = Object.freeze({
-    source: [
-        'app/**/*.js',
-        'bin/**/*.js',
-        'index.js',
-        'lib/**/*.js',
-    ],
-    test:   [ 'test/**/*.js' ],
-    config: [ 'config/**/*.js' ],
-    views:  [ 'views/**' ],
+const GLOBS = Object.freeze({
+  source: SOURCE_GLOBS,
+  test:   [
+    'test/bootstrap.mjs',
+    'test/**/*.js',
+    'test/**/*.mjs',
+  ],
+  config: [ 'config/**/*.js' ],
+  views:  [ 'views/**' ],
 });
 
-function cleanBuild() {
-    return gulp.src('build')
-        .pipe(clean({ force: true }))
-    ;
-}
-function es5SymlinkViews() {
-    return gulp.src('views')
-        .pipe(symlink('build/es5/views', { force: true }))
-    ;
-}
-function es5CompileSource() {
-    var globs = GLOBS.source
-        .concat(GLOBS.test)
-        .concat(GLOBS.config)
-        .map(function(glob) {
-            return './' + glob;
-        })
-    ;
-    return gulp.src(globs, { base: './' })
-        .pipe(sourcemaps.init({ debug: true }))
-        .pipe(babel({ babelrc: true }))
-        .pipe(sourcemaps.write('../sourcemaps', { debug: true }))
-        .pipe(gulp.dest('build/es5'))
-    ;
-}
-function sourceWatch() {
-    var globs = GLOBS.source.concat(GLOBS.test).concat(GLOBS.config);
-    var watcher = gulp.watch(globs, {
-        interval: 1000,
-        debounceDelay: 2000,
-    }, [ 'es5-babel' ]);
 
-    watcher.on('change', function(event) {
-        var filepath = (event && event.path);
-        var parts;
-        if (filepath) {
-            // the last segment
-            parts = filepath.split(path.sep);
-            console.log('   ', parts[parts.length - 1]);
-        }
-    });
-
-    return watcher;
+function taskClean() {
+  return gulp.src('build', {
+    allowEmpty: true,
+  })
+  .pipe(clean({
+    force: true,
+  }));
 }
 
+/**
+ * @see https://github.com/eslint/eslint
+ * @see http://eslint.org/docs/user-guide/configuring
+ * @see http://eslint.org/docs/rules/
+ */
+function taskLint() {
+  const { source, test } = GLOBS;
 
-gulp.task('default', [ 'compile' ]);
+  return gulp.src(
+    source.concat(test)
+  )
+  .pipe(eslint({
+    configFile: './.eslintrc',
+    quiet: false,
+    fix: false,
+  }))
+  .pipe(eslint.format())
+  .pipe(eslint.failAfterError());
+}
 
-// cannot do a "clean, then compile" in sequence, so don't clean
-gulp.task('compile', [ 'es5-views', 'es5-babel' ]);
-gulp.task('clean', cleanBuild);
+/**
+ * @see https://github.com/jsdoc3/jsdoc
+ * @see http://usejsdoc.org/
+ */
+function taskDoc(cb) {
+  const { source, test } = GLOBS;
+  const task = jsdoc(JSDOC_CONFIG, cb);
 
-gulp.task('es5-views', es5SymlinkViews);
-gulp.task('es5-babel', es5CompileSource);
+  return gulp.src(
+    // the source file list seems to be disregarded;
+    //   when i omit any part of the `source` JSON config,
+    //   only '*.js' files get processed :(
+    source.concat(test)
+  )
+  .pipe(task);
+}
 
-gulp.task('watch', sourceWatch);
+// gulp@4 made sequencing so darn easy
+//   this is a worthless example because this Project doesn't *need* refinements
+//   but it's good to remember how it gets done ;)
+const taskDefault = gulp.series(
+  taskLint,
+  gulp.parallel( taskDoc )
+);
+
+
+gulp.task('clean', taskClean);
+gulp.task('lint', taskLint);
+gulp.task('doc', taskDoc);
+
+gulp.task('default', taskDefault);

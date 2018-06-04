@@ -2,12 +2,19 @@ SHELL = /bin/bash
 ROOT = $(shell pwd)
 REPO_URL = git@github.com:cantremember/node-sleepbot-cgi.git
 
-ES5 = $(ROOT)/build/es5
 NODE_BIN = $(ROOT)/node_modules/.bin
 COVERAGE_INFO = $(ROOT)/build/coverage/lcov.info
+COVERAGE_REPORT = $(ROOT)/build/coverage/lcov-report/index.html
+DOC_DIR = $(ROOT)/build/doc
 
-JS_DIRS = app/ bin/ config/ gulpfile.js index.js lib/ test/ views/
+# also
+#   @see package.json + `nyc.include`
+#   @see bin/gulp.js
+JS_FILES = gulpfile.js index.js index.mjs
+JS_DIRS = app/ bin/ config/ lib/ test/ views/
 JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | grep ".js$")
+
+TEST_FILES = $(ROOT)/test/bootstrap.mjs $(ROOT)/test/**/*.js $(ROOT)/test/**/*.mjs
 
 
 # colors
@@ -30,54 +37,53 @@ CODE_GET=cat $(CODE_FILE)
 
 
 .PHONY: \
-	init clean build \
-	server server-debug \
-	compile watch rewatch \
+	init clean build lock edit \
+	server server-debug server-production \
 	test test-debug \
-	quality lint style only-check coverage quality ci \
-	doc gh-pages \
+	lint notes only-check coverage view-coverage \
+	quality ci \
+	doc view-doc  gh-pages \
 	post-install pre-commit \
 
-.DEFAULT_GOAL: build
+.DEFAULT_GOAL: test
 
 
 # Build steps
 
+init:
+	@mkdir -p build
+
 clean:
 	@$(NODE_BIN)/gulp clean
 
-build:  compile
+build:  init
+	@# no build steps, currently
 
-init:
-	@mkdir -p build
+lock:
+	@npm install --package-lock-only
+
+edit:
+	@subl node-sleepbot-cgi.sublime-project
 
 
 # Run the thing
 
 server:
-	BLUEBIRD_DEBUG=1 NODE_ENV=dev node $(ES5)/bin/app.js
+	BLUEBIRD_DEBUG=1 node $(ROOT)/bin/app.js
 
 server-debug:
-	BLUEBIRD_DEBUG=1 NODE_ENV=dev node debug $(ES5)/bin/app.js
-
-
-# Language support
-
-compile:  init
-	@$(NODE_BIN)/gulp compile
-
-watch:
-	$(NODE_BIN)/gulp watch
-
-rewatch:  clean build  watch
+	BLUEBIRD_DEBUG=1 node debug $(ROOT)/bin/app.js
 
 
 # Test Suite
-
+#   leaving this as `mocha` shell scripting via Make, vs. `gulp-mocha`
+#   because it's a pain to enable a debugger REPL in a Gulp Task
+#   `gulp debug` => "Task never defined: debug", etc.
 test:
-	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
+	@BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
+		-r esm \
 		--recursive --ui bdd --reporter spec --timeout 2000 \
-		$(ES5)/test/bootstrap.js $(ES5)/test \
+		$(TEST_FILES) \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -87,18 +93,16 @@ test:
 	fi
 
 test-debug:
-	BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha debug $(ES5)/test
+	@BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha debug \
+		-r esm \
+		--recursive --ui bdd --reporter spec --timeout 2000 \
+		$(TEST_FILES)
 
 
-# Code Quality
+# Code Quality Tasks
 
-# https://github.com/eslint/eslint
-#   http://eslint.org/docs/user-guide/configuring
-#   http://eslint.org/docs/rules/
 lint:
-	@$(NODE_BIN)/eslint --config .eslintrc \
-		--color \
-		$(JS_DIRS) \
+	@$(NODE_BIN)/gulp lint \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -107,25 +111,13 @@ lint:
 		$(call E_OK,"Lint passed!"); \
 	fi
 
-# https://github.com/jscs-dev/node-jscs
-#   http://jscs.info/rules.html
-style:
-	@$(NODE_BIN)/jscs --esnext --config .jscs.json $(JS_DIRS) \
-		&& $(CODE_OK) || $(CODE_FAIL)
-
-	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
-		$(call E_ERR,"Style failed"); exit 1; \
-	else \
-		$(call E_OK,"Style passed!"); \
-	fi
-
 # https://github.com/stephenb/node-notes
 notes:
-	@$(NODE_BIN)/notes $(JS_DIRS)
+	@$(NODE_BIN)/notes $(JS_FILES) $(JS_DIRS)
 
 # leftover Mocha `describe.only`s, etc.
 only-check:
-	@git grep -Eq '\.only\(' -- test \
+	@git grep -E '\.only\(' -- test \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@# inverted logic; no find = success
@@ -133,19 +125,22 @@ only-check:
 		$(call E_ERR,"please remove '.only' calls from the Test Suite"); exit 1; \
 	fi
 
-# https://github.com/gotwarlost/istanbul#configuring
-#   `istanbul help`
-#   .istanbul.yml
+# https://github.com/istanbuljs/nyc
+#   https://github.com/istanbuljs/istanbuljs
+#   `nyc help`
+#   https://github.com/istanbuljs/nyc#configuring-nyc
+#   package.json + `nyc`
+# inlines
 #   /* istanbul ignore if */
 #   /* istanbul ignore else */
 #   /* istanbul ignore next */
+#   /* istanbul ignore file */
+# TODO:  Gulp task
+#	current `gulp-istanbul` is for 1.0, https://github.com/gotwarlost/istanbul
 coverage:
-	@# uses `_mocha`, unlike `npm test`
-	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
-		$(ES5)/test/bootstrap.js $(ES5)/test -- \
-		--recursive --ui bdd --reporter nyan --timeout 5000
-	@$(NODE_BIN)/istanbul report
-	@$(NODE_BIN)/istanbul check-coverage \
+	@NODE_ENV=test $(NODE_BIN)/nyc \
+		$(MAKE) test
+	@$(NODE_BIN)/nyc check-coverage \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -154,35 +149,37 @@ coverage:
 		$(call E_OK,"Coverage passed!"); \
 	fi
 
+view-coverage:
+	open $(COVERAGE_REPORT)
+
+
+# Code Quality Aggregations
+
 # (1) from source
 # (2) from build
-quality:  only-check lint style  build coverage
+quality:  only-check lint  build coverage
 
 # https://github.com/cainus/node-coveralls
+#   https://istanbul.js.org/docs/tutorials/mocha/
+#   "Integrating with Coveralls"
+# environment
+#   COVERALLS_SERVICE_NAME  # eg. 'travis-ci', 'local'
+#   COVERALLS_REPO_TOKEN    # from https://coveralls.io/github/cantremember/node-sleepbot-cgi/settings
 # FIXME:  Bad response: 422 {"message":"Couldn't find a repository matching this job.","error":true}
+#   on local / non Travis-CI builds
 #   we are not gonna make CI success dependent upon Coveralls.io
 #   CODE=$?
-ci:  only-check lint style  clean build
-	@rm -f $(COVERAGE_INFO)
-
-	@# uses `_mocha`, unlike `npm test`
-	@NODE_ENV=test $(NODE_BIN)/istanbul cover $(NODE_BIN)/_mocha \
-		$(ES5)/test/bootstrap.js $(ES5)/test -- \
-		--recursive --ui bdd --reporter dot --timeout 5000
-
-	cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
+#
+ci:  only-check lint  clean build coverage
+	@cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
 		$(call E_WARN,"Coveralls.io failure ignored")
 	@$(call E_OK,"CI passed!")
 
 
 # Documentation
 
-# https://github.com/jsdoc3/jsdoc
-#   http://usejsdoc.org/
-#   "jsdoc": "3.3.0-beta1"
-#   .jsdoc.json
 doc:  build
-	@$(NODE_BIN)/jsdoc -c $(ROOT)/.jsdoc.json \
+	@$(NODE_BIN)/gulp doc \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -190,6 +187,10 @@ doc:  build
 	else \
 		$(call E_OK,"doc built!"); \
 	fi
+
+view-doc:
+	open $(DOC_DIR)/index.html
+
 
 # https://help.github.com/articles/creating-project-pages-manually/
 #   ```bash
@@ -203,7 +204,9 @@ doc:  build
 gh-pages:  init
 	@rm -rf build/gh-pages
 	@git clone -b gh-pages $(REPO_URL) build/gh-pages
-	@$(NODE_BIN)/jsdoc -c $(ROOT)/.jsdoc.json --destination build/gh-pages
+
+	@$(MAKE) doc
+	@cp -r $(DOC_DIR)/*  build/gh-pages
 
 	@cd build/gh-pages && \
 		git diff --name-only --diff-filter=ACM | \
@@ -248,7 +251,6 @@ post-install:
 pre-commit:
 	@if [[ "$(JS_STAGED)" == "" ]]; then \
 	    $(call E_INFO,"no JavaScript changes"); \
+	else \
+		@$(MAKE) quality \
 	fi
-
-	@# work from source
-	@$(MAKE) quality
