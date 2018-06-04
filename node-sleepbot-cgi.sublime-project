@@ -1,0 +1,19 @@
+{
+  "SublimeLinter": {
+    "// README": "https://github.com/SublimeLinter/SublimeLinter/blob/master/docs/settings.rst#project-settings",
+    "linters": {
+      "eslint": {
+        "disable": false
+      },
+      "jshint": {
+        "disable": true
+      }
+    }
+  },
+  "folders": [
+    {
+      "follow_symlinks": true,
+      "path": "."
+    }
+  ]
+}

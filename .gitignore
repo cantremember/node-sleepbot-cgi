@@ -6,6 +6,7 @@ npm-debug.log
 # ignore build results
 build
 tmp
+.nyc_output
 
 # ignore Apple DS Store
 *.DS_Store
@@ -28,8 +29,6 @@ logs
 .vagrant
 
 # hide Sublime settings
-*.sublime-project
 *.sublime-workspace
-.sublimelinterrc
 sftp-config.json
 sftp-settings.json
