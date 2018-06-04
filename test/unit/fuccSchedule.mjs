@@ -1,248 +1,269 @@
-const assert = require('assert');
-const sinon = require('sinon');
-const mockfs = require('mock-fs');
-// TODO:  node-mocks-http@^1.5.2, once Request#render(cb)
-const httpMocks = require('@cantremember/node-mocks-http');
+import assert from 'assert';
+import sinon from 'sinon';
+import mockfs from 'mock-fs';
+import httpMocks from 'node-mocks-http';
+import moment from 'moment';
 
-const theLib = require('../../lib/index');
-const willHandle = require('../../app/fuccSchedule');
+import wwwRoot from '../../lib/wwwRoot';
+import willHandle from '../../app/fuccSchedule';
 
-const NO_DATA = new Buffer(0);
+
+// aligned to Date() local time
+const NOW = moment();
+const MOMENT_SHOW = moment('2001-01-01T01:00:00Z').add(NOW.utcOffset(), 'minutes');
+const MOMENT_LIVE = moment('2002-02-02T02:00:00Z').add(NOW.utcOffset(), 'minutes');
+
+const NO_DATA = Buffer.alloc(0);
+
+const SHOW_DATA = `
+FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
+file\tanchor\t${
+  MOMENT_SHOW.day() /* of week */ }\t${
+  MOMENT_SHOW.hour() }\t${ MOMENT_SHOW.clone().add(1, 'hour').hour()
+}
+`;
 const SHOW_HTML = `
 before
 <A NAME="anchor">
-body1
-body2
+show1
+show2
 <!-- start -->
 title
-body3
+show3
 <!-- end -->
 <A NAME="different">
 after
 `;
+
+const LIVE_DATA = `
+FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
+file\tanchor\t${
+  MOMENT_LIVE.year() }\t${ MOMENT_LIVE.month() }\t${ MOMENT_LIVE.date() }\t${
+  MOMENT_LIVE.hour() }\t${ MOMENT_LIVE.clone().add(1, 'hour').hour()
+}
+`;
+const LIVE_HTML = `
+before
+<A NAME="anchor">
+live1
+live2
+live3
+<A NAME="different">
+after
+`;
+
 const QUIP_DATA = `
 text
 text
 `;
 
 
+
 describe('fuccSchedule', () => {
-    const sandbox = sinon.sandbox.create();
-    let cb;
-    let req;
-    let res;
-    let date;
-    let SHOW_DATA;
+  const sandbox = sinon.createSandbox();
+  let clock;
+  let cb;
+  let req;
+  let res;
 
-    beforeEach(() => {
-        cb = sandbox.spy();
-
-        // mock Request & Response
-        req = httpMocks.createRequest();
-        res = httpMocks.createResponse();
-
-        date = new Date();
-        SHOW_DATA = `
-FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
-file\tanchor\t${ date.getDay() }\t${ date.getHours() }\t${ date.getHours() + 1 }
-`;
-
-        sandbox.spy(theLib.wwwRoot, 'willLoadTSV');
-        sandbox.spy(theLib.wwwRoot, 'willLoadFile');
-    });
-    afterEach(() => {
-        sandbox.restore();
-        mockfs.restore();
+  beforeEach(() => {
+    cb = sandbox.spy();
+    clock = sandbox.useFakeTimers({
+      now: 0,
+      toFake: [ 'Date' ], // nothing that touches Promises / the uv_loop
     });
 
+    // mock Request & Response
+    req = httpMocks.createRequest();
+    res = httpMocks.createResponse();
 
-    it('knows when the station is dead', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'dead.txt': 'DEAD',
-                'showquip.txt': QUIP_DATA,
-            }
-        } });
+    sandbox.spy(wwwRoot, 'willLoadTSV');
+    sandbox.spy(wwwRoot, 'willLoadFile');
+  });
+  afterEach(() => {
+    sandbox.restore();
+    clock.restore();
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert.equal(theLib.wwwRoot.willLoadFile.callCount, 1);
-            assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 1);
+    mockfs.restore();
+  });
 
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
-            assert.equal(res.statusCode, 200);
 
-            const context = res._getRenderData();
-            assert.equal(context.dead, 'DEAD');
-            assert(! context.current);
-            assert.equal(context.quip.text, 'text');
-        });
+  it('knows when the station is dead', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'dead.txt': 'DEAD',
+        'showquip.txt': QUIP_DATA,
+      }
+    } });
+
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert.equal(wwwRoot.willLoadFile.callCount, 1);
+      assert.equal(wwwRoot.willLoadTSV.callCount, 1);
+
+      assert(! cb.called);
+      assert.equal(res._getData(), 'fuccSchedule.ejs');
+      assert.equal(res.statusCode, 200);
+
+      const context = res._getRenderData();
+      assert.equal(context.dead, 'DEAD');
+      assert(! context.current);
+      assert.equal(context.quip.text, 'text');
     });
+  });
 
-    it('knows when the station has a live event', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'live.txt': `
-FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
-file\tanchor\t${
-    date.getYear() }\t${ date.getMonth() }\t${ date.getDate() }\t${
-    date.getHours() }\t${ date.getHours() + 1
-}
-`,
-                'live.html': `
-before
-<A NAME="anchor">
-body1
-body2
-body3
-<A NAME="different">
-after
-`,
-                'showquip.txt': QUIP_DATA,
-            }
-        } });
+  it('knows when the station has a live event', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'live.txt': LIVE_DATA,
+        'live.html': LIVE_HTML,
+        'show.txt': SHOW_DATA,
+        'show.html': NO_DATA,
+        'showquip.txt': QUIP_DATA,
+      }
+    } });
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert.equal(theLib.wwwRoot.willLoadFile.callCount, 2);
-            assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 2);
+    // live
+    clock.tick(MOMENT_LIVE.valueOf());
 
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert.equal(wwwRoot.willLoadFile.callCount, 2);
+      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-            const context = res._getRenderData();
-            assert(! context.dead);
-            assert.equal(context.current.type, 'live');
-            assert.equal(context.current.anchor, 'anchor');
-            assert.equal(context.current.year, date.getFullYear());
-            assert.equal(context.current.body, 'body1\nbody2\nbody3');
-            assert.strictEqual(context.current.title, undefined);
-            assert.equal(context.quip.text, 'text');
-        });
+      assert(! cb.called);
+      assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+      const context = res._getRenderData();
+      assert(! context.dead);
+      assert.equal(context.current.type, 'live');
+      assert.equal(context.current.anchor, 'anchor');
+      assert.equal(context.current.year, MOMENT_LIVE.year());
+      assert.equal(context.current.body, 'live1\nlive2\nlive3');
+      assert.strictEqual(context.current.title, undefined);
+      assert.equal(context.quip.text, 'text');
     });
+  });
 
-    it('knows when the station has a show', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                // not live
-                'live.txt': `
-FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
-file\tanchor\t1970\t0\t1\t0\t0
-`,
-                'live.html': NO_DATA,
-                'show.txt': SHOW_DATA,
-                'show.html': SHOW_HTML,
-                'showquip.txt': QUIP_DATA,
-            }
-        } });
+  it('knows when the station has a show', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'live.txt': LIVE_DATA,
+        'live.html': NO_DATA,
+        'show.txt': SHOW_DATA,
+        'show.html': SHOW_HTML,
+        'showquip.txt': QUIP_DATA,
+      }
+    } });
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert.equal(theLib.wwwRoot.willLoadFile.callCount, 3);
-            assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 3);
+    // a show
+    clock.tick(MOMENT_SHOW.valueOf());
 
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert.equal(wwwRoot.willLoadFile.callCount, 3);
+      assert.equal(wwwRoot.willLoadTSV.callCount, 3);
 
-            const context = res._getRenderData();
-            assert(! context.dead);
-            assert.equal(context.current.type, 'show');
-            assert.equal(context.current.anchor, 'anchor');
-            assert.equal(context.current.dayOfWeek, date.getDay());
-            assert.equal(context.current.body, 'body1\nbody2\nbody3');
-            assert.equal(context.current.title, 'title');
-            assert.equal(context.quip.text, 'text');
-        });
+      assert(! cb.called);
+      assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+      const context = res._getRenderData();
+      assert(! context.dead);
+      assert.equal(context.current.type, 'show');
+      assert.equal(context.current.anchor, 'anchor');
+      assert.equal(context.current.dayOfWeek, MOMENT_SHOW.day());
+      assert.equal(context.current.body, 'show1\nshow2\nshow3');
+      assert.equal(context.current.title, 'title');
+      assert.equal(context.quip.text, 'text');
     });
+  });
 
-    it('knows when it is being told nothing useful', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'live.txt': NO_DATA,
-                'live.html': NO_DATA,
-                // no show
-                'show.txt': `
-FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
-file\tanchor\t0\t0\t0
-`,
-                'show.html': NO_DATA,
-                'showquip.txt': QUIP_DATA,
-            }
-        } });
+  it('knows when it is being told nothing useful', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'live.txt': LIVE_DATA,
+        'live.html': NO_DATA,
+        'show.txt': SHOW_DATA,
+        'show.html': NO_DATA,
+        'showquip.txt': QUIP_DATA,
+      }
+    } });
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert.equal(theLib.wwwRoot.willLoadFile.callCount, 3);
-            assert.equal(theLib.wwwRoot.willLoadTSV.callCount, 3);
+    // off-schedule
+    clock.tick(NOW.valueOf());
 
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert.equal(wwwRoot.willLoadFile.callCount, 3);
+      assert.equal(wwwRoot.willLoadTSV.callCount, 3);
 
-            const context = res._getRenderData();
-            assert(! context.dead);
-            assert(! context.current);
-            assert.equal(context.quip.text, 'text');
-        });
+      assert(! cb.called);
+      assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+      const context = res._getRenderData();
+      assert(! context.dead);
+      assert(! context.current);
+      assert.equal(context.quip.text, 'text');
     });
+  });
 
-    it('fails on missing quips', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'show.txt': SHOW_DATA,
-                'show.html': SHOW_HTML,
-            }
-        } });
+  it('fails on missing quips', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'show.txt': SHOW_DATA,
+        'show.html': SHOW_HTML,
+      }
+    } });
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            const err = cb.args[0][0];
-            assert(err.message.match(/ENOENT/));
+    return willHandle(req, res, cb)
+    .then(() => {
+      const err = cb.args[0][0];
+      assert(err.message.match(/ENOENT/));
 
-            // it('will fail gracefully')
-        });
+      // it('will fail gracefully')
     });
+  });
 
-    it('survives missing everything EXCEPT quips', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'showquip.txt': QUIP_DATA,
-            }
-        } });
+  it('survives missing everything EXCEPT quips', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'showquip.txt': QUIP_DATA,
+      }
+    } });
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert(! cb.called);
-            assert.equal(res._getData(), 'fuccSchedule.ejs');
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert(! cb.called);
+      assert.equal(res._getData(), 'fuccSchedule.ejs');
 
-            const context = res._getRenderData();
-            assert(! context.dead);
-            assert(! context.current);
-        });
+      const context = res._getRenderData();
+      assert(! context.dead);
+      assert(! context.current);
     });
+  });
 
-    it('will fail gracefully', () => {
-        mockfs({ '/mock-fs': {
-            'fucc': {
-                'showquip.txt': QUIP_DATA,
-                'show.txt': SHOW_DATA,
-                'show.html': SHOW_HTML,
-            }
-        } });
+  it('will fail gracefully', () => {
+    mockfs({ '/mock-fs': {
+      'fucc': {
+        'showquip.txt': QUIP_DATA,
+        'show.txt': SHOW_DATA,
+        'show.html': SHOW_HTML,
+      }
+    } });
 
-        sandbox.stub(res, 'render').throws(new Error('BOOM'));
-        sandbox.spy(res, 'send');
+    sandbox.stub(res, 'render').throws(new Error('BOOM'));
+    sandbox.spy(res, 'send');
 
-        return willHandle(req, res, cb)
-        .then(() => {
-            assert(res.render.calledOnce);
-            assert(! res.send.called);
+    return willHandle(req, res, cb)
+    .then(() => {
+      assert(res.render.calledOnce);
+      assert(! res.send.called);
 
-            // Express gets informed
-            assert(cb.called);
+      // Express gets informed
+      assert(cb.called);
 
-            const err = cb.args[0][0];
-            assert.equal(err.message, 'BOOM');
-        });
+      const err = cb.args[0][0];
+      assert.equal(err.message, 'BOOM');
     });
+  });
 });

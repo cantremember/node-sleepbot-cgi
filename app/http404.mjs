@@ -1,6 +1,6 @@
-const Promise = require('bluebird');
+import Promise from 'bluebird';
 
-const theLib = require('../lib/index');
+import theLib from '../lib/index';
 
 
 /**
@@ -15,21 +15,18 @@ const theLib = require('../lib/index');
  * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-module.exports = function handler(req, res, cb) {
-    return Promise.resolve()
-    .then(() => {
-        // from within an established Promise
-        return Promise.promisify(res.render, {
-            context: res,
-        })('http404.ejs', {
-            config: theLib.config,
-            real_uri: req.headers['x-real-uri'],
-        })
-        .then((body) => {
-            // send and resolve
-            res.send(body, 404);
-        });
-    })
-    .return(res)
-    .catch(cb);
-};
+export default function handler(req, res, cb) {
+  // from within a `bluebird` Promise
+  return Promise.try(() => {
+    return theLib.willRenderView(res, 'http404.ejs', {
+      config: theLib.config,
+      real_uri: req.headers['x-real-uri'],
+    });
+  })
+  .then((body) => {
+    // send and resolve
+    res.status(404).send(body);
+  })
+  .return(res)
+  .catch(cb);
+}

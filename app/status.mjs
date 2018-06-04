@@ -1,5 +1,5 @@
 const STATUS = Object.freeze({
-    ok: true
+  ok: true
 });
 
 
@@ -18,6 +18,6 @@ const STATUS = Object.freeze({
  * @params {express.response} res
  * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  */
-module.exports = function handler(req, res) {
-    res.send(STATUS);
-};
+export default function handler(req, res) {
+  res.send(STATUS);
+}

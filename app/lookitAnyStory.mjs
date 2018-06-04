@@ -1,25 +1,24 @@
-const Promise = require('bluebird');
-
-const theLib = require('../lib/index');
+import wwwRoot from '../lib/wwwRoot';
+import theLib from '../lib/index';
 
 
 // the filenames
 const willGetFilenames = theLib.willMemoize(() => {
-    return theLib.wwwRoot.willGetFilenames('lookit/story/*.txt');
+  return wwwRoot.willGetFilenames('lookit/story/*.txt');
 });
 
 // the files themselves
 const willGetFile = (filepath) => {
-    const cache = handler.cache; // eslint-disable-line no-use-before-define
-    const will = cache[filepath] || theLib.willMemoize(() => {
-        return theLib.wwwRoot.willLoadFile(filepath);
-    });
-    if (theLib.config.get('caching')) {
-        // cache
-        cache[filepath] = will;
-    }
-    // execute to produce a Promise
-    return will();
+  const cache = handler.cache; // eslint-disable-line no-use-before-define
+  const will = cache[filepath] || theLib.willMemoize(() => {
+    return wwwRoot.willLoadFile(filepath);
+  });
+  if (theLib.config.get('caching')) {
+    // cache
+    cache[filepath] = will;
+  }
+  // execute to produce a Promise
+  return will();
 };
 
 
@@ -36,25 +35,23 @@ const willGetFile = (filepath) => {
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
 function handler(req, res, cb) {
-    return willGetFilenames()
-    .then((filenames) => {
-        const filepath = theLib.chooseAny(filenames);
+  return willGetFilenames()
+  .then((filenames) => {
+    const filepath = theLib.chooseAny(filenames);
 
-        return willGetFile('lookit/story/' + filepath);
-    })
-    .then((body) => {
-        return Promise.promisify(res.render, {
-            context: res,
-        })('lookitAnyStory.ejs', {
-            config: theLib.config,
-            body,
-        })
-        .then((rendered) => {
-            res.send(rendered);
-        });
-    })
-    .return(res)
-    .catch(cb);
+    return willGetFile('lookit/story/' + filepath);
+  })
+  .then((body) => {
+    return theLib.willRenderView(res, 'lookitAnyStory.ejs', {
+      config: theLib.config,
+      body,
+    });
+  })
+  .then((body) => {
+    res.send(body);
+  })
+  .return(res)
+  .catch(cb);
 }
 
 /**
@@ -64,9 +61,9 @@ function handler(req, res, cb) {
  * @function forget
  */
 handler.forget = function forget() {
-    this.cache = {};
+  this.cache = {};
 };
 handler.forget();
 
 
-module.exports = handler;
+export default handler;

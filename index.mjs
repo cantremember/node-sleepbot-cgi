@@ -1,1 +1,2 @@
-module.exports = require('./lib/index');
+import theLib from './lib/index';
+export default theLib;

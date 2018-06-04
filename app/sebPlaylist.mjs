@@ -1,4 +1,5 @@
-const theLib = require('../lib/index');
+import theLib from '../lib/index';
+
 const sebServers = theLib.config.get('sebServers');
 
 
@@ -17,28 +18,26 @@ const sebServers = theLib.config.get('sebServers');
  * @params {express.response} res
  * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  */
-module.exports = function handler(req, res) {
-    // http://gonze.com/playlists/playlist-format-survey.html
-    //   "A proprietary format used for playing Shoutcast and Icecast streams"
-    //   audio/mpegurl
-    //   audio/x-mpegurl
-    res.set('Content-Type', 'audio/x-scpls');
+export default function handler(req, res) {
+  // http://gonze.com/playlists/playlist-format-survey.html
+  //   "A proprietary format used for playing Shoutcast and Icecast streams"
+  //   audio/mpegurl
+  //   audio/x-mpegurl
+  res.set('Content-Type', 'audio/x-scpls');
 
-    res.send([
-        '[playlist]',
-        'numberofentries=' + sebServers.length,
-        'Version=2',
-    ].concat(sebServers.map((server, index) => {
-        const n = index + 1;
-        return [
-            'File' +   n + '=' + server.url,
-            'Title' +  n + '=Sleepbot Environmental Broadcast',
-            'Length' + n + '=-1',
-            /* eslint-disable max-len */
-            /* jscs:disable maximumLineLength */
-            // Browser1=http://www.winamp.com/bin/sc/sccontext.php?title=Sleepbot+Environmental+Broadcast&genre=Ambient+Downtempo&url=http%3A%2F%2Fsleepbot.com%2Fseb
-            /* jscs:enable */
-            /* eslint-enable max-len */
-        ].join('\n');
-    })).join('\n') + '\n');
-};
+  res.send([
+    '[playlist]',
+    'numberofentries=' + sebServers.length,
+    'Version=2',
+  ].concat(sebServers.map((server, index) => {
+    const n = index + 1;
+    return [
+      'File' +   n + '=' + server.url,
+      'Title' +  n + '=Sleepbot Environmental Broadcast',
+      'Length' + n + '=-1',
+      /* eslint-disable max-len */
+      // Browser1=http://www.winamp.com/bin/sc/sccontext.php?title=Sleepbot+Environmental+Broadcast&genre=Ambient+Downtempo&url=http%3A%2F%2Fsleepbot.com%2Fseb
+      /* eslint-enable max-len */
+    ].join('\n');
+  })).join('\n') + '\n');
+}

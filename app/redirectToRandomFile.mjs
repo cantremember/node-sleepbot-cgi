@@ -1,6 +1,7 @@
-const path = require('path');
+import path from 'path';
 
-const theLib = require('../lib/index');
+import wwwRoot from '../lib/wwwRoot';
+import theLib from '../lib/index';
 
 
 /**
@@ -12,26 +13,26 @@ const theLib = require('../lib/index');
  * @params {String} glob a glob pattern
  * @returns {Function} an Express handler
  */
-module.exports = function(filepath, glob = '*.*') {
-    // a Promise
-    const globpath = path.join(filepath, glob);
-    const willGetFilenames = theLib.willMemoize(() => {
-        return theLib.wwwRoot.willGetFilenames(globpath);
-    });
+export default function handler(filepath, /* istanbul ignore next */ glob = '*.*') {
+  // a Promise
+  const globpath = path.join(filepath, glob);
+  const willGetFilenames = theLib.willMemoize(() => {
+    return wwwRoot.willGetFilenames(globpath);
+  });
 
-    return (req, res, cb) => {
-        return willGetFilenames()
-        .then((filenames) => {
-            const choice = theLib.chooseAny(filenames);
-            if (choice === undefined) {
-                throw new Error('no glob results: ' + globpath);
-            }
+  return (req, res, cb) => {
+    return willGetFilenames()
+    .then((filenames) => {
+      const choice = theLib.chooseAny(filenames);
+      if (choice === undefined) {
+        throw new Error('no glob results: ' + globpath);
+      }
 
-            res.redirect(theLib.baseURL(
-                path.join(filepath, theLib.chooseAny(filenames))
-            ));
-        })
-        .return(res)
-        .catch(cb);
-    };
-};
+      res.redirect(theLib.baseURL(
+        path.join(filepath, theLib.chooseAny(filenames))
+      ));
+    })
+    .return(res)
+    .catch(cb);
+  };
+}

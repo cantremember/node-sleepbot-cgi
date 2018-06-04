@@ -1,6 +1,6 @@
-const Promise = require('bluebird');
+import wwwRoot from '../lib/wwwRoot';
+import theLib from '../lib/index';
 
-const theLib = require('../lib/index');
 
 // // TODO: timezone support
 // const timeZoneOffset = 0;
@@ -16,90 +16,94 @@ const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 function coerceData(data) {
-    // FIXME:  TypeError: Property '@@iterator' of object"
-    //   for (let key of Object.keys(data)) {
-    const keys = Object.keys(data);
-    for (let i = 0, key; i < keys.length; ++i) {
-        key = keys[i];
+  // FIXME:  TypeError: Property '@@iterator' of object"
+  //   for (let key of Object.keys(data)) {
+  const keys = Object.keys(data);
+  for (let i = 0, key; i < keys.length; ++i) {
+    key = keys[i];
 
-        switch (key) {
-            case 'file':
-            case 'anchor':
-                break;
-            default: // numeric properties
-                data[key] = parseInt(data[key], 10);
-        }
+    switch (key) {
+      case 'file':
+      case 'anchor':
+        break;
+      default: // numeric properties
+        data[key] = parseInt(data[key], 10);
     }
-    return data;
+  }
+  return data;
 }
 
 function scrapeBodyTitle( // eslint-disable-line max-params
-    data,
-    lines,
-    start,
-    titleStartArg /* optional */,
-    endArg
+  data,
+  lines,
+  start,
+  titleStartArg /* optional */,
+  endArg
 ) {
-    // call signature: (..., titleStart, end)
-    let titleStart = titleStartArg;
-    let end = endArg;
-    if (end === undefined) {
-        // call signature: (..., end)
-        end = titleStartArg;
-        titleStart = undefined;
-    }
+  // call signature: (..., titleStart, end)
+  let titleStart = titleStartArg;
+  let end = endArg;
+  if (end === undefined) {
+    // call signature: (..., end)
+    end = titleStartArg;
+    titleStart = undefined;
+  }
 
-    const body = [];
-    let phase = 0;
+  const body = [];
+  let phase = 0;
 
-    // FIXME:  TypeError: Property '@@iterator' of object"
-    //   for (let line of lines) {
-    for (let i = 0, line; i < lines.length; ++i) {
-        line = lines[i];
+  // FIXME:  TypeError: Property '@@iterator' of object"
+  //   for (let line of lines) {
+  for (let i = 0, line; i < lines.length; ++i) {
+    line = lines[i];
 
-        switch (phase) {
-            case 0: // searching
-                if (start.test(line)) {
-                    // the next line starts it
-                    phase += 1;
-                }
-                break;
-            case 1: // scraping the body
-                if (titleStart && titleStart.test(line)) {
-                    // the next line starts it
-                    phase += 1;
-                }
-                else if (end.test(line)) {
-                    // that's the end of it
-                    phase = 4;
-                }
-                else {
-                    body.push(line);
-                }
-                break;
-            case 2: // scraping the single-line title
-                data.title = line;
-
-                // and the rest is body
-                phase += 1;
-                break;
-            case 3: // scraping the rest of the body
-                if (end.test(line)) {
-                    // that's the end of it
-                    phase += 1;
-                }
-                else {
-                    body.push(line);
-                }
-                break;
-            default:
-                // that's the end of it
+    switch (phase) {
+      case 0: // searching
+        if (start.test(line)) {
+          // the next line starts it
+          phase += 1;
         }
-    }
+        break;
 
-    // stringify
-    data.body = body.join('\n');
-    return data;
+      case 1: // scraping the body
+        if (titleStart && titleStart.test(line)) {
+          // the next line starts it
+          phase += 1;
+        }
+        else if (end.test(line)) {
+          // that's the end of it
+          phase = 4;
+        }
+        else {
+          body.push(line);
+        }
+        break;
+
+      case 2: // scraping the single-line title
+        data.title = line;
+
+        // and the rest is body
+        phase += 1;
+        break;
+
+      case 3: // scraping the rest of the body
+        if (end.test(line)) {
+          // that's the end of it
+          phase += 1;
+        }
+        else {
+          body.push(line);
+        }
+        break;
+
+      default:
+        // that's the end of it
+    }
+  }
+
+  // stringify
+  data.body = body.join('\n');
+  return data;
 }
 
 
@@ -107,11 +111,11 @@ function scrapeBodyTitle( // eslint-disable-line max-params
    the dead file
 */
 const loadDead = theLib.willMemoize(() => {
-    return theLib.wwwRoot.willLoadFile('fucc/dead.txt')
-    .catch(/* istanbul ignore next */ () => {
-        // not present
-        return undefined;
-    });
+  return wwwRoot.willLoadFile('fucc/dead.txt')
+  .catch(/* istanbul ignore next */ () => {
+    // not present
+    return undefined;
+  });
 });
 
 
@@ -119,113 +123,119 @@ const loadDead = theLib.willMemoize(() => {
    the live file
 */
 function isLiveNow(data, date) {
-    // exact date match
-    if ((data.year !== date.getFullYear()) || (data.month !== date.getMonth()) || (data.day !== date.getDate())) {
-        return false;
-    }
-    // and within the hour range
-    const hour = date.getHours();
-    return (hour >= data.hourStart) && (hour < data.hourEnd);
+  // exact date match
+  if ((data.year !== date.getFullYear()) || (data.month !== date.getMonth()) || (data.day !== date.getDate())) {
+    return false;
+  }
+
+  // and within the hour range
+  const hour = date.getHours();
+  return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
+
 const loadLives = theLib.willMemoize(() => {
-    let datas;
+  let datas;
 
-    return theLib.wwwRoot.willLoadTSV('fucc/live.txt')
-    .then((rows) => {
-        // coerce
-        datas = rows.map((row) => {
-            const data = coerceData(theLib.dataColumnMap(row, liveColumns));
-            data.type = 'live';
+  return wwwRoot.willLoadTSV('fucc/live.txt')
+  .then((rows) => {
+    // coerce
+    datas = rows.map((row) => {
+      const data = coerceData(theLib.dataColumnMap(row, liveColumns));
+      data.type = 'live';
 
-            // 2-digit year
-            const yy = parseInt(data.year, 10);
-            data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
+      // 2-digit year
+      const yy = parseInt(data.year, 10);
+      data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
 
-            return data;
-        });
-
-        // the live schedule, for scrape-age
-        return theLib.wwwRoot.willLoadFile('fucc/live.html');
-    })
-    .then((page) => {
-        const lines = (page || '').split('\n');
-
-        return datas.map((data) => {
-            return scrapeBodyTitle(data, lines,
-                new RegExp('^<A NAME="' + data.anchor + '">'),
-                /^<A NAME=/
-            );
-        });
+      return data;
     });
+
+    // the live schedule, for scrape-age
+    return wwwRoot.willLoadFile('fucc/live.html');
+  })
+  .then((page) => {
+    const lines = (page || '').split('\n');
+
+    return datas.map((data) => {
+      return scrapeBodyTitle(data, lines,
+        new RegExp('^<A NAME="' + data.anchor + '">'),
+        /^<A NAME=/
+      );
+    });
+  });
 });
+
 function checkLive(date) {
-    // load up the rows
-    return loadLives()
-    .then((datas) => {
-        // the first one that's live
-        return datas && datas.filter((data) => {
-            return isLiveNow(data, date);
-        })[0];
-    })
-    .catch(() => {
-        // treat as no match
-        return undefined;
-    });
+  // load up the rows
+  return loadLives()
+  .then((datas) => {
+    // the first one that's live
+    return datas && datas.filter((data) => {
+      return isLiveNow(data, date);
+    })[0];
+  })
+  .catch(() => {
+    // treat as no match
+    return undefined;
+  });
 }
 
 /*
    the show file
 */
 function isShowNow(data, date) {
-    // same day of the week (0-based)
-    if (data.dayOfWeek !== date.getDay()) {
-        return false;
-    }
-    // and within the hour range
-    const hour = date.getHours();
-    return (hour >= data.hourStart) && (hour < data.hourEnd);
+  // same day of the week (0-based)
+  if (data.dayOfWeek !== date.getDay()) {
+    return false;
+  }
+
+  // and within the hour range
+  const hour = date.getHours();
+  return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
+
 const loadShows = theLib.willMemoize(() => {
-    let datas;
+  let datas;
 
-    return theLib.wwwRoot.willLoadTSV('fucc/show.txt')
-    .then((rows) => {
-        // coerce
-        datas = rows.map((row) => {
-            const data = coerceData(theLib.dataColumnMap(row, showColumns));
-            data.type = 'show';
+  return wwwRoot.willLoadTSV('fucc/show.txt')
+  .then((rows) => {
+    // coerce
+    datas = rows.map((row) => {
+      const data = coerceData(theLib.dataColumnMap(row, showColumns));
+      data.type = 'show';
 
-            return data;
-        });
-
-        // the show schedule, for scrape-age
-        return theLib.wwwRoot.willLoadFile('fucc/show.html');
-    })
-    .then((page) => {
-        const lines = (page || '').split('\n');
-
-        return datas.map((data) => {
-            return scrapeBodyTitle(data, lines,
-                new RegExp('^<A NAME="' + data.anchor + '">'),
-                /^<!-- start -->/,
-                /^<!-- end -->/
-            );
-        });
+      return data;
     });
+
+    // the show schedule, for scrape-age
+    return wwwRoot.willLoadFile('fucc/show.html');
+  })
+  .then((page) => {
+    const lines = (page || '').split('\n');
+
+    return datas.map((data) => {
+      return scrapeBodyTitle(data, lines,
+        new RegExp('^<A NAME="' + data.anchor + '">'),
+        /^<!-- start -->/,
+        /^<!-- end -->/
+      );
+    });
+  });
 });
+
 function checkShow(date) {
-    // load up the rows
-    return loadShows()
-    .then((datas) => {
-        // the first one that's live
-        return datas && datas.filter((data) => {
-            return isShowNow(data, date);
-        })[0];
-    })
-    .catch(() => {
-        // treat as no match
-        return undefined;
-    });
+  // load up the rows
+  return loadShows()
+  .then((datas) => {
+    // the first one that's live
+    return datas && datas.filter((data) => {
+      return isShowNow(data, date);
+    })[0];
+  })
+  .catch(() => {
+    // treat as no match
+    return undefined;
+  });
 }
 
 
@@ -233,7 +243,7 @@ function checkShow(date) {
    the quip file
 */
 const loadQuips = theLib.willMemoize(() => {
-    return theLib.wwwRoot.willLoadTSV('fucc/showquip.txt');
+  return wwwRoot.willLoadTSV('fucc/showquip.txt');
 });
 
 
@@ -249,56 +259,54 @@ const loadQuips = theLib.willMemoize(() => {
  * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-module.exports = function handler(req, res, cb) {
-    const date = new Date();
-    const day = date.getDay();
-    let dead;
-    let current;
-    let quip;
+export default function handler(req, res, cb) {
+  const date = new Date();
+  const day = date.getDay();
+  let dead;
+  let current;
+  let quip;
 
-    return loadDead()
-    .then((_dead) => {
-        dead = _dead;
-        if (dead || current) {
-            // we're done
-            return undefined;
-        }
+  return loadDead()
+  .then((_dead) => {
+    dead = _dead;
+    if (dead || current) {
+      // we're done
+      return undefined;
+    }
 
-        return checkLive(date);
-    })
-    .then((_live) => {
-        current = current || _live;
-        if (dead || current) {
-            // we're done
-            return undefined;
-        }
+    return checkLive(date);
+  })
+  .then((_live) => {
+    current = current || _live;
+    if (dead || current) {
+      // we're done
+      return undefined;
+    }
 
-        return checkShow(date);
-    })
-    .then((_show) => {
-        current = current || _show;
+    return checkShow(date);
+  })
+  .then((_show) => {
+    current = current || _show;
 
-        return loadQuips();
-    })
-    .then((rows) => {
-        // choose a random quip
-        quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
+    return loadQuips();
+  })
+  .then((rows) => {
+    // choose a random quip
+    quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
 
-        return Promise.promisify(res.render, {
-            context: res,
-        })('fuccSchedule.ejs', {
-            config: theLib.config,
-            dead,
-            current,
-            quip,
-            date,
-            dayOfWeekName: dayOfWeekNames[day],
-            dayOfWeekAnchor: dayOfWeekAnchors[day],
-        })
-        .then((body) => {
-            res.send(body);
-        });
-    })
-    .return(res)
-    .catch(cb);
-};
+    return theLib.willRenderView(res, 'fuccSchedule.ejs', {
+      config: theLib.config,
+      dead,
+      current,
+      quip,
+      date,
+      dayOfWeekName: dayOfWeekNames[day],
+      dayOfWeekAnchor: dayOfWeekAnchors[day],
+    });
+  })
+  .then((body) => {
+    res.send(body);
+  })
+  .return(res)
+  .catch(cb);
+}

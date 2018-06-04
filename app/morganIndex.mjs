@@ -1,4 +1,4 @@
-const theLib = require('../lib/index');
+import theLib from '../lib/index';
 
 const COOKIE_NAME = 'morgan_config';
 const ROUTE_FLAT = 'flat';
@@ -18,13 +18,13 @@ const ROUTE_FLAT = 'flat';
  * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-module.exports = function handler(req, res) {
-    // the appropriate index file
-    const config = req.cookies[COOKIE_NAME];
-    const route = ((config === ROUTE_FLAT)
-        ? '/morgan/index_h.html'
-        : '/morgan/index_p.html'
-    );
+export default function handler(req, res) {
+  // the appropriate index file
+  const config = req.cookies[COOKIE_NAME];
+  const route = ((config === ROUTE_FLAT)
+    ? '/morgan/index_h.html'
+    : '/morgan/index_p.html'
+  );
 
-    res.redirect(theLib.baseURL(route));
-};
+  res.redirect(theLib.baseURL(route));
+}
