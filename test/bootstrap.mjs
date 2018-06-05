@@ -6,11 +6,6 @@ import assert from 'assert';
 import sinon from 'sinon';
 import theHelper from './helper';
 
-/* eslint-disable no-unused-vars */
-// modules which must be loaded before Promise.promisify
-import mockFs from 'mock-fs';
-/* eslint-enable no-unused-vars */
-
 // non-HTTP `net.socket` mocking
 //   must be executed before any import of 'net'
 //   engaged by `theHelper.mitm.enable()`
