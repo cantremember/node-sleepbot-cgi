@@ -25,6 +25,8 @@ export default {
     return fs.readFileSync(path.join(REAL_VIEWS_ROOT, filename), { encoding: 'utf8' }); // eslint-disable-line no-sync
   },
 
+  // inject =  `mockConfig({ mocked: true })`
+  // restore = `mockConfig()`
   mockConfig(store, config = theConfig) {
     config.stores.mock.store = (store || {});
   },

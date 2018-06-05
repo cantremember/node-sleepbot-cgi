@@ -33,6 +33,7 @@ import assert from 'assert';
 import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import supertest from 'supertest';
+import nock from 'nock';
 
 supertest.Test.prototype.endAsync = Promise.promisify(supertest.Test.prototype.end);
 
@@ -46,6 +47,15 @@ const QUIP_DATA = `
 text
 quip
 `;
+
+const NOCK_DATA = 'NOCK_DATA';
+const NOCK_SEB_URL = 'http://seb.nock'; // does not undergo DNS resolution
+const NOCK_SEB_PRIMARY = {
+  url: NOCK_SEB_URL,
+  primary: true,
+  user: 'USER',
+  pass: 'PASS',
+};
 
 function mockGlobFile(sandbox) {
   theHelper.mockGlob(sandbox, () => {
@@ -87,11 +97,12 @@ describe('app integration', () => {
     //   but we do it manually, to ensure mock-fs will not affect App loading
     console.log('    (registering the Express app ...)'); // eslint-disable-line no-console
     this.timeout(30000); // eslint-disable-line no-invalid-this
-
-    return theApp;
   });
   afterEach(() => {
     sandbox.restore();
+
+    theHelper.mockConfig();
+
     mockfs.restore();
   });
 
@@ -162,21 +173,54 @@ describe('app integration', () => {
     .endAsync();
   });
 
-  // there's really no good way to mock this in an Integration test
-  it.skip('GET /ambience/cgi/7.cgi', () => {
+  it('GET /ambience/cgi/7.cgi', () => {
+    // mock data for `sebServerPrimary`
+    theHelper.mockConfig({
+      sebServers: [ NOCK_SEB_PRIMARY ],
+    });
+
+    // produces HTTP 404 unless everything matches
+    const nocked = nock(NOCK_SEB_URL)
+    .get('/7.html')
+    .matchHeader('user-agent', /XML Getter/)
+    .reply(200, NOCK_DATA);
+
     return client().get('/ambience/cgi/7.cgi')
     .expect(200)
     .expect('content-type', /html/)
-    .expect(bodyIncludes('<meta http-equiv="Pragma" content="no-cache">'))
+    .expect(bodyIncludes(NOCK_DATA))
+    .expect(() => {
+      assert.ok(nocked.isDone());
+    })
     .endAsync();
   });
 
-  // there's really no good way to mock this in an Integration test
-  it.skip('GET /ambience/cgi/viewxml.cgi', () => {
+  it('GET /ambience/cgi/viewxml.cgi', () => {
+    // mock data for `sebServerPrimary`
+    theHelper.mockConfig({
+      sebServers: [ NOCK_SEB_PRIMARY ],
+    });
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
+    const authorization = Buffer.from('USER:PASS').toString('base64');
+
+    // produces HTTP 404 unless everything matches
+    const nocked = nock(NOCK_SEB_URL)
+    .get('/admin.cgi')
+    .query({ mode: 'viewxml' })
+    .matchHeader('user-agent', /^XML Getter/)
+    .matchHeader('authorization', `Basic ${ authorization }`)
+    .reply(200, NOCK_DATA, {
+      'www-authenticate': 'basic realm="Shoutcast Server"',
+    });
+
     return client().get('/ambience/cgi/viewxml.cgi')
     .expect(200)
     .expect('content-type', /xml/)
-    .expect(bodyIncludes('<!DOCTYPE SHOUTCASTSERVER'))
+    .expect(bodyIncludes(NOCK_DATA))
+    .expect(() => {
+      assert.ok(nocked.isDone());
+    })
     .endAsync();
   });
 
