@@ -569,7 +569,7 @@ id\tabbrev\ttitle
     .endAsync();
   });
 
-  it('GET /WRLDtime/cgi/utc.cgi', () => {
+  it.skip('GET /WRLDtime/cgi/utc.cgi', () => {
     mitm.enable();
 
     // mock data for `ntpServers`
