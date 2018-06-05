@@ -73,6 +73,7 @@ const willTryServers = Promise.method((res, tried=[]) => {
     const parts = [];
 
     function onData(data) {
+      /* istanbul ignore if */
       if (! connection) {
         return;
       }
