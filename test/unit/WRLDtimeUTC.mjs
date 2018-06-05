@@ -57,7 +57,18 @@ describe('WRLDtimeUTC', () => {
   let req;
   let res;
 
+  // we should always release all Connection listeners
+  let connection;
+  let listenerCount;
+  function setConnection(_connection) {
+    connection = _connection;
+    listenerCount = connection.listeners().length;
+  }
+
   beforeEach(() => {
+    connection = undefined;
+    listenerCount = 0;
+
     cb = sandbox.spy();
 
     // mock Request & Response
@@ -67,18 +78,22 @@ describe('WRLDtimeUTC', () => {
   afterEach(() => {
     sandbox.restore();
     theHelper.mockConfig();
+
+    if (connection) {
+      assert.equal(connection.listeners().length, listenerCount);
+    }
   });
 
 
   it('responds when the Connection provides data and closes', () => {
     theHelper.mockConfig({ ntpServers: [ 'ntp-good' ] });
 
-    let connection;
     sandbox.stub(net, 'connect').callsFake((port, host) => {
       assert.equal(host, 'ntp-good');
       assert.equal(port, 13); // ntp
 
       connection = new Connection(CONNECTION_CLOSE);
+      setConnection(connection);
       return connection;
     });
 
@@ -95,9 +110,9 @@ describe('WRLDtimeUTC', () => {
   it('responds when the Connection provides data and ends', () => {
     theHelper.mockConfig({ ntpServers: [ 'ntp-good' ] });
 
-    let connection;
     sandbox.stub(net, 'connect').callsFake(() => {
       connection = new Connection(CONNECTION_END);
+      setConnection(connection);
       return connection;
     });
 
@@ -129,9 +144,9 @@ describe('WRLDtimeUTC', () => {
   it('does nothing without a Connection response', () => {
     theHelper.mockConfig({ ntpServers: [ 'ntp-bad' ] });
 
-    let connection;
     sandbox.stub(net, 'connect').callsFake(() => {
       connection = new Connection(CONNECTION_EMPTY);
+      setConnection(connection);
       return connection;
     });
 

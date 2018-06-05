@@ -2,6 +2,7 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
+import mitm from 'mitm';
 
 import theConfig from '../lib/config';
 const theConfigDefaults = theConfig.stores[theConfig.FILE_DEFAULT];
@@ -9,8 +10,17 @@ assert.ok(theConfigDefaults, '`nconf` has changed how it stores things');
 
 const REAL_VIEWS_ROOT = theConfigDefaults.get('viewsRoot');
 
+// a singleton MITM instance
+//  must be created before anyone imports `net`; @see bootstrap
+//  `theHelper.mitm.enable();`
+//  `theHelper.mitm.disable();`
+const mitmSingleton = mitm();
+mitmSingleton.disable();
+
 
 export default {
+  mitm: mitmSingleton,
+
   // returns a Function that throws
   throws(e = new Error('threw')) {
     return () => { throw e; };

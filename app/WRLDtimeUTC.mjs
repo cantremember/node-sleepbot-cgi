@@ -33,13 +33,14 @@ const willTryServers = Promise.method((res, tried=[]) => {
     let connection = net.connect(13, server);
     connection.setTimeout(theLib.config.get('ntpTimeout'));
 
+
     // fail
     function failOn(topic) {
-      connection.on(topic, (err) => {
+      function listener(err) {
+        /* istanbul ignore if */
         if (! connection) {
           return;
         }
-        connection = null;
 
         /* eslint-disable no-console */
         if (err instanceof Error) {
@@ -54,46 +55,80 @@ const willTryServers = Promise.method((res, tried=[]) => {
         // delete servers[server];
 
         // keep on trying
-        resolve(willTryServers(res, tried));
-        return;
-      });
+        //   and there may be more Errors on the way,
+        //   so don't release until the upstream is done
+        resolve(
+          willTryServers(res, tried).finally(release) // eslint-disable-line no-use-before-define
+        );
+      }
+
+      connection.on(topic, listener);
+      return listener;
     }
-    failOn('error');
-    failOn('timeout');
+    const failOnError = failOn('error');
+    const failOnTimeout = failOn('timeout');
+
 
     // accumulate
     const parts = [];
 
-    connection.on('data', (data) => {
+    function onData(data) {
       if (! connection) {
         return;
       }
       parts.push(data.toString());
-    });
+    }
+    connection.on('data', onData);
+
 
     // succeed
     function succeedOn(topic) {
-      connection.on(topic, () => {
+      function listener() {
+        /* istanbul ignore if */
         if (! connection) {
           return;
         }
-        connection = null;
 
         // if it's non-blank, we've got what we want!
         if (parts.length !== 0) {
           const result = parts.join('\n');
-          res.send(result);
+          res.set('Content-Type', 'text/plain').status(200).send(result);
+
           resolve(result);
+          release(); // eslint-disable-line no-use-before-define
           return;
         }
 
         // keep on trying
-        resolve(willTryServers(res, tried));
-        return;
-      });
+        //   and there may be more Errors on the way,
+        //   so don't release until the upstream is done
+        resolve(
+          willTryServers(res, tried).finally(release) // eslint-disable-line no-use-before-define
+        );
+      }
+
+      connection.on(topic, listener);
+      return listener;
     }
-    succeedOn('close');
-    succeedOn('end');
+    const succeedOnClose = succeedOn('close');
+    const succeedOnEnd = succeedOn('end');
+
+
+    // let go
+    function release() {
+      /* istanbul ignore if */
+      if (! connection) {
+        return;
+      }
+
+      connection.removeListener('close', succeedOnClose);
+      connection.removeListener('end', succeedOnEnd);
+      connection.removeListener('data', onData);
+      connection.removeListener('error', failOnError);
+      connection.removeListener('timeout', failOnTimeout);
+
+      connection = undefined;
+    }
   });
 });
 

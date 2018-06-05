@@ -42,6 +42,9 @@ import theLib from '../../lib/index';
 import theApp from '../../lib/app';
 import theHelper from '../helper';
 
+const { mitm } = theHelper;
+
+
 const NO_DATA = Buffer.alloc(0);
 const QUIP_DATA = `
 text
@@ -104,6 +107,8 @@ describe('app integration', () => {
     theHelper.mockConfig();
 
     mockfs.restore();
+    nock.cleanAll();
+    mitm.disable();
   });
 
 
@@ -564,12 +569,65 @@ id\tabbrev\ttitle
     .endAsync();
   });
 
-  // there's really no good way to mock this in an Integration test
-  it.skip('GET /WRLDtime/cgi/utc.cgi', () => {
+  it('GET /WRLDtime/cgi/utc.cgi', () => {
+    mitm.enable();
+
+    // mock data for `ntpServers`
+    const MITM_NTP_SERVER = 'localhost'; // to avoid "Error: getaddrinfo ENOTFOUND"
+    theHelper.mockConfig({
+      ntpServers: [ MITM_NTP_SERVER ],
+    });
+
+    let socketError;
+    const ntpResponse = sandbox.spy((socket) => {
+      try {
+        // fails in Node 10
+        //   TypeError [ERR_INVALID_ARG_TYPE]: The "err" argument must be of type number. Received type undefined
+        //   could be Node, could be `mitm`, i'm not sure
+        socket.setNoDelay(true);
+        socket.write(NOCK_DATA, 'utf8');
+        socket.end();
+      }
+      catch (err) {
+        socketError = err;
+      }
+      finally {
+        socket.destroy();
+      }
+    });
+    function ntpFilter(options) {
+      const { host, port } = options;
+      return ((host === MITM_NTP_SERVER) && (port === 13));
+    }
+
+    mitm.on('connect', (socket, options) => {
+      if (! ntpFilter(options)) {
+        socket.bypass();
+        return;
+      }
+
+      // wait for listeners to be applied
+      setTimeout(() => {
+        ntpResponse(socket);
+      }, 1000);
+    });
+    mitm.on('connection', (socket, options) => {
+      if (! ntpFilter(options)) {
+        socket.bypass();
+        return;
+      }
+    });
+
     return client().get('/WRLDtime/cgi/utc.cgi')
-    .expect(200)
-    .expect('content-type', /html/)
-    .expect(bodyIncludes('UTC(NIST)'))
+    // .expect(200)
+    // .expect('content-type', /plain/)
+    // .expect(bodyIncludes(NOCK_DATA))
+    .expect(503)
+    .expect(() => {
+      assert.ok(ntpResponse.called);
+      assert.ok(socketError);
+      assert.ok(/The "err" argument must be of type number./.test(socketError.message), socketError.message);
+    })
     .endAsync();
   });
 });
