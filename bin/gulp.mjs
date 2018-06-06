@@ -19,7 +19,6 @@ const GLOBS = Object.freeze({
     'test/**/*.js',
     'test/**/*.mjs',
   ],
-  config: [ 'config/**/*.js' ],
   views:  [ 'views/**' ],
 });
 

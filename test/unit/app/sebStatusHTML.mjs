@@ -4,8 +4,8 @@ import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 import axios from 'axios';
 
-import theLib from '../../lib/index';
-import willHandle from '../../app/sebStatusHTML';
+import theLib from '../../../lib/index';
+import willHandle from '../../../app/sebStatusHTML';
 
 
 describe('sebStatusHTML', () => {

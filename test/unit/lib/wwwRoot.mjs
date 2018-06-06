@@ -7,9 +7,9 @@ import mockfs from 'mock-fs';
 import fs from 'fs';
 import path from 'path';
 
-import wwwRoot from '../../lib/wwwRoot';
-import theLib from '../../lib/index';
-import theHelper from '../helper';
+import wwwRoot from '../../../lib/wwwRoot';
+import theLib from '../../../lib/index';
+import theHelper from '../../helper';
 
 // make sure header is on the 1st line
 const TSV_CONTENT = `A\tB

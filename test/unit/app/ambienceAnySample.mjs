@@ -3,10 +3,10 @@ import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 
-import wwwRoot from '../../lib/wwwRoot';
-import theLib from '../../lib/index';
-import theHelper from '../helper';
-import willHandle from '../../app/ambienceAnySample';
+import wwwRoot from '../../../lib/wwwRoot';
+import theLib from '../../../lib/index';
+import theHelper from '../../helper';
+import willHandle from '../../../app/ambienceAnySample';
 
 const NO_DATA = Buffer.alloc(0);
 const ANY_DATA = `

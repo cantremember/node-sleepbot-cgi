@@ -5,8 +5,8 @@ import net from 'net';
 import events from 'events';
 import util from 'util';
 
-import theHelper from '../helper';
-import willHandle from '../../app/WRLDtimeUTC';
+import theHelper from '../../helper';
+import willHandle from '../../../app/WRLDtimeUTC';
 
 
 // mock net.Connection

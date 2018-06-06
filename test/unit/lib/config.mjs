@@ -1,15 +1,15 @@
 import assert from 'assert';
 import proxyquire from 'proxyquire';
 
-import theHelper from '../helper';
-import configTest from '../../config/test';
-import configDefault from '../../config/default';
+import theHelper from '../../helper';
+import configTest from '../../../config/test';
+import configDefault from '../../../config/default';
 
-import theConfig from '../../lib/config';
+import theConfig from '../../../lib/config';
 const { FILE_DEFAULT } = theConfig;
 
 
-const CONFIG_PATH = '../../lib/config';
+const CONFIG_PATH = '../../../lib/config';
 const STUBS = Object.freeze({ '@noCallThru': false });
 
 

@@ -7,8 +7,8 @@ import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 import _ from 'lodash';
 
-import theLib from '../../lib/index';
-import theHelper from '../helper';
+import theLib from '../../../lib/index';
+import theHelper from '../../helper';
 
 
 describe('lib/index', () => {

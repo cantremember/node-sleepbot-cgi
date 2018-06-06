@@ -2,8 +2,8 @@ import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
-import theLib from '../../lib/index';
-import willHandle from '../../app/http404';
+import theLib from '../../../lib/index';
+import willHandle from '../../../app/http404';
 
 
 describe('http404', () => {

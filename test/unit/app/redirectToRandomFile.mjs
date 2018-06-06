@@ -2,9 +2,9 @@ import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
-import theLib from '../../lib/index';
-import theHelper from '../helper';
-import willHandle from '../../app/redirectToRandomFile';
+import theLib from '../../../lib/index';
+import theHelper from '../../helper';
+import willHandle from '../../../app/redirectToRandomFile';
 
 
 describe('redirectToRandomFile', () => {

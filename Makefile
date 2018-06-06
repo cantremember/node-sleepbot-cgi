@@ -14,7 +14,9 @@ JS_FILES = gulpfile.js index.js index.mjs
 JS_DIRS = app/ bin/ config/ lib/ test/ views/
 JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | egrep "\.(js|mjs)$")
 
-TEST_FILES = $(ROOT)/test/bootstrap.mjs $(ROOT)/test/**/*.js $(ROOT)/test/**/*.mjs
+TEST_FILES = $(ROOT)/test/bootstrap.mjs \
+	$(ROOT)/test/**/*.js $(ROOT)/test/**/*.mjs \
+	$(ROOT)/test/**/**/*.js $(ROOT)/test/**/**/*.mjs
 
 
 # colors
