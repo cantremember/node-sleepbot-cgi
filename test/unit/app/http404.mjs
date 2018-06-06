@@ -26,7 +26,10 @@ describe('http404', () => {
 
   it('will render its page', () => {
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(! cb.called);
 
       assert.equal(res._getRenderView(), 'http404.ejs');
@@ -40,7 +43,10 @@ describe('http404', () => {
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(theLib.willRenderView.calledOnce);
       assert(! res.send.called);
 

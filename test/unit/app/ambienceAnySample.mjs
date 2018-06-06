@@ -61,7 +61,10 @@ describe('ambienceAnySample', () => {
       assert(! theLib.config.get('caching'));
 
       return willHandle(req, res, cb)
-      .then(() => {
+      .then((_res) => {
+        // it resolves the Response
+        assert.equal(_res, res);
+
         assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
         assert(! cb.called);
@@ -107,7 +110,10 @@ describe('ambienceAnySample', () => {
         res = httpMocks.createResponse();
         return willHandle(req, res, cb);
       })
-      .then(() => {
+      .then((_res) => {
+        // it resolves the Response
+        assert.equal(_res, res);
+
         assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
         assert(! cb.called);
@@ -197,7 +203,10 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(res.render.calledOnce);
       assert(! res.send.called);
 

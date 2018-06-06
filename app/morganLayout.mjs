@@ -3,10 +3,10 @@ import theLib from '../lib/index';
 
 
 // column -> index mapping
-const cardColumns = theLib.columnToIndexMap('id abbrev title');
+const CARD_COLUMNS = theLib.columnToIndexMap('id abbrev title');
 
-const quipColumns = theLib.columnToIndexMap('text');
-const quips = [
+const QUIP_COLUMNS = theLib.columnToIndexMap('text');
+const QUIPS = [
   [ 'THE PURPLE BEAM, AND YOUR FOREHEAD' ],
   [ 'PEARLS WITHIN SWINE'                ],
   [ 'EFFORTLESS'                         ],
@@ -15,19 +15,18 @@ const quips = [
   [ '(The Kite Eating Tree)'             ],
   [ 'THE WALLS ARE NOT MELTING'          ],
 ].map((row) => {
-  return theLib.dataColumnMap(row, quipColumns);
+  return theLib.dataColumnMap(row, QUIP_COLUMNS);
 });
 
 // load the cards file
-const loadCards = theLib.willMemoize(() => {
-  return wwwRoot.willLoadTSV('morgan/card.txt')
-  .then((rows) => {
-    return rows.map((row) => {
-      const data = theLib.dataColumnMap(row, cardColumns);
-      data.id = parseInt(data.id, 10);
+const willLoadCards = theLib.willMemoize(async () => {
+  const rows = await wwwRoot.willLoadTSV('morgan/card.txt');
 
-      return data;
-    });
+  return rows.map((row) => {
+    const data = theLib.dataColumnMap(row, CARD_COLUMNS);
+    data.id = parseInt(data.id, 10);
+
+    return data;
   });
 });
 
@@ -41,11 +40,11 @@ const loadCards = theLib.willMemoize(() => {
  * @function app.morganLayout
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
-  const quip = theLib.chooseAny(quips);
+export default async function middleware(req, res, next) {
+  const quip = theLib.chooseAny(QUIPS);
   const cardIds = [];
   const cards = [];
 
@@ -60,9 +59,9 @@ export default function handler(req, res, cb) {
   cardCount = parseInt(cardCount, 10) || 0;
   cardCount = Math.min(Math.max(cardCount, 1), 10);
 
-  return loadCards()
-  .then((datas) => {
+  try {
     // choose N unique cards
+    const datas = await willLoadCards();
     while (cards.length < cardCount) {
       if (cards.length >= datas.length) {
         // we've chosen all of them
@@ -81,15 +80,17 @@ export default function handler(req, res, cb) {
       cardIds.push(id);
     }
 
-    return theLib.willRenderView(res, 'morganLayout.ejs', {
+    const body = await theLib.willRenderView(res, 'morganLayout.ejs', {
       config: theLib.config,
       cards,
       quip,
     });
-  })
-  .then((body) => {
-    res.send(body);
-  })
-  .return(res)
-  .catch(cb);
+    res.status(200).send(body);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }

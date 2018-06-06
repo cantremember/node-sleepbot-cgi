@@ -53,7 +53,10 @@ describe('lookitAnyStory', () => {
       assert(! theLib.config.get('caching'));
 
       return willHandle(req, res, cb)
-      .then(() => {
+      .then((_res) => {
+        // it resolves the Response
+        assert.equal(_res, res);
+
         assert.equal(wwwRoot.willLoadFile.callCount, 1);
 
         assert(! cb.called);
@@ -115,7 +118,10 @@ describe('lookitAnyStory', () => {
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(res.render.calledOnce);
       assert(! res.send.called);
 

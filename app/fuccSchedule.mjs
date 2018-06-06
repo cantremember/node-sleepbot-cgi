@@ -6,11 +6,11 @@ import theLib from '../lib/index';
 // const timeZoneOffset = 0;
 
 // column -> index mapping
-const liveColumns = theLib.columnToIndexMap('file anchor year month day hourStart hourEnd');
-const showColumns = theLib.columnToIndexMap('file anchor dayOfWeek hourStart hourEnd');
-const quipColumns = theLib.columnToIndexMap('text');
-const dayOfWeekNames = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(/\s/); // 0-based
-const dayOfWeekAnchors = 'SUN MON TUE WED THU FRI SAT'.split(/\s/); // 0-based
+const LIVE_COLUMNS = theLib.columnToIndexMap('file anchor year month day hourStart hourEnd');
+const SHOW_COLUMNS = theLib.columnToIndexMap('file anchor dayOfWeek hourStart hourEnd');
+const QUIP_COLUMNS = theLib.columnToIndexMap('text');
+const DAY_OF_WEEK_NAMES = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(/\s/); // 0-based
+const DAY_OF_WEEK_ANCHORS = 'SUN MON TUE WED THU FRI SAT'.split(/\s/); // 0-based
 
 const FAKE_QUIP = Object.freeze({ text: '' });
 
@@ -37,18 +37,10 @@ function scrapeBodyTitle( // eslint-disable-line max-params
   data,
   lines,
   start,
-  titleStartArg /* optional */,
-  endArg
+  ...args //, titleStartArg?, endArg
 ) {
-  // call signature: (..., titleStart, end)
-  let titleStart = titleStartArg;
-  let end = endArg;
-  if (end === undefined) {
-    // call signature: (..., end)
-    end = titleStartArg;
-    titleStart = undefined;
-  }
-
+  const end = args.pop();
+  const titleStart = args.pop(); // optional
   const body = [];
   let phase = 0;
 
@@ -110,12 +102,14 @@ function scrapeBodyTitle( // eslint-disable-line max-params
 /*
    the dead file
 */
-const loadDead = theLib.willMemoize(() => {
-  return wwwRoot.willLoadFile('fucc/dead.txt')
-  .catch(/* istanbul ignore next */ () => {
-    // not present
+const willLoadDead = theLib.willMemoize(async () => {
+  try {
+    const file = await wwwRoot.willLoadFile('fucc/dead.txt');
+    return file;
+  }
+  catch (err) /* istanbul ignore next */ {
     return undefined;
-  });
+  }
 });
 
 
@@ -133,51 +127,48 @@ function isLiveNow(data, date) {
   return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
 
-const loadLives = theLib.willMemoize(() => {
-  let datas;
+const willLoadLives = theLib.willMemoize(async () => {
+  const [ rows, page ] = await Promise.all([
+    wwwRoot.willLoadTSV('fucc/live.txt'),
+    wwwRoot.willLoadFile('fucc/live.html'), // the live schedule, for scrape-age
+  ]);
 
-  return wwwRoot.willLoadTSV('fucc/live.txt')
-  .then((rows) => {
-    // coerce
-    datas = rows.map((row) => {
-      const data = coerceData(theLib.dataColumnMap(row, liveColumns));
-      data.type = 'live';
+  // coerce
+  const datas = rows.map((row) => {
+    const data = coerceData(theLib.dataColumnMap(row, LIVE_COLUMNS));
+    data.type = 'live';
 
-      // 2-digit year
-      const yy = parseInt(data.year, 10);
-      data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
+    // 2-digit year
+    const yy = parseInt(data.year, 10);
+    data.year = yy + (yy < 500 ? 1900 : /* istanbul ignore next */ 0);
 
-      return data;
-    });
+    return data;
+  });
 
-    // the live schedule, for scrape-age
-    return wwwRoot.willLoadFile('fucc/live.html');
-  })
-  .then((page) => {
-    const lines = (page || '').split('\n');
-
-    return datas.map((data) => {
-      return scrapeBodyTitle(data, lines,
-        new RegExp('^<A NAME="' + data.anchor + '">'),
-        /^<A NAME=/
-      );
-    });
+  // scrape
+  const lines = (page || '').split('\n');
+  return datas.map((data) => {
+    return scrapeBodyTitle(data, lines,
+      new RegExp('^<A NAME="' + data.anchor + '">'),
+      /^<A NAME=/
+    );
   });
 });
 
-function checkLive(date) {
-  // load up the rows
-  return loadLives()
-  .then((datas) => {
+async function checkLive(date) {
+  try {
+    // load up the rows
+    const datas = await willLoadLives();
+
     // the first one that's live
     return datas && datas.filter((data) => {
       return isLiveNow(data, date);
     })[0];
-  })
-  .catch(() => {
+  }
+  catch (err) {
     // treat as no match
     return undefined;
-  });
+  }
 }
 
 /*
@@ -194,56 +185,54 @@ function isShowNow(data, date) {
   return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
 
-const loadShows = theLib.willMemoize(() => {
-  let datas;
+const willLoadShows = theLib.willMemoize(async () => {
+  const [ rows, page ] = await Promise.all([
+    wwwRoot.willLoadTSV('fucc/show.txt'),
+    wwwRoot.willLoadFile('fucc/show.html'), // the show schedule, for scrape-age
+  ]);
 
-  return wwwRoot.willLoadTSV('fucc/show.txt')
-  .then((rows) => {
-    // coerce
-    datas = rows.map((row) => {
-      const data = coerceData(theLib.dataColumnMap(row, showColumns));
-      data.type = 'show';
+  // coerce
+  const datas = rows.map((row) => {
+    const data = coerceData(theLib.dataColumnMap(row, SHOW_COLUMNS));
+    data.type = 'show';
 
-      return data;
-    });
+    return data;
+  });
 
-    // the show schedule, for scrape-age
-    return wwwRoot.willLoadFile('fucc/show.html');
-  })
-  .then((page) => {
-    const lines = (page || '').split('\n');
-
-    return datas.map((data) => {
-      return scrapeBodyTitle(data, lines,
-        new RegExp('^<A NAME="' + data.anchor + '">'),
-        /^<!-- start -->/,
-        /^<!-- end -->/
-      );
-    });
+  // scrape
+  const lines = (page || '').split('\n');
+  return datas.map((data) => {
+    return scrapeBodyTitle(data, lines,
+      new RegExp('^<A NAME="' + data.anchor + '">'),
+      /^<!-- start -->/,
+      /^<!-- end -->/
+    );
   });
 });
 
-function checkShow(date) {
-  // load up the rows
-  return loadShows()
-  .then((datas) => {
+async function checkShow(date) {
+  try {
+    // load up the rows
+    const datas = await willLoadShows();
+
     // the first one that's live
     return datas && datas.filter((data) => {
       return isShowNow(data, date);
     })[0];
-  })
-  .catch(() => {
+  }
+  catch (err) {
     // treat as no match
     return undefined;
-  });
+  }
 }
 
 
 /*
    the quip file
 */
-const loadQuips = theLib.willMemoize(() => {
-  return wwwRoot.willLoadTSV('fucc/showquip.txt');
+const willLoadQuips = theLib.willMemoize(async () => {
+  const file = await wwwRoot.willLoadTSV('fucc/showquip.txt');
+  return file;
 });
 
 
@@ -256,57 +245,37 @@ const loadQuips = theLib.willMemoize(() => {
  * @function app.fuccSchedule
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
+export default async function middleware(req, res, next) {
   const date = new Date();
   const day = date.getDay();
-  let dead;
-  let current;
-  let quip;
 
-  return loadDead()
-  .then((_dead) => {
-    dead = _dead;
-    if (dead || current) {
-      // we're done
-      return undefined;
-    }
+  try {
+    const dead = await willLoadDead();
+    const live = await ((dead) ? undefined : checkLive(date));
+    const show = await ((dead || live) ? undefined : checkShow(date));
+    const quips = await willLoadQuips();
 
-    return checkLive(date);
-  })
-  .then((_live) => {
-    current = current || _live;
-    if (dead || current) {
-      // we're done
-      return undefined;
-    }
-
-    return checkShow(date);
-  })
-  .then((_show) => {
-    current = current || _show;
-
-    return loadQuips();
-  })
-  .then((rows) => {
     // choose a random quip
-    quip = theLib.dataColumnMap(theLib.chooseAny(rows), quipColumns) || /* istanbul ignore next */ FAKE_QUIP;
+    const quip = theLib.dataColumnMap(theLib.chooseAny(quips), QUIP_COLUMNS) || /* istanbul ignore next */ FAKE_QUIP;
 
-    return theLib.willRenderView(res, 'fuccSchedule.ejs', {
+    const body = await theLib.willRenderView(res, 'fuccSchedule.ejs', {
       config: theLib.config,
       dead,
-      current,
+      current: (live || show),
       quip,
       date,
-      dayOfWeekName: dayOfWeekNames[day],
-      dayOfWeekAnchor: dayOfWeekAnchors[day],
+      dayOfWeekName: DAY_OF_WEEK_NAMES[day],
+      dayOfWeekAnchor: DAY_OF_WEEK_ANCHORS[day],
     });
-  })
-  .then((body) => {
-    res.send(body);
-  })
-  .return(res)
-  .catch(cb);
+    res.status(200).send(body);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }

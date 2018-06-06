@@ -50,7 +50,10 @@ describe('morganLayout', () => {
     } });
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert.equal(wwwRoot.willLoadTSV.callCount, 1);
 
       assert(! cb.called);
@@ -156,7 +159,10 @@ id\tabbrev\ttitle
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(res.render.calledOnce);
       assert(! res.send.called);
 

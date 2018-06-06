@@ -43,7 +43,10 @@ describe('sebStatusXML', () => {
     });
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(! cb.called);
       assert(axios.request.calledOnce);
 
@@ -58,7 +61,10 @@ describe('sebStatusXML', () => {
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(axios.request.calledOnce);
       assert(! res.send.called);
 

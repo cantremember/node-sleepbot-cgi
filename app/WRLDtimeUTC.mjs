@@ -4,8 +4,18 @@ import net from 'net';
 import theLib from '../lib/index';
 
 
-// keeps Promising to try another one ...
-const willTryServers = Promise.method((res, tried=[]) => {
+/**
+ * Actually, this is a darn good use of Promises
+ * because of the nested chain-on-failure strategy.
+ *
+ * An async / await version is possible,
+ * but this is a good classic Promise reference example to keep around.
+ *
+ * @params {express.response} res
+ * @params {Array<String>} tried all the servers we've tried so far
+ * @returns {Promise<String>} a Promise resolving an `ntp` representation
+ */
+async function willTryServers(res, tried=[]) { // eslint-disable-line require-await
   const servers = theLib.config.get('ntpServers');
 
   if (tried.length >= servers.length) {
@@ -93,7 +103,10 @@ const willTryServers = Promise.method((res, tried=[]) => {
         // if it's non-blank, we've got what we want!
         if (parts.length !== 0) {
           const result = parts.join('\n');
-          res.set('Content-Type', 'text/plain').status(200).send(result);
+          res
+          .set('Content-Type', 'text/plain')
+          .status(200)
+          .send(result);
 
           resolve(result);
           release(); // eslint-disable-line no-use-before-define
@@ -131,7 +144,7 @@ const willTryServers = Promise.method((res, tried=[]) => {
       connection = undefined;
     }
   });
-});
+}
 
 
 /**
@@ -144,11 +157,16 @@ const willTryServers = Promise.method((res, tried=[]) => {
  * @function app.WRLDtimeUTC
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
-  return willTryServers(res)
-  .return(res)
-  .catch(cb);
+export default async function middleware(req, res, next) {
+  try {
+    await willTryServers(res);
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }

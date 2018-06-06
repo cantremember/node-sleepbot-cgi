@@ -194,14 +194,18 @@ describe('lib/index', () => {
     const CONTEXT = Object.freeze({});
     const RENDERED = 'RENDERED';
 
-    it('will not mock what it cannot comprehend', () => {
+    it('will not mock what it cannot comprehend', async () => {
       const response = {
         render: sandbox.stub().callsArgWith(2, new Error('BOOM')),
       };
 
-      assert.throws(() => {
-        return theLib.willRenderView(response, FILENAME, CONTEXT);
-      }, /not applying monkey-patch/);
+      try {
+        await theLib.willRenderView(response, FILENAME, CONTEXT);
+        theHelper.notCalled();
+      }
+      catch (err) {
+        assert.ok(/not applying monkey-patch/.test(err.message));
+      }
     });
 
     describe('with a representative express Response', () => {

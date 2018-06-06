@@ -1,41 +1,49 @@
 import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
+import _ from 'lodash';
 
 import theLib from '../../../lib/index';
 import theHelper from '../../helper';
-import willHandle from '../../../app/redirectToRandomFile';
+import builder from '../../../app/redirectToRandomFile';
 
 
 describe('redirectToRandomFile', () => {
   const sandbox = sinon.createSandbox();
-  let cb;
+  let next;
   let req;
   let res;
-  let handle;
+  let middleware;
 
   beforeEach(() => {
-    cb = sandbox.spy();
+    next = sandbox.spy();
 
     // mock Request & Response
     req = httpMocks.createRequest();
     res = httpMocks.createResponse();
 
-    handle = willHandle('path', 'some-glob');
+    middleware = builder('path', 'some-glob');
   });
   afterEach(() => {
     sandbox.restore();
   });
 
 
+  it('builds a middleware Function', () => {
+    assert.ok(_.isFunction(middleware));
+  });
+
   it('will redirect to a route relative to baseURL', () => {
     theHelper.mockGlob(sandbox, () => {
       return [ 'glob.file' ];
     });
 
-    return handle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
+    return middleware(req, res, next)
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
+      assert(! next.called);
       assert.equal(res._getRedirectUrl(), theLib.baseURL('path/glob.file'));
     });
   });
@@ -45,9 +53,9 @@ describe('redirectToRandomFile', () => {
       return [];
     });
 
-    return handle(req, res, cb)
+    return middleware(req, res, next)
     .then(() => {
-      const err = cb.args[0][0];
+      const err = next.args[0][0];
       assert(err.message.match(/no glob results/));
     });
   });
@@ -58,14 +66,17 @@ describe('redirectToRandomFile', () => {
     });
     sandbox.stub(res, 'send');
 
-    return handle(req, res, cb)
-    .then(() => {
+    return middleware(req, res, next)
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(! res.send.called);
 
       // Express gets informed
-      assert(cb.called);
+      assert(next.called);
 
-      const err = cb.args[0][0];
+      const err = next.args[0][0];
       assert.equal(err.message, 'BOOM');
     });
   });

@@ -1,10 +1,8 @@
-import Promise from 'bluebird';
-
 import theLib from '../lib/index';
 
 
 /**
- * HTTP 404 handler for [Sleepbot Constructs](http://sleepbot.com/404-not-found)
+ * HTTP 404 middleware for [Sleepbot Constructs](http://sleepbot.com/404-not-found)
  *
  * &nbsp;
  *
@@ -12,21 +10,22 @@ import theLib from '../lib/index';
  * @function app.http404
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
-  // from within a `bluebird` Promise
-  return Promise.try(() => {
-    return theLib.willRenderView(res, 'http404.ejs', {
+export default async function middleware(req, res, next) {
+  try {
+    const body = await theLib.willRenderView(res, 'http404.ejs', {
       config: theLib.config,
       real_uri: req.headers['x-real-uri'],
     });
-  })
-  .then((body) => {
-    // send and resolve
     res.status(404).send(body);
-  })
-  .return(res)
-  .catch(cb);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }
+

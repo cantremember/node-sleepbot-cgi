@@ -1,5 +1,3 @@
-import Promise from 'bluebird';
-
 import theLib from '../lib/index';
 
 
@@ -14,29 +12,29 @@ import theLib from '../lib/index';
  * @function app.lookitImgFoley
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
-  return Promise.resolve()
-  .then(() => {
+export default async function middleware(req, res, next) {
+  try {
     let { title, image } = req.query;
-
     title = title || '(image)';
     image = (image
       ? ('/lookit/images/dfoley/' + image)
       : '/images/shim_clear.gif'
     );
 
-    return theLib.willRenderView(res, 'lookitImgFoley.ejs', {
+    const body = await theLib.willRenderView(res, 'lookitImgFoley.ejs', {
       config: theLib.config,
       title,
       image,
     });
-  })
-  .then((body) => {
-    res.send(body);
-  })
-  .return(res)
-  .catch(cb);
+    res.status(200).send(body);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }

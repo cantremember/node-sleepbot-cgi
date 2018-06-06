@@ -1,7 +1,5 @@
 import theLib from '../lib/index';
 
-const sebServers = theLib.config.get('sebServers');
-
 
 /**
  * Generates an [M3U-format](https://en.wikipedia.org/wiki/M3U) playlist
@@ -16,16 +14,15 @@ const sebServers = theLib.config.get('sebServers');
  * @function app.sebPlaylist
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  */
-export default function handler(req, res) {
+export default function middleware(req, res) {
+  const sebServers = theLib.config.get('sebServers');
+
   // http://gonze.com/playlists/playlist-format-survey.html
   //   "A proprietary format used for playing Shoutcast and Icecast streams"
   //   audio/mpegurl
   //   audio/x-mpegurl
-  res.set('Content-Type', 'audio/x-scpls');
-
-  res.send([
+  const body = [
     '[playlist]',
     'numberofentries=' + sebServers.length,
     'Version=2',
@@ -39,5 +36,10 @@ export default function handler(req, res) {
       // Browser1=http://www.winamp.com/bin/sc/sccontext.php?title=Sleepbot+Environmental+Broadcast&genre=Ambient+Downtempo&url=http%3A%2F%2Fsleepbot.com%2Fseb
       /* eslint-enable max-len */
     ].join('\n');
-  })).join('\n') + '\n');
+  })).join('\n') + '\n';
+
+  res
+  .set('Content-Type', 'audio/x-scpls')
+  .status(200)
+  .send(body);
 }

@@ -16,8 +16,7 @@ const STATUS = Object.freeze({
  * @function app.status
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  */
-export default function handler(req, res) {
-  res.send(STATUS);
+export default function middleware(req, res) {
+  res.status(200).send(STATUS);
 }

@@ -98,7 +98,10 @@ describe('WRLDtimeUTC', () => {
     });
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(! cb.called);
       assert(net.connect.calledOnce);
 
@@ -217,7 +220,10 @@ describe('WRLDtimeUTC', () => {
     sandbox.spy(res, 'send');
 
     return willHandle(req, res, cb)
-    .then(() => {
+    .then((_res) => {
+      // it resolves the Response
+      assert.equal(_res, res);
+
       assert(net.connect.calledOnce);
       assert(! res.send.called);
 

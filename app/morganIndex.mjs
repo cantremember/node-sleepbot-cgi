@@ -15,15 +15,14 @@ const ROUTE_FLAT = 'flat';
  * @function app.morganIndex
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res) {
+export default function middleware(req, res) {
   // the appropriate index file
   const config = req.cookies[COOKIE_NAME];
   const route = ((config === ROUTE_FLAT)
-    ? '/morgan/index_h.html'
-    : '/morgan/index_p.html'
+    ? '/morgan/index_h.html' // "header", no footer
+    : '/morgan/index_p.html' // "parent" of header + footer
   );
 
   res.redirect(theLib.baseURL(route));

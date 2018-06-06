@@ -5,30 +5,22 @@ import theLib from '../lib/index';
 
 
 // column -> index mapping
-const sampleColumns = theLib.columnToIndexMap('file ext page stub artist album track size');
-const quipColumns = theLib.columnToIndexMap('text');
+const SAMPLE_COLUMNS = theLib.columnToIndexMap('file ext page stub artist album track size');
+const QUIP_COLUMNS = theLib.columnToIndexMap('text');
 
 const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 // load the samples file
-const loadSamples = theLib.willMemoize(() => {
-  return wwwRoot.willLoadTSV('ambience/any.txt')
-  .then((rows) => {
-    return rows.map((row) => {
-      return theLib.dataColumnMap(row, sampleColumns);
-    });
-  });
+const willLoadSamples = theLib.willMemoize(async () => {
+  const rows = await wwwRoot.willLoadTSV('ambience/any.txt');
+  return rows.map((row) => theLib.dataColumnMap(row, SAMPLE_COLUMNS));
 });
 
 // load the quips file
-const loadQuips = theLib.willMemoize(() => {
-  return wwwRoot.willLoadTSV('ambience/anyquip.txt')
-  .then((rows) => {
-    return rows.map((row) => {
-      return theLib.dataColumnMap(row, quipColumns);
-    });
-  });
+const willLoadQuips = theLib.willMemoize(async () => {
+  const rows = await wwwRoot.willLoadTSV('ambience/anyquip.txt');
+  return rows.map((row) => theLib.dataColumnMap(row, QUIP_COLUMNS));
 });
 
 
@@ -41,89 +33,69 @@ const loadQuips = theLib.willMemoize(() => {
  * @function app.ambienceAnySample
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-function handler(req, res, cb) {
-  let quip;
-  let sample;
+async function middleware(req, res, next) {
+  try {
+    const [ samples, quips ] = await Promise.all([
+      willLoadSamples(),
+      willLoadQuips(),
+    ]);
+    const quip = theLib.chooseAny(quips) || FAKE_QUIP;
 
-  return Promise.all([
-    // (1) the sample
-    loadSamples()
-    .then((datas) => {
-      // choose a random sample
-      sample = theLib.chooseAny(datas);
-      if (sample === undefined) {
-        return undefined;
-      }
+    // choose a random sample
+    const sample = theLib.chooseAny(samples);
+    if (sample === undefined) {
+      // we cannot provide a response
+      //   nor are we releasing Zalgo
+      next();
+      return await res;
+    }
 
-      // we split sample storage into two subdirectories
-      sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
+    // mutate the cached sample Object;
+    //   the results are consistent
 
-      // things about the album
-      const stub = sample.stub;
-      let album = handler.cache[stub];
+    // we split sample storage into two subdirectories
+    sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
 
-      if (album) {
-        // already cached
-        sample = Object.assign({}, album, sample);
-        return undefined;
-      }
+    // things about the album
+    const stub = sample.stub;
+    let album = middleware.cache[stub];
 
+    if (! album) {
       // populate the cache
       const albumFile = stub.toLowerCase();
-      const coverImage = [ '/ambience/covergif/', albumFile, '.gif'].join('');
+      const coverImage = `/ambience/covergif/${ albumFile }.gif`;
+      const coverExists = await wwwRoot.willDetectFile(coverImage);
+
       album = {
         albumFile,
         albumAnchor: stub.toUpperCase(),
-        // has a cover image?
         coverImage,
-        coverExists: false,
+        coverExists,
       };
 
       if (theLib.config.get('caching')) {
         // cache
-        handler.cache[stub] = album;
+        middleware.cache[stub] = album;
       }
-
-      return wwwRoot.willDetectFile(coverImage)
-      .then((exists) => {
-        album.coverExists = exists;
-
-        sample = Object.assign({}, album, sample);
-      });
-    }),
-
-    // (2) the quip
-    loadQuips()
-    .then((datas) => {
-      // choose a random quip
-      quip = theLib.chooseAny(datas);
-    })
-  ])
-  .then(() => {
-    if (sample === undefined) {
-      // we cannot provide a response
-      //   nor are we releasing Zalgo
-      return cb && cb(null);
     }
+    Object.assign(sample, album);
 
-    if (quip === undefined) {
-      quip = FAKE_QUIP;
-    }
-
-    return theLib.willRenderView(res, 'ambienceAnySample.ejs', {
+    const body = await theLib.willRenderView(res, 'ambienceAnySample.ejs', {
       config: theLib.config,
       sample,
       quip,
-    })
-    .then((body) => {
-      res.send(body);
     });
-  })
-  .return(res)
-  .catch(cb);
+    res.status(200).send(body);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }
 
 /**
@@ -132,10 +104,10 @@ function handler(req, res, cb) {
  * @memberof app.ambienceAnySample
  * @function forget
  */
-handler.forget = function forget() {
+middleware.forget = function forget() {
   this.cache = {};
 };
-handler.forget();
+middleware.forget();
 
 
-export default handler;
+export default middleware;

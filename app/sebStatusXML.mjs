@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import axios from 'axios';
 
 import theLib from '../lib/index';
@@ -15,15 +14,14 @@ import theLib from '../lib/index';
  * @function app.sebStatusXML
  * @params {express.request} req
  * @params {express.response} res
- * @params {Function} cb a callback invoked to continue down the Express middleware pipeline
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
  * @returns {Promise<express.response>} a Promise resolving `res`
  */
-export default function handler(req, res, cb) {
+export default async function middleware(req, res, next) {
   const { sebServerPrimary } = theLib;
 
-  // from within a `bluebird` Promise
-  return Promise.try(() => {
-    return axios.request({
+  try {
+    const response = await axios.request({
       method: 'GET',
       url: (sebServerPrimary.url + '/admin.cgi?mode=viewxml'),
       headers: {
@@ -35,12 +33,17 @@ export default function handler(req, res, cb) {
       },
       maxRedirects: 1,
     });
-  })
-  .then((response) => {
-    const { data } = response;
 
-    res.set('Content-Type', 'text/xml').send(data);
-  })
-  .return(res)
-  .catch(cb);
+    const { data } = response;
+    res
+    .set('Content-Type', 'text/xml')
+    .status(200)
+    .send(data);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
 }
