@@ -6,17 +6,17 @@ import httpMocks from 'node-mocks-http';
 import wwwRoot from '../../../lib/wwwRoot';
 import theLib from '../../../lib/index';
 import theHelper from '../../helper';
-import willHandle from '../../../app/lookitAnyStory';
+import middleware from '../../../app/lookitAnyStory';
 
 
 describe('lookitAnyStory', () => {
   const sandbox = sinon.createSandbox();
-  let cb;
+  let next;
   let req;
   let res;
 
   beforeEach(() => {
-    cb = sandbox.spy();
+    next = sandbox.spy();
 
     // mock Request & Response
     req = httpMocks.createRequest();
@@ -30,7 +30,7 @@ describe('lookitAnyStory', () => {
     theHelper.mockConfig();
 
     theLib.forget();
-    willHandle.forget();
+    middleware.forget();
   });
 
 
@@ -49,87 +49,81 @@ describe('lookitAnyStory', () => {
       } });
     });
 
-    it('produces a response', () => {
+    it('produces a response', async () => {
       assert(! theLib.config.get('caching'));
 
-      return willHandle(req, res, cb)
-      .then((_res) => {
-        // it resolves the Response
-        assert.equal(_res, res);
+      // it resolves the Response
+      const returned = await middleware(req, res, next);
+      assert.equal(returned, res);
 
-        assert.equal(wwwRoot.willLoadFile.callCount, 1);
+      assert.equal(wwwRoot.willLoadFile.callCount, 1);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'lookitAnyStory.ejs');
-        assert.equal(res.statusCode, 200);
+      assert(! next.called);
+      assert.equal(res._getData(), 'lookitAnyStory.ejs');
+      assert.equal(res.statusCode, 200);
 
-        // no caching
-        assert.equal(Object.keys(willHandle.cache).length, 0);
+      // no caching
+      assert.equal(Object.keys(middleware.cache).length, 0);
 
-        const context = res._getRenderData();
-        assert.equal(context.body, 'GLOB.FILE');
-      });
+      const context = res._getRenderData();
+      assert.equal(context.body, 'GLOB.FILE');
     });
 
-    it('caches a response', () => {
+    it('caches a response', async () => {
       theHelper.mockConfig({ caching: true });
 
-      return willHandle(req, res, cb)
-      .then(() => {
-        assert.equal(wwwRoot.willLoadFile.callCount, 1);
+      // un-cached
+      await middleware(req, res, next);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'lookitAnyStory.ejs');
+      assert.equal(wwwRoot.willLoadFile.callCount, 1);
 
-        assert.equal(Object.keys(willHandle.cache).length, 1);
+      assert(! next.called);
+      assert.equal(res._getData(), 'lookitAnyStory.ejs');
 
-        // and again
-        res = httpMocks.createResponse();
-        return willHandle(req, res);
-      })
-      .then(() => {
-        assert.equal(wwwRoot.willLoadFile.callCount, 1);
+      assert.equal(Object.keys(middleware.cache).length, 1);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'lookitAnyStory.ejs');
+      // and again, cached
+      res = httpMocks.createResponse();
+      await middleware(req, res, next);
 
-        assert.equal(Object.keys(willHandle.cache).length, 1);
-      });
+      assert.equal(wwwRoot.willLoadFile.callCount, 1);
+
+      assert(! next.called);
+      assert.equal(res._getData(), 'lookitAnyStory.ejs');
+
+      assert.equal(Object.keys(middleware.cache).length, 1);
     });
   });
 
-  it('survives with no file contents', () => {
+  it('survives with no file contents', async () => {
     theHelper.mockGlob(sandbox, () => {
       return [ 'glob.file' ];
     });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
-      assert.equal(res._getData(), 'lookitAnyStory.ejs');
+    await middleware(req, res, next);
 
-      const context = res._getRenderData();
-      assert.strictEqual(context.body, '');
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'lookitAnyStory.ejs');
+
+    const context = res._getRenderData();
+    assert.strictEqual(context.body, '');
   });
 
-  it('will fail gracefully', () => {
+  it('will fail gracefully', async () => {
     sandbox.stub(res, 'render').throws(new Error('BOOM'));
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert(res.render.calledOnce);
-      assert(! res.send.called);
+    assert(res.render.calledOnce);
+    assert(! res.send.called);
 
-      // Express gets informed
-      assert(cb.called);
+    // Express gets informed
+    assert(next.called);
 
-      const err = cb.args[0][0];
-      assert.equal(err.message, 'BOOM');
-    });
+    const err = next.args[0][0];
+    assert.equal(err.message, 'BOOM');
   });
 });

@@ -6,7 +6,7 @@ import httpMocks from 'node-mocks-http';
 import wwwRoot from '../../../lib/wwwRoot';
 import theLib from '../../../lib/index';
 import theHelper from '../../helper';
-import willHandle from '../../../app/ambienceAnySample';
+import middleware from '../../../app/ambienceAnySample';
 
 const NO_DATA = Buffer.alloc(0);
 const ANY_DATA = `
@@ -21,12 +21,12 @@ text
 
 describe('ambienceAnySample', () => {
   const sandbox = sinon.createSandbox();
-  let cb;
+  let next;
   let req;
   let res;
 
   beforeEach(() => {
-    cb = sandbox.spy();
+    next = sandbox.spy();
 
     // mock Request & Response
     req = httpMocks.createRequest();
@@ -40,7 +40,7 @@ describe('ambienceAnySample', () => {
     theHelper.mockConfig();
 
     theLib.forget();
-    willHandle.forget();
+    middleware.forget();
   });
 
 
@@ -57,74 +57,68 @@ describe('ambienceAnySample', () => {
       } });
     });
 
-    it('produces a response', () => {
+    it('produces a response', async () => {
       assert(! theLib.config.get('caching'));
 
-      return willHandle(req, res, cb)
-      .then((_res) => {
-        // it resolves the Response
-        assert.equal(_res, res);
+      // it resolves the Response
+      const returned = await middleware(req, res, next);
+      assert.equal(returned, res);
 
-        assert.equal(wwwRoot.willLoadTSV.callCount, 2);
+      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'ambienceAnySample.ejs');
-        assert.equal(res.statusCode, 200);
+      assert(! next.called);
+      assert.equal(res._getData(), 'ambienceAnySample.ejs');
+      assert.equal(res.statusCode, 200);
 
-        // no caching
-        assert.equal(Object.keys(willHandle.cache).length, 0);
+      // no caching
+      assert.equal(Object.keys(middleware.cache).length, 0);
 
-        const context = res._getRenderData();
+      const context = res._getRenderData();
 
-        assert.equal(context.sample.file, 'file');
-        assert.equal(context.sample.ext, 'ext');
-        assert.equal(context.sample.page, 'page');
-        assert.equal(context.sample.stub, 'stub');
-        assert.equal(context.sample.artist, 'artist');
-        assert.equal(context.sample.track, 'track');
-        assert.equal(context.sample.size, 'size');
+      assert.equal(context.sample.file, 'file');
+      assert.equal(context.sample.ext, 'ext');
+      assert.equal(context.sample.page, 'page');
+      assert.equal(context.sample.stub, 'stub');
+      assert.equal(context.sample.artist, 'artist');
+      assert.equal(context.sample.track, 'track');
+      assert.equal(context.sample.size, 'size');
 
-        assert.equal(context.sample.albumFile, 'stub');
-        assert.equal(context.sample.albumAnchor, 'STUB');
-        assert.equal(context.sample.dirNum, 1);
-        assert.equal(context.sample.coverImage, '/ambience/covergif/stub.gif');
-        assert(context.sample.coverExists);
+      assert.equal(context.sample.albumFile, 'stub');
+      assert.equal(context.sample.albumAnchor, 'STUB');
+      assert.equal(context.sample.dirNum, 1);
+      assert.equal(context.sample.coverImage, '/ambience/covergif/stub.gif');
+      assert(context.sample.coverExists);
 
-        assert.equal(context.quip.text, 'text');
-      });
+      assert.equal(context.quip.text, 'text');
     });
 
-    it('caches a response', () => {
+    it('caches a response', async () => {
       theHelper.mockConfig({ caching: true });
 
-      return willHandle(req, res, cb)
-      .then(() => {
-        assert.equal(wwwRoot.willLoadTSV.callCount, 2);
+      // un-cached
+      await middleware(req, res, next);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'ambienceAnySample.ejs');
+      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-        assert.equal(Object.keys(willHandle.cache).length, 1);
+      assert(! next.called);
+      assert.equal(res._getData(), 'ambienceAnySample.ejs');
 
-        // and again
-        res = httpMocks.createResponse();
-        return willHandle(req, res, cb);
-      })
-      .then((_res) => {
-        // it resolves the Response
-        assert.equal(_res, res);
+      assert.equal(Object.keys(middleware.cache).length, 1);
 
-        assert.equal(wwwRoot.willLoadTSV.callCount, 2);
+      // and again, cached
+      res = httpMocks.createResponse();
+      await middleware(req, res, next);
 
-        assert(! cb.called);
-        assert.equal(res._getData(), 'ambienceAnySample.ejs');
+      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-        assert.equal(Object.keys(willHandle.cache).length, 1);
-      });
+      assert(! next.called);
+      assert.equal(res._getData(), 'ambienceAnySample.ejs');
+
+      assert.equal(Object.keys(middleware.cache).length, 1);
     });
   });
 
-  it('produces a response with a high-order file having no cover image', () => {
+  it('produces a response with a high-order file having no cover image', async () => {
     mockfs({ '/mock-fs': {
       'ambience': {
         'any.txt': `
@@ -135,27 +129,26 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
       },
     } });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
+    await middleware(req, res, next);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'ambienceAnySample.ejs');
-      assert.equal(res.statusCode, 200);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-      // no caching
-      assert.equal(Object.keys(willHandle.cache).length, 0);
+    assert(! next.called);
+    assert.equal(res._getData(), 'ambienceAnySample.ejs');
+    assert.equal(res.statusCode, 200);
 
-      const context = res._getRenderData();
+    // no caching
+    assert.equal(Object.keys(middleware.cache).length, 0);
 
-      assert.equal(context.sample.file, 'zzzz');
+    const context = res._getRenderData();
 
-      assert.equal(context.sample.dirNum, 2);
-      assert(! context.sample.coverExists);
-    });
+    assert.equal(context.sample.file, 'zzzz');
+
+    assert.equal(context.sample.dirNum, 2);
+    assert(! context.sample.coverExists);
   });
 
-  it('survives no data', () => {
+  it('survives no data', async () => {
     mockfs({ '/mock-fs': {
       'ambience': {
         'any.txt': NO_DATA,
@@ -166,15 +159,14 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
     sandbox.spy(res, 'render');
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(cb.calledOnce);
-      assert(! res.render.called);
-      assert(! res.send.called);
-    });
+    await middleware(req, res, next);
+
+    assert(next.calledOnce);
+    assert(! res.render.called);
+    assert(! res.send.called);
   });
 
-  it('fails on missing data', () => {
+  it('fails on missing data', async () => {
     mockfs({ '/mock-fs': {
       'ambience': { },
     } });
@@ -182,16 +174,15 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
     sandbox.spy(res, 'render');
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      const err = cb.args[0][0];
-      assert(err.message.match(/ENOENT/));
+    await middleware(req, res, next);
 
-      // it('will fail gracefully')
-    });
+    const err = next.args[0][0];
+    assert(err.message.match(/ENOENT/));
+
+    // it('will fail gracefully')
   });
 
-  it('will fail gracefully', () => {
+  it('will fail gracefully', async () => {
     mockfs({ '/mock-fs': {
       'ambience': {
         'any.txt': ANY_DATA,
@@ -202,19 +193,17 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
     sandbox.stub(res, 'render').throws(new Error('BOOM'));
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert(res.render.calledOnce);
-      assert(! res.send.called);
+    assert(res.render.calledOnce);
+    assert(! res.send.called);
 
-      // Express gets informed
-      assert(cb.called);
+    // Express gets informed
+    assert(next.called);
 
-      const err = cb.args[0][0];
-      assert.equal(err.message, 'BOOM');
-    });
+    const err = next.args[0][0];
+    assert.equal(err.message, 'BOOM');
   });
 });

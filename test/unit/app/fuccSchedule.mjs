@@ -5,7 +5,7 @@ import httpMocks from 'node-mocks-http';
 import moment from 'moment';
 
 import wwwRoot from '../../../lib/wwwRoot';
-import willHandle from '../../../app/fuccSchedule';
+import middleware from '../../../app/fuccSchedule';
 
 
 // aligned to Date() local time
@@ -62,12 +62,12 @@ text
 describe('fuccSchedule', () => {
   const sandbox = sinon.createSandbox();
   let clock;
-  let cb;
+  let next;
   let req;
   let res;
 
   beforeEach(() => {
-    cb = sandbox.spy();
+    next = sandbox.spy();
     clock = sandbox.useFakeTimers({
       now: 0,
       toFake: [ 'Date' ], // nothing that touches Promises / the uv_loop
@@ -88,7 +88,7 @@ describe('fuccSchedule', () => {
   });
 
 
-  it('knows when the station is dead', () => {
+  it('knows when the station is dead', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'dead.txt': 'DEAD',
@@ -96,26 +96,24 @@ describe('fuccSchedule', () => {
       }
     } });
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert.equal(wwwRoot.willLoadFile.callCount, 1);
-      assert.equal(wwwRoot.willLoadTSV.callCount, 1);
+    assert.equal(wwwRoot.willLoadFile.callCount, 1);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 1);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'fuccSchedule.ejs');
-      assert.equal(res.statusCode, 200);
+    assert(! next.called);
+    assert.equal(res._getData(), 'fuccSchedule.ejs');
+    assert.equal(res.statusCode, 200);
 
-      const context = res._getRenderData();
-      assert.equal(context.dead, 'DEAD');
-      assert(! context.current);
-      assert.equal(context.quip.text, 'text');
-    });
+    const context = res._getRenderData();
+    assert.equal(context.dead, 'DEAD');
+    assert(! context.current);
+    assert.equal(context.quip.text, 'text');
   });
 
-  it('knows when the station has a live event', () => {
+  it('knows when the station has a live event', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'live.txt': LIVE_DATA,
@@ -129,26 +127,25 @@ describe('fuccSchedule', () => {
     // live
     clock.tick(MOMENT_LIVE.valueOf());
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert.equal(wwwRoot.willLoadFile.callCount, 2);
-      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
+    await middleware(req, res, next);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'fuccSchedule.ejs');
+    assert.equal(wwwRoot.willLoadFile.callCount, 2);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
-      const context = res._getRenderData();
-      assert(! context.dead);
-      assert.equal(context.current.type, 'live');
-      assert.equal(context.current.anchor, 'anchor');
-      assert.equal(context.current.year, MOMENT_LIVE.year());
-      assert.equal(context.current.body, 'live1\nlive2\nlive3');
-      assert.strictEqual(context.current.title, undefined);
-      assert.equal(context.quip.text, 'text');
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+    const context = res._getRenderData();
+    assert(! context.dead);
+    assert.equal(context.current.type, 'live');
+    assert.equal(context.current.anchor, 'anchor');
+    assert.equal(context.current.year, MOMENT_LIVE.year());
+    assert.equal(context.current.body, 'live1\nlive2\nlive3');
+    assert.strictEqual(context.current.title, undefined);
+    assert.equal(context.quip.text, 'text');
   });
 
-  it('knows when the station has a show', () => {
+  it('knows when the station has a show', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'live.txt': LIVE_DATA,
@@ -162,26 +159,25 @@ describe('fuccSchedule', () => {
     // a show
     clock.tick(MOMENT_SHOW.valueOf());
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert.equal(wwwRoot.willLoadFile.callCount, 3);
-      assert.equal(wwwRoot.willLoadTSV.callCount, 3);
+    await middleware(req, res, next);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'fuccSchedule.ejs');
+    assert.equal(wwwRoot.willLoadFile.callCount, 3);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 3);
 
-      const context = res._getRenderData();
-      assert(! context.dead);
-      assert.equal(context.current.type, 'show');
-      assert.equal(context.current.anchor, 'anchor');
-      assert.equal(context.current.dayOfWeek, MOMENT_SHOW.day());
-      assert.equal(context.current.body, 'show1\nshow2\nshow3');
-      assert.equal(context.current.title, 'title');
-      assert.equal(context.quip.text, 'text');
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+    const context = res._getRenderData();
+    assert(! context.dead);
+    assert.equal(context.current.type, 'show');
+    assert.equal(context.current.anchor, 'anchor');
+    assert.equal(context.current.dayOfWeek, MOMENT_SHOW.day());
+    assert.equal(context.current.body, 'show1\nshow2\nshow3');
+    assert.equal(context.current.title, 'title');
+    assert.equal(context.quip.text, 'text');
   });
 
-  it('knows when it is being told nothing useful', () => {
+  it('knows when it is being told nothing useful', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'live.txt': LIVE_DATA,
@@ -195,22 +191,21 @@ describe('fuccSchedule', () => {
     // off-schedule
     clock.tick(NOW.valueOf());
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert.equal(wwwRoot.willLoadFile.callCount, 3);
-      assert.equal(wwwRoot.willLoadTSV.callCount, 3);
+    await middleware(req, res, next);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'fuccSchedule.ejs');
+    assert.equal(wwwRoot.willLoadFile.callCount, 3);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 3);
 
-      const context = res._getRenderData();
-      assert(! context.dead);
-      assert(! context.current);
-      assert.equal(context.quip.text, 'text');
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+    const context = res._getRenderData();
+    assert(! context.dead);
+    assert(! context.current);
+    assert.equal(context.quip.text, 'text');
   });
 
-  it('fails on missing quips', () => {
+  it('fails on missing quips', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'show.txt': SHOW_DATA,
@@ -218,34 +213,32 @@ describe('fuccSchedule', () => {
       }
     } });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      const err = cb.args[0][0];
-      assert(err.message.match(/ENOENT/));
+    await middleware(req, res, next);
 
-      // it('will fail gracefully')
-    });
+    const err = next.args[0][0];
+    assert(err.message.match(/ENOENT/));
+
+    // it('will fail gracefully')
   });
 
-  it('survives missing everything EXCEPT quips', () => {
+  it('survives missing everything EXCEPT quips', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'showquip.txt': QUIP_DATA,
       }
     } });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
-      assert.equal(res._getData(), 'fuccSchedule.ejs');
+    await middleware(req, res, next);
 
-      const context = res._getRenderData();
-      assert(! context.dead);
-      assert(! context.current);
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'fuccSchedule.ejs');
+
+    const context = res._getRenderData();
+    assert(! context.dead);
+    assert(! context.current);
   });
 
-  it('will fail gracefully', () => {
+  it('will fail gracefully', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
         'showquip.txt': QUIP_DATA,
@@ -257,19 +250,17 @@ describe('fuccSchedule', () => {
     sandbox.stub(res, 'render').throws(new Error('BOOM'));
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert(res.render.calledOnce);
-      assert(! res.send.called);
+    assert(res.render.calledOnce);
+    assert(! res.send.called);
 
-      // Express gets informed
-      assert(cb.called);
+    // Express gets informed
+    assert(next.called);
 
-      const err = cb.args[0][0];
-      assert.equal(err.message, 'BOOM');
-    });
+    const err = next.args[0][0];
+    assert.equal(err.message, 'BOOM');
   });
 });

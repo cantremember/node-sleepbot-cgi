@@ -4,7 +4,7 @@ import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 
 import wwwRoot from '../../../lib/wwwRoot';
-import willHandle from '../../../app/morganLayout';
+import middleware from '../../../app/morganLayout';
 
 const CARD_DATA = `
 ID\tABBREV\tTITLE
@@ -23,12 +23,12 @@ ID\tABBREV\tTITLE
 
 describe('morganLayout', () => {
   const sandbox = sinon.createSandbox();
-  let cb;
+  let next;
   let req;
   let res;
 
   beforeEach(() => {
-    cb = sandbox.spy();
+    next = sandbox.spy();
 
     // mock Request & Response
     req = httpMocks.createRequest();
@@ -42,31 +42,29 @@ describe('morganLayout', () => {
   });
 
 
-  it('displays three cards by default', () => {
+  it('displays three cards by default', async () => {
     mockfs({ '/mock-fs': {
       'morgan': {
         'card.txt': CARD_DATA,
       },
     } });
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert.equal(wwwRoot.willLoadTSV.callCount, 1);
+    assert.equal(wwwRoot.willLoadTSV.callCount, 1);
 
-      assert(! cb.called);
-      assert.equal(res._getData(), 'morganLayout.ejs');
-      assert.equal(res.statusCode, 200);
+    assert(! next.called);
+    assert.equal(res._getData(), 'morganLayout.ejs');
+    assert.equal(res.statusCode, 200);
 
-      const context = res._getRenderData();
-      assert.equal(context.cards.length, 3);
-      assert(context.quip.text);
-    });
+    const context = res._getRenderData();
+    assert.equal(context.cards.length, 3);
+    assert(context.quip.text);
   });
 
-  it('displays at least 1 card', () => {
+  it('displays at least 1 card', async () => {
     mockfs({ '/mock-fs': {
       'morgan': {
         'card.txt': CARD_DATA,
@@ -77,17 +75,16 @@ describe('morganLayout', () => {
       query: { cards: 0 }
     });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
-      assert.equal(res._getData(), 'morganLayout.ejs');
+    await middleware(req, res, next);
 
-      const context = res._getRenderData();
-      assert.equal(context.cards.length, 1);
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'morganLayout.ejs');
+
+    const context = res._getRenderData();
+    assert.equal(context.cards.length, 1);
   });
 
-  it('displays at most 10 cards', () => {
+  it('displays at most 10 cards', async () => {
     mockfs({ '/mock-fs': {
       'morgan': {
         'card.txt': CARD_DATA,
@@ -98,17 +95,16 @@ describe('morganLayout', () => {
       query: { cards: 99 }
     });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
-      assert.equal(res._getData(), 'morganLayout.ejs');
+    await middleware(req, res, next);
 
-      const context = res._getRenderData();
-      assert.equal(context.cards.length, 10);
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'morganLayout.ejs');
+
+    const context = res._getRenderData();
+    assert.equal(context.cards.length, 10);
   });
 
-  it('will not display more cards that it has', () => {
+  it('will not display more cards that it has', async () => {
     mockfs({ '/mock-fs': {
       'morgan': {
         'card.txt': `
@@ -124,31 +120,29 @@ id\tabbrev\ttitle
       query: { cards: 99 }
     });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      assert(! cb.called);
-      assert.equal(res._getData(), 'morganLayout.ejs');
+    await middleware(req, res, next);
 
-      const context = res._getRenderData();
-      assert.equal(context.cards.length, 3);
-    });
+    assert(! next.called);
+    assert.equal(res._getData(), 'morganLayout.ejs');
+
+    const context = res._getRenderData();
+    assert.equal(context.cards.length, 3);
   });
 
-  it('fails on missing cards', () => {
+  it('fails on missing cards', async () => {
     mockfs({ '/mock-fs': {
       'morgan': { }
     } });
 
-    return willHandle(req, res, cb)
-    .then(() => {
-      const err = cb.args[0][0];
-      assert(err.message.match(/ENOENT/));
+    await middleware(req, res, next);
 
-      // it('will fail gracefully')
-    });
+    const err = next.args[0][0];
+    assert(err.message.match(/ENOENT/));
+
+    // it('will fail gracefully')
   });
 
-  it('will fail gracefully', () => {
+  it('will fail gracefully', async () => {
     mockfs({ '/mock-fs': {
       'morgan': {
         'card.txt': CARD_DATA,
@@ -158,19 +152,17 @@ id\tabbrev\ttitle
     sandbox.stub(res, 'render').throws(new Error('BOOM'));
     sandbox.spy(res, 'send');
 
-    return willHandle(req, res, cb)
-    .then((_res) => {
-      // it resolves the Response
-      assert.equal(_res, res);
+    // it resolves the Response
+    const returned = await middleware(req, res, next);
+    assert.equal(returned, res);
 
-      assert(res.render.calledOnce);
-      assert(! res.send.called);
+    assert(res.render.calledOnce);
+    assert(! res.send.called);
 
-      // Express gets informed
-      assert(cb.called);
+    // Express gets informed
+    assert(next.called);
 
-      const err = cb.args[0][0];
-      assert.equal(err.message, 'BOOM');
-    });
+    const err = next.args[0][0];
+    assert.equal(err.message, 'BOOM');
   });
 });

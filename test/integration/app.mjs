@@ -60,15 +60,17 @@ const NOCK_SEB_PRIMARY = {
   pass: 'PASS',
 };
 
-function mockGlobFile(sandbox) {
+function _mockGlobFile(sandbox) {
   theHelper.mockGlob(sandbox, () => {
     return [ 'glob.file' ];
   });
 }
-function client() {
+
+function _client() {
   return supertest(theApp);
 }
-function bodyIncludes(string, doesArg) {
+
+function _bodyIncludes(string, doesArg) {
   const does = doesArg || (doesArg === undefined);
   return (res) => {
     // "If the response is ok, it should return falsy"
@@ -79,7 +81,8 @@ function bodyIncludes(string, doesArg) {
     throw new Error([ 'does not include "', string, '"' ].join(''));
   };
 }
-function redirectsTo(route) {
+
+function _redirectsTo(route) {
   const absolute = [ theLib.config.get('baseURL'), route ].join('');
   return (res) => {
     // "If the response is ok, it should return falsy"
@@ -98,7 +101,7 @@ describe('app integration', () => {
     // explicity load the App up-front;
     //   it'll take a few moments, even if we let it happen 'naturally',
     //   but we do it manually, to ensure mock-fs will not affect App loading
-    console.log('    (registering the Express app ...)'); // eslint-disable-line no-console
+    console.log('    (registering the Express app ... this may take a moment ...)'); // eslint-disable-line no-console
     this.timeout(30000); // eslint-disable-line no-invalid-this
   });
   afterEach(() => {
@@ -112,20 +115,18 @@ describe('app integration', () => {
   });
 
 
-  it('has access to HTTP assets', () => {
+  it('has access to HTTP assets', async () => {
     mockfs({ '/mock-fs': {
       'index.html': NO_DATA,
     } });
 
-    return wwwRoot.willDetectFile('index.html')
-    .then((exists) => {
-      assert(exists);
-    });
+    const exists = await wwwRoot.willDetectFile('index.html');
+    assert(exists);
   });
 
 
-  it('GET /status.cgi', () => {
-    return client().get('/status.cgi')
+  it('GET /status.cgi', async () => {
+    await _client().get('/status.cgi')
     .expect(200)
     .expect('content-type', /json/)
     .endAsync();
@@ -138,47 +139,47 @@ describe('app integration', () => {
       } });
     });
 
-    it('without headers', () => {
-      return client().get('/404.cgi')
+    it('without headers', async () => {
+      await _client().get('/404.cgi')
       .expect(404)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<base href="http://localhost:3000">'))
-      .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
-      .expect(bodyIncludes('That\'s net-speak for "I can\'t find any information for":', false))
+      .expect(_bodyIncludes('<base href="http://localhost:3000">'))
+      .expect(_bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
+      .expect(_bodyIncludes('That\'s net-speak for "I can\'t find any information for":', false))
       .endAsync();
     });
 
-    it('with headers', () => {
-      return client().get('/404.cgi')
+    it('with headers', async () => {
+      await _client().get('/404.cgi')
       .set('x-real-uri', 'REAL-URI')
       .expect(404)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
-      .expect(bodyIncludes('REAL-URI'))
+      .expect(_bodyIncludes('<title>Sleepbot Constructs:  404 Not Found</title>'))
+      .expect(_bodyIncludes('REAL-URI'))
       .endAsync();
     });
   });
 
 
-  it('GET /cgi/animbot.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /cgi/animbot.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/cgi/animbot.cgi')
+    await _client().get('/cgi/animbot.cgi')
     .expect(302)
-    .expect(redirectsTo('/images/animbot/glob.file'))
+    .expect(_redirectsTo('/images/animbot/glob.file'))
     .endAsync();
   });
 
 
-  it('GET /ambience/cgi/listen.cgi', () => {
-    return client().get('/ambience/cgi/listen.cgi')
+  it('GET /ambience/cgi/listen.cgi', async () => {
+    await _client().get('/ambience/cgi/listen.cgi')
     .expect(200)
     .expect('content-type', /x-scpls/)
-    .expect(bodyIncludes('[playlist]'))
+    .expect(_bodyIncludes('[playlist]'))
     .endAsync();
   });
 
-  it('GET /ambience/cgi/7.cgi', () => {
+  it('GET /ambience/cgi/7.cgi', async () => {
     // mock data for `sebServerPrimary`
     theHelper.mockConfig({
       sebServers: [ NOCK_SEB_PRIMARY ],
@@ -190,17 +191,17 @@ describe('app integration', () => {
     .matchHeader('user-agent', /XML Getter/)
     .reply(200, NOCK_DATA);
 
-    return client().get('/ambience/cgi/7.cgi')
+    await _client().get('/ambience/cgi/7.cgi')
     .expect(200)
     .expect('content-type', /html/)
-    .expect(bodyIncludes(NOCK_DATA))
+    .expect(_bodyIncludes(NOCK_DATA))
     .expect(() => {
       assert.ok(nocked.isDone());
     })
     .endAsync();
   });
 
-  it('GET /ambience/cgi/viewxml.cgi', () => {
+  it('GET /ambience/cgi/viewxml.cgi', async () => {
     // mock data for `sebServerPrimary`
     theHelper.mockConfig({
       sebServers: [ NOCK_SEB_PRIMARY ],
@@ -219,31 +220,31 @@ describe('app integration', () => {
       'www-authenticate': 'basic realm="Shoutcast Server"',
     });
 
-    return client().get('/ambience/cgi/viewxml.cgi')
+    await _client().get('/ambience/cgi/viewxml.cgi')
     .expect(200)
     .expect('content-type', /xml/)
-    .expect(bodyIncludes(NOCK_DATA))
+    .expect(_bodyIncludes(NOCK_DATA))
     .expect(() => {
       assert.ok(nocked.isDone());
     })
     .endAsync();
   });
 
-  it('GET /ambience/cgi/imgpage.cgi', () => {
-    return client().get('/ambience/cgi/imgpage.cgi')
+  it('GET /ambience/cgi/imgpage.cgi', async () => {
+    await _client().get('/ambience/cgi/imgpage.cgi')
     .expect(302)
-    .expect(redirectsTo('/ambience'))
+    .expect(_redirectsTo('/ambience'))
     .endAsync();
   });
 
   describe('GET /ambience/cgi/any_f.cgi', () => {
-    it('without data', () => {
+    it('without data', async () => {
       mockfs({ '/mock-fs': {
         'ambience': { },
         'ambienceAnySample.ejs': theHelper.realEjs('ambienceAnySample.ejs'),
       } });
 
-      return client().get('/ambience/cgi/any_f.cgi')
+      await _client().get('/ambience/cgi/any_f.cgi')
       .expect(500, JSON.stringify({
         name: 'Error',
         message: 'ENOENT, no such file or directory \'/mock-fs/ambience/any.txt\'',
@@ -252,7 +253,7 @@ describe('app integration', () => {
       .endAsync();
     });
 
-    it('with data', () => {
+    it('with data', async () => {
       mockfs({ '/mock-fs': {
         'ambience': {
           'any.txt': `
@@ -264,43 +265,43 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
         'ambienceAnySample.ejs': theHelper.realEjs('ambienceAnySample.ejs'),
       } });
 
-      return client().get('/ambience/cgi/any_f.cgi')
+      await _client().get('/ambience/cgi/any_f.cgi')
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<base href="http://localhost:3000">'))
-      .expect(bodyIncludes('<title>Ambience by the Dice :: Ambience for the Masses</title>'))
-      .expect(bodyIncludes('href="/ambience/album/stub'))
-      .expect(bodyIncludes('quip<br />'))
+      .expect(_bodyIncludes('<base href="http://localhost:3000">'))
+      .expect(_bodyIncludes('<title>Ambience by the Dice :: Ambience for the Masses</title>'))
+      .expect(_bodyIncludes('href="/ambience/album/stub'))
+      .expect(_bodyIncludes('quip<br />'))
       .endAsync();
     });
   });
 
 
-  it('GET /critturs/cgi/anyaudio.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /critturs/cgi/anyaudio.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/critturs/cgi/anyaudio.cgi')
+    await _client().get('/critturs/cgi/anyaudio.cgi')
     .expect(302)
-    .expect(redirectsTo('/critturs/mp2/glob.file'))
+    .expect(_redirectsTo('/critturs/mp2/glob.file'))
     .endAsync();
   });
 
-  it('GET /critturs/cgi/critlogo.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /critturs/cgi/critlogo.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/critturs/cgi/critlogo.cgi')
+    await _client().get('/critturs/cgi/critlogo.cgi')
     .expect(302)
-    .expect(redirectsTo('/critturs/images/logo/glob.file'))
+    .expect(_redirectsTo('/critturs/images/logo/glob.file'))
     .endAsync();
   });
 
 
-  it('GET /fucc/cgi/anyaudio.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /fucc/cgi/anyaudio.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/fucc/cgi/anyaudio.cgi')
+    await _client().get('/fucc/cgi/anyaudio.cgi')
     .expect(302)
-    .expect(redirectsTo('/fucc/mpg/glob.file'))
+    .expect(_redirectsTo('/fucc/mpg/glob.file'))
     .endAsync();
   });
 
@@ -310,13 +311,13 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
       date = new Date();
     });
 
-    it('without data', () => {
+    it('without data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': { },
         'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
       } });
 
-      return client().get('/fucc/cgi/schednow.cgi')
+      await _client().get('/fucc/cgi/schednow.cgi')
       .expect(500, JSON.stringify({
         name: 'Error',
         message: 'ENOENT, no such file or directory \'/mock-fs/fucc/showquip.txt\'',
@@ -325,7 +326,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
       .endAsync();
     });
 
-    it('with dead data', () => {
+    it('with dead data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': {
           'dead.txt': 'DEAD',
@@ -334,16 +335,16 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
         'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
       } });
 
-      return client().get('/fucc/cgi/schednow.cgi')
+      await _client().get('/fucc/cgi/schednow.cgi')
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
-      .expect(bodyIncludes('<!-- DEAD -->'))
-      .expect(bodyIncludes('<FONT SIZE=+1>quip</FONT>', false))
+      .expect(_bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
+      .expect(_bodyIncludes('<!-- DEAD -->'))
+      .expect(_bodyIncludes('<FONT SIZE=+1>quip</FONT>', false))
       .endAsync();
     });
 
-    it('with live data', () => {
+    it('with live data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': {
           'live.txt': `
@@ -364,18 +365,18 @@ live3
         'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
       } });
 
-      return client().get('/fucc/cgi/schednow.cgi')
+      await _client().get('/fucc/cgi/schednow.cgi')
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
-      .expect(bodyIncludes('<!-- ON -->'))
-      .expect(bodyIncludes('live1\nlive2\nlive3'))
-      .expect(bodyIncludes('HREF="/fucc/file#anchor"', false)) // no title
-      .expect(bodyIncludes('<FONT SIZE=+1>quip</FONT>'))
+      .expect(_bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
+      .expect(_bodyIncludes('<!-- ON -->'))
+      .expect(_bodyIncludes('live1\nlive2\nlive3'))
+      .expect(_bodyIncludes('HREF="/fucc/file#anchor"', false)) // no title
+      .expect(_bodyIncludes('<FONT SIZE=+1>quip</FONT>'))
       .endAsync();
     });
 
-    it('with show data', () => {
+    it('with show data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': {
           'show.txt': `
@@ -396,30 +397,30 @@ show3
         'fuccSchedule.ejs': theHelper.realEjs('fuccSchedule.ejs'),
       } });
 
-      return client().get('/fucc/cgi/schednow.cgi')
+      await _client().get('/fucc/cgi/schednow.cgi')
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
-      .expect(bodyIncludes('<!-- ON -->'))
-      .expect(bodyIncludes('show1\nshow2\nshow3'))
-      .expect(bodyIncludes('HREF="/fucc/file#anchor">title</A>'))
-      .expect(bodyIncludes('<FONT SIZE=+1>quip</FONT>'))
+      .expect(_bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
+      .expect(_bodyIncludes('<!-- ON -->'))
+      .expect(_bodyIncludes('show1\nshow2\nshow3'))
+      .expect(_bodyIncludes('HREF="/fucc/file#anchor">title</A>'))
+      .expect(_bodyIncludes('<FONT SIZE=+1>quip</FONT>'))
       .endAsync();
     });
   });
 
 
-  it('GET /lookit/cgi/anyfoley.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /lookit/cgi/anyfoley.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/lookit/cgi/anyfoley.cgi')
+    await _client().get('/lookit/cgi/anyfoley.cgi')
     .expect(302)
-    .expect(redirectsTo('/lookit/etc/glob.file'))
+    .expect(_redirectsTo('/lookit/etc/glob.file'))
     .endAsync();
   });
 
-  it('GET /lookit/cgi/anystory.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /lookit/cgi/anystory.cgi', async () => {
+    _mockGlobFile(sandbox);
 
     mockfs({ '/mock-fs': {
       'lookit': {
@@ -430,13 +431,13 @@ show3
       'lookitAnyStory.ejs': theHelper.realEjs('lookitAnyStory.ejs'),
     } });
 
-    return client().get('/lookit/cgi/anystory.cgi')
+    await _client().get('/lookit/cgi/anystory.cgi')
     .expect(200)
     .expect('content-type', /html/)
-    .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
-    .expect(bodyIncludes('<TITLE>Lookit Tells You a Story</TITLE>'))
-    .expect(bodyIncludes('<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>'))
-    .expect(bodyIncludes('GLOB.FILE'))
+    .expect(_bodyIncludes('<BASE HREF="http://localhost:3000">'))
+    .expect(_bodyIncludes('<TITLE>Lookit Tells You a Story</TITLE>'))
+    .expect(_bodyIncludes('<A HREF="/" TARGET="_top"><TT><B>Sleepbot Constructs</B></TT></A><BR>'))
+    .expect(_bodyIncludes('GLOB.FILE'))
     .endAsync();
   });
 
@@ -447,35 +448,35 @@ show3
       } });
     });
 
-    it('without parameters', () => {
-      return client().get('/lookit/cgi/imgfoley.cgi')
+    it('without parameters', async () => {
+      await _client().get('/lookit/cgi/imgfoley.cgi')
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<base href="http://localhost:3000">'))
-      .expect(bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: (image)</title>'))
-      .expect(bodyIncludes('src="/images/shim_clear.gif" title="(image)"'))
+      .expect(_bodyIncludes('<base href="http://localhost:3000">'))
+      .expect(_bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: (image)</title>'))
+      .expect(_bodyIncludes('src="/images/shim_clear.gif" title="(image)"'))
       .endAsync();
     });
 
-    it('with parameters', () => {
-      return client().get('/lookit/cgi/imgfoley.cgi')
+    it('with parameters', async () => {
+      await _client().get('/lookit/cgi/imgfoley.cgi')
       .query({ title: 'TITLE', image: 'IMAGE' })
       .expect(200)
       .expect('content-type', /html/)
-      .expect(bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: TITLE</title>'))
-      .expect(bodyIncludes('src="/lookit/images/dfoley/IMAGE" title="TITLE"'))
+      .expect(_bodyIncludes('<title>d f o l e y   @   s l e e p b o t . c o m :: :: TITLE</title>'))
+      .expect(_bodyIncludes('src="/lookit/images/dfoley/IMAGE" title="TITLE"'))
       .endAsync();
     });
   });
 
   describe('GET /morgan/cgi/morglay.cgi', () => {
-    it('without data', () => {
+    it('without data', async () => {
       mockfs({ '/mock-fs': {
         'morgan': { },
         'morganLayout.ejs': theHelper.realEjs('morganLayout.ejs'),
       } });
 
-      return client().get('/morgan/cgi/morglay.cgi')
+      await _client().get('/morgan/cgi/morglay.cgi')
       .expect(500, JSON.stringify({
         name: 'Error',
         message: 'ENOENT, no such file or directory \'/mock-fs/morgan/card.txt\'',
@@ -501,39 +502,39 @@ id\tabbrev\ttitle
         } });
       });
 
-      it('without parameters', () => {
-        return client().get('/morgan/cgi/morglay.cgi')
+      it('without parameters', async () => {
+        await _client().get('/morgan/cgi/morglay.cgi')
         .expect(200)
         .expect('content-type', /html/)
-        .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
-        .expect(bodyIncludes('<BASE HREF="http://localhost:3000">'))
-        .expect(bodyIncludes('Your 3 cards'))
+        .expect(_bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
+        .expect(_bodyIncludes('<BASE HREF="http://localhost:3000">'))
+        .expect(_bodyIncludes('Your 3 cards'))
         .endAsync();
       });
 
-      it('with parameters', () => {
-        return client().get('/morgan/cgi/morglay.cgi')
+      it('with parameters', async () => {
+        await _client().get('/morgan/cgi/morglay.cgi')
         .query({ cards: 23 })
         .expect(200)
         .expect('content-type', /html/)
-        .expect(bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
-        .expect(bodyIncludes('Your 5 cards')) // all we have is 5
-        .expect(bodyIncludes('<A HREF="/morgan/card/one.html'))
-        .expect(bodyIncludes('TITLE="TWO"'))
-        .expect(bodyIncludes('ALT="THREE"'))
-        .expect(bodyIncludes('window.status=\'FOUR\''))
-        .expect(bodyIncludes('/morgan/images/card/five.gif'))
+        .expect(_bodyIncludes('<TITLE>Morgan\'s Tarot:  '))
+        .expect(_bodyIncludes('Your 5 cards')) // all we have is 5
+        .expect(_bodyIncludes('<A HREF="/morgan/card/one.html'))
+        .expect(_bodyIncludes('TITLE="TWO"'))
+        .expect(_bodyIncludes('ALT="THREE"'))
+        .expect(_bodyIncludes('window.status=\'FOUR\''))
+        .expect(_bodyIncludes('/morgan/images/card/five.gif'))
         .endAsync();
       });
     });
   });
 
-  it('GET /morgan/cgi/morgpick.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /morgan/cgi/morgpick.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/morgan/cgi/morgpick.cgi')
+    await _client().get('/morgan/cgi/morgpick.cgi')
     .expect(302)
-    .expect(redirectsTo('/morgan/card/glob.file'))
+    .expect(_redirectsTo('/morgan/card/glob.file'))
     .endAsync();
   });
 
@@ -543,33 +544,33 @@ id\tabbrev\ttitle
     '/morgan/',
     '/morgan'
   ].forEach((route) => {
-    it(('GET ' + route), () => {
-      return client().get(route)
+    it(('GET ' + route), async () => {
+      await _client().get(route)
       .expect(302)
-      .expect(redirectsTo('/morgan/index_p.html'))
+      .expect(_redirectsTo('/morgan/index_p.html'))
       .endAsync();
     });
   });
 
-  it('GET /morgan, with a cookie', () => {
-    return client().get('/morgan')
+  it('GET /morgan, with a cookie', async () => {
+    await _client().get('/morgan')
     .set('cookie', 'morgan_config=flat')
     .expect(302)
-    .expect(redirectsTo('/morgan/index_h.html'))
+    .expect(_redirectsTo('/morgan/index_h.html'))
     .endAsync();
   });
 
 
-  it('GET /WRLDtime/cgi/anyclock.cgi', () => {
-    mockGlobFile(sandbox);
+  it('GET /WRLDtime/cgi/anyclock.cgi', async () => {
+    _mockGlobFile(sandbox);
 
-    return client().get('/WRLDtime/cgi/anyclock.cgi')
+    await _client().get('/WRLDtime/cgi/anyclock.cgi')
     .expect(302)
-    .expect(redirectsTo('/WRLDtime/face/glob.file'))
+    .expect(_redirectsTo('/WRLDtime/face/glob.file'))
     .endAsync();
   });
 
-  it.skip('GET /WRLDtime/cgi/utc.cgi', () => {
+  it.skip('GET /WRLDtime/cgi/utc.cgi', async () => {
     mitm.enable();
 
     // mock data for `ntpServers`
@@ -618,10 +619,10 @@ id\tabbrev\ttitle
       }
     });
 
-    return client().get('/WRLDtime/cgi/utc.cgi')
+    await _client().get('/WRLDtime/cgi/utc.cgi')
     // .expect(200)
     // .expect('content-type', /plain/)
-    // .expect(bodyIncludes(NOCK_DATA))
+    // .expect(_bodyIncludes(NOCK_DATA))
     .expect(503)
     .expect(() => {
       assert.ok(ntpResponse.called);
