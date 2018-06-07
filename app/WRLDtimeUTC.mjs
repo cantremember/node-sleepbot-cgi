@@ -44,8 +44,28 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
     connection.setTimeout(theLib.config.get('ntpTimeout'));
 
 
+    // retry with the next server
+    //   Node 8 seems to wrap an `async function` it its own Promise;
+    //   so even though we construct & return a `bluebird` Promise, and then
+    //   `resolve( willTryServers(res, tried).finally(release) );`
+    //   we get "TypeError: willTryServers(...).finally is not a function"
+    async function _retry() {
+      let result;
+      try {
+        result = await willTryServers(res, tried);
+      }
+      finally {
+        // there may be more Errors on the way,
+        //   so don't release until the upstream is done
+        release(); // eslint-disable-line no-use-before-define
+
+        resolve(result);
+      }
+    }
+
+
     // fail
-    function failOn(topic) {
+    function _failOn(topic) {
       function listener(err) {
         /* istanbul ignore if */
         if (! connection) {
@@ -65,35 +85,31 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
         // delete servers[server];
 
         // keep on trying
-        //   and there may be more Errors on the way,
-        //   so don't release until the upstream is done
-        resolve(
-          willTryServers(res, tried).finally(release) // eslint-disable-line no-use-before-define
-        );
+        _retry();
       }
 
       connection.on(topic, listener);
       return listener;
     }
-    const failOnError = failOn('error');
-    const failOnTimeout = failOn('timeout');
+    const failOnError = _failOn('error');
+    const failOnTimeout = _failOn('timeout');
 
 
     // accumulate
     const parts = [];
 
-    function onData(data) {
+    function _onData(data) {
       /* istanbul ignore if */
       if (! connection) {
         return;
       }
       parts.push(data.toString());
     }
-    connection.on('data', onData);
+    connection.on('data', _onData);
 
 
     // succeed
-    function succeedOn(topic) {
+    function _succeedOn(topic) {
       function listener() {
         /* istanbul ignore if */
         if (! connection) {
@@ -114,18 +130,14 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
         }
 
         // keep on trying
-        //   and there may be more Errors on the way,
-        //   so don't release until the upstream is done
-        resolve(
-          willTryServers(res, tried).finally(release) // eslint-disable-line no-use-before-define
-        );
+        _retry();
       }
 
       connection.on(topic, listener);
       return listener;
     }
-    const succeedOnClose = succeedOn('close');
-    const succeedOnEnd = succeedOn('end');
+    const succeedOnClose = _succeedOn('close');
+    const succeedOnEnd = _succeedOn('end');
 
 
     // let go
@@ -137,7 +149,7 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
 
       connection.removeListener('close', succeedOnClose);
       connection.removeListener('end', succeedOnEnd);
-      connection.removeListener('data', onData);
+      connection.removeListener('data', _onData);
       connection.removeListener('error', failOnError);
       connection.removeListener('timeout', failOnTimeout);
 
