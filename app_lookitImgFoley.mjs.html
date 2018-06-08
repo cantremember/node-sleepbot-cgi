@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>cantremember/node-sleepbot-cgi - Namespace: config</title>
+    <title>cantremember/node-sleepbot-cgi - Source: app/lookitImgFoley.mjs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -23,192 +23,58 @@
 ></a>
 
 <div id="main">
-    <h1 class="page-title">Namespace: config</h1>
+    <h1 class="page-title">Source: app/lookitImgFoley.mjs</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        <h2>config</h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><h4>Hierarchical configuration, using <a href="https://www.npmjs.com/package/nconf">nconf</a></h4><p>&nbsp;</p></div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_config.js.html">lib/config.js</a>, <a href="lib_config.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-        <h2>config</h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><h4>Hierarchical configuration, using <a href="https://www.npmjs.com/package/nconf">nconf</a></h4><p>&nbsp;</p></div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_config.js.html">lib/config.js</a>, <a href="lib_config.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import theLib from '../lib/index';
+
+
+/**
+ * Renders an `&lt;img />` wrapper page for [The Root of All Things Lookit](
+ *   http://sleepbot.com/lookit/cgi/imgfoley.cgi?title=Jonesie,+the+Groovepuss&amp;image=jonesie.jpg
+ * )
+ *
+ * &amp;nbsp;
+ *
+ * @see http://sleepbot.com/lookit/cgi/imgfoley.cgi?title=Example
+ * @function app.lookitImgFoley
+ * @params {express.request} req
+ * @params {express.response} res
+ * @params {Function} next a callback invoked to continue down the Express middleware pipeline
+ * @returns {Promise&lt;express.response>} a Promise resolving `res`
+ */
+export default async function middleware(req, res, next) {
+  try {
+    let { title, image } = req.query;
+    title = title || '(image)';
+    image = (image
+      ? ('/lookit/images/dfoley/' + image)
+      : '/images/shim_clear.gif'
+    );
+
+    const body = await theLib.willRenderView(res, 'lookitImgFoley.ejs', {
+      config: theLib.config,
+      title,
+      image,
+    });
+    res.status(200).send(body);
+
+    return res;
+  }
+  catch (err) {
+    next(err);
+    return res;
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>cantremember/node-sleepbot-cgi - Namespace: config</title>
+    <title>cantremember/node-sleepbot-cgi - Source: app/morganIndex.mjs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -23,192 +23,47 @@
 ></a>
 
 <div id="main">
-    <h1 class="page-title">Namespace: config</h1>
+    <h1 class="page-title">Source: app/morganIndex.mjs</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        <h2>config</h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><h4>Hierarchical configuration, using <a href="https://www.npmjs.com/package/nconf">nconf</a></h4><p>&nbsp;</p></div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_config.js.html">lib/config.js</a>, <a href="lib_config.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-        <h2>config</h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><h4>Hierarchical configuration, using <a href="https://www.npmjs.com/package/nconf">nconf</a></h4><p>&nbsp;</p></div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_config.js.html">lib/config.js</a>, <a href="lib_config.js.html#line91">line 91</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import theLib from '../lib/index';
+
+const COOKIE_NAME = 'morgan_config';
+const ROUTE_FLAT = 'flat';
+
+
+/**
+ * Displays the stand-alone or `&lt;frameset />`-based homepage of [Morgan's Tarot](http://sleepbot.com/morgan)
+ *
+ * &amp;nbsp;
+ *
+ * @see http://sleepbot.com/morgan/index.cgi
+ * @see http://sleepbot.com/morgan/
+ * @see http://sleepbot.com/morgan
+ * @function app.morganIndex
+ * @params {express.request} req
+ * @params {express.response} res
+ * @returns {Promise&lt;express.response>} a Promise resolving `res`
+ */
+export default function middleware(req, res) {
+  // the appropriate index file
+  const config = req.cookies[COOKIE_NAME];
+  const route = ((config === ROUTE_FLAT)
+    ? '/morgan/index_h.html' // "header", no footer
+    : '/morgan/index_p.html' // "parent" of header + footer
+  );
+
+  res.redirect(theLib.baseURL(route));
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

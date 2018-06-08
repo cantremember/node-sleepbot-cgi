@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>cantremember/node-sleepbot-cgi - Source: lib/wwwRoot.mjs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<a href="https://github.com/cantremember/node-sleepbot-cgi"><img
+    style="position: fixed; top: 0; right: 0; border: 0;"
+    src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67"
+    alt="Fork me on GitHub"
+    data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
+></a>
+
+<div id="main">
+    <h1 class="page-title">Source: lib/wwwRoot.mjs</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Promise from 'bluebird';
+import path from 'path';
+import fs from 'fs';
+import csvParse from 'csv-parse';
+import glob from 'glob';
+
+import theConfig from './config';
+
+
+const FS_READ_OPTIONS = Object.freeze({
+  encoding: 'utf8'
+});
+const CSV_PARSE_OPTIONS = Object.freeze({
+  cast: false,
+  comment: undefined, // '#'
+  delimiter: '\t', // TSV
+  skip_empty_lines: true,
+  trim: true,
+});
+
+
+/**
+ * #### A Library of Functions relating to `wwwRoot` from {@link config}
+ *
+ * &amp;nbsp;
+ *
+ * @namespace wwwRoot
+ */
+export default {
+  /**
+   * @returns {String} the value of `wwwRoot` from {@link config}
+   */
+  get basePath() {
+    return theConfig.get('wwwRoot');
+  },
+
+  /**
+   * @see lib.dataColumnMap
+   * @memberof wwwRoot
+   * @param {String} relativePath a path relative to {@link wwwRoot}
+   * @param {Object&lt;Integer>} [options] options for a [csv](https://www.npmjs.com/package/csv) parser
+   * @returns {Promise&lt;Array>} a Promise resolving the rows of the TSV file at `relativePath`
+   */
+  async willLoadTSV(relativePath, options = CSV_PARSE_OPTIONS) {
+    const headersAndColumns = await new Promise((resolve, reject) => {
+      try {
+        const filepath = path.join(this.basePath, relativePath);
+        const reader = fs.createReadStream(filepath, FS_READ_OPTIONS);
+        const parser = csvParse(options);
+        const results = [];
+
+        // http://csv.adaltas.com/parse/examples/
+        parser.on('error', reject);
+        parser.on('readable', () => {
+          let data;
+          while (data = parser.read()) { // eslint-disable-line no-cond-assign
+            results.push(data);
+          }
+        });
+        parser.on('end', () => {
+          // do not release Zalgo
+          setImmediate(() => {
+            resolve(results);
+          });
+        });
+
+        reader.on('error', reject);
+        reader.pipe(parser);
+      }
+      catch (err) {
+        reject(err);
+      }
+    });
+
+    // drop the the headers
+    return headersAndColumns.slice(1);
+  },
+
+  /**
+   * @memberof wwwRoot
+   * @param {String} relativePath a path relative to {@link wwwRoot}
+   * @returns {Promise&lt;String>} a Promise resolving the contents of the file at `relativePath`
+   *   or a blank String if the file is not present
+   */
+  async willLoadFile(relativePath) {
+    const exists = await this.willDetectFile(relativePath);
+    if (! exists) {
+      return '';
+    }
+
+    // Promisify on-demand for mocking purposes
+    const filepath = path.join(this.basePath, relativePath);
+    const file = await Promise.promisify(fs.readFile, {
+      context: fs,
+    })(filepath, FS_READ_OPTIONS);
+
+    return file;
+  },
+
+  /**
+   * @memberof wwwRoot
+   * @param {String} fileglob a path-and-glob-pattern relative to {@link wwwRoot}
+   * @returns {Promise&lt;Array>} a Promise resolving the filenames matching `fileglob`
+   */
+  async willGetFilenames(fileglob) {
+    const pathglob = path.join(this.basePath, fileglob);
+
+    // Promisify on-demand for mocking purposes
+    const files = await Promise.promisify(glob)(pathglob);
+
+    // just the filenames, please
+    return files.map((file) => path.basename(file));
+  },
+
+  /**
+   * @memberof wwwRoot
+   * @param {String} relativePath a path relative to {@link wwwRoot}
+   * @returns {Promise&lt;Array>} a Promise resolving true if a file exists at `relativePath`
+   */
+  async willDetectFile(relativePath) {
+    const filepath = path.join(this.basePath, relativePath);
+
+    try {
+      // Promisify on-demand for mocking purposes
+      const stat = await Promise.promisify(fs.stat, {
+        context: fs
+      })(filepath);
+
+      return stat.isFile();
+    }
+    catch (errThrown) {
+      // traverse the cause chain, eg. `OperationalError`
+      let err = errThrown;
+      let cause;
+      while (cause = err.cause) { // eslint-disable-line no-cond-assign
+        err = cause;
+      }
+
+      if (err.code === 'ENOENT') {
+        return false;
+      }
+      throw err;
+    }
+  },
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li><li><a href="config.html">config</a></li><li><a href="lib.html">lib</a></li><li><a href="wwwRoot.html">wwwRoot</a></li></ul><h3>Global</h3><ul><li><a href="global.html#taskDoc">taskDoc</a></li><li><a href="global.html#taskLint">taskLint</a></li><li><a href="global.html#willTryServers">willTryServers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
