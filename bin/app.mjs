@@ -1,23 +1,25 @@
-#!/usr/bin/env node
-/* istanbul ignore file */
-/* eslint-disable no-console */
-
 /*
+  #!/usr/bin/env node -r esm
+
+  https://stackoverflow.com/questions/4303128/how-to-use-multiple-arguments-for-awk-with-a-shebang-i-e
+    "... everything after the path of the shebang gets parsed to the program as one argument."
+    so that's a problem ... we can't self pre-load ESModules
+  better alternatives going forward
+    `make server`
+    `/bin/bash -c 'make server 2>&1 >> stdio.log'`
+
   ENV
     HTTP_PORT
     WWW_ROOT
     ...
     NODE_ENV
     BLUEBIRD_DEBUG=1
-    NODE_CONFIG_DIR=./config
-
-  /etc/init.d
-    https://github.com/nodejitsu/forever
 
   TODO
-    https://github.com/lorenwest/node-config
     https://github.com/trentm/node-bunyan
 */
+/* istanbul ignore file */
+/* eslint-disable no-console */
 
 import minimist from 'minimist';
 

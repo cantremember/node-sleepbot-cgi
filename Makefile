@@ -39,6 +39,7 @@ CODE_GET=cat $(CODE_FILE)
 
 
 .PHONY: \
+	install \
 	init clean build lock edit \
 	server server-debug server-production \
 	test test-debug \
@@ -51,6 +52,12 @@ CODE_GET=cat $(CODE_FILE)
 
 
 # Build steps
+
+# https://github.com/npm/npm/issues/3497
+#   npm postinstall "npm WARN cannot run in wd"
+#   because sudo
+install:
+	@npm install --unsafe-perm
 
 init:
 	@mkdir -p build
@@ -229,6 +236,9 @@ gh-pages:  init
 	fi
 
 	@rm -rf build/gh-pages
+
+view-gh-pages:
+	@open http://cantremember.github.io/node-sleepbot-cgi/
 
 
 # `npm run <TARGET>`

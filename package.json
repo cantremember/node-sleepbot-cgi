@@ -24,10 +24,11 @@
   "readmeFilename": "README.md",
   "scripts": {
     "build": "make build",
-    "quality": "make quality",
     "doc": "make doc",
     "gh-pages": "make gh-pages",
     "postinstall": "make post-install",
+    "quality": "make quality",
+    "start": "make server",
     "test": "make test"
   },
   "engines": {
@@ -77,7 +78,6 @@
     "ejs": "^2.6.1",
     "esm": "^3.0.46",
     "express": "^4.16.3",
-    "forever": "~0.15.2",
     "glob": "^7.0.5",
     "lodash": "^4.17.10",
     "marked-engine": "~0.2.0",
