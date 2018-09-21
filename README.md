@@ -49,4 +49,4 @@ In the absence of a true definitive guide,
 [david-img]: https://img.shields.io/david/cantremember/node-sleepbot-cgi.svg?style=flat-square
 [david-url]: https://david-dm.org/cantremember/node-sleepbot-cgi
 [license-img]: https://img.shields.io/badge/license-WTFPL-blue.svg?style=flat-square
-[license-url]: LICENSE
+[license-url]: http://www.wtfpl.net/
