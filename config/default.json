@@ -13,8 +13,7 @@
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"
-    },
-    { "url": "http://sc7.shoutcaststreaming.us:8044" }
+    }
   ],
 
   "ntpServers": [
