@@ -35,7 +35,7 @@ describe('lib/index', () => {
   describe('sebServerPrimary', () => {
     it('returns the primary SEB server', () => {
       const sebServers = theLib.config.get('sebServers');
-      assert.equal(sebServers.length, 2);
+      assert.equal(sebServers.length, 3);
 
       const { sebServerPrimary } = theLib;
       assert.notEqual(sebServerPrimary, undefined);
