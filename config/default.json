@@ -7,14 +7,13 @@
   "viewsRoot": "../views",
 
   "sebServers": [
-    { "url": "http://sc13.shoutcaststreaming.us:8218/seb" },
-    { "url": "http://209.104.5.207:8096/seb" },
     {
-      "url": "http://sc13.shoutcaststreaming.us:8194",
+      "url": "http://sc13.shoutcaststreaming.us:8218/seb",
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"
-    }
+    },
+    { "url": "http://209.104.5.207:8096/seb" }
   ],
 
   "ntpServers": [
