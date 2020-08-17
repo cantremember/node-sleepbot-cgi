@@ -41,7 +41,7 @@ CODE_GET=cat $(CODE_FILE)
 .PHONY: \
 	install \
 	init clean build lock edit \
-	server server-debug server-production \
+	server server-production server-debug server-repl \
 	test test-debug \
 	lint notes only-check coverage view-coverage \
 	quality ci \
@@ -77,11 +77,18 @@ edit:
 
 # Run the thing
 
-server:
-	@BLUEBIRD_DEBUG=1 node -r esm $(ROOT)/bin/app.mjs
+# server:
+# 	@BLUEBIRD_DEBUG=1 node -r esm  $(ROOT)/bin/app.mjs
+
+server-repl:
+	@BLUEBIRD_DEBUG=1 node debug -r esm  $(ROOT)/bin/app.mjs
 
 server-debug:
-	@BLUEBIRD_DEBUG=1 node debug -r esm $(ROOT)/bin/app.mjs
+	@BLUEBIRD_DEBUG=1 node --inspect=localhost:9229 -r esm  $(ROOT)/bin/app.mjs
+
+server-production: server-debug
+
+server: server-debug
 
 
 # Test Suite

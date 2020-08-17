@@ -83,7 +83,7 @@
     "marked-engine": "~0.2.0",
     "minimist": "^1.2.0",
     "moment": "^2.22.2",
-    "morgan": "^1.7.0",
+    "morgan": "^1.10.0",
     "nconf": "~0.10.0"
   },
   "devDependencies": {
