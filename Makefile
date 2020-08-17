@@ -86,6 +86,9 @@ server-repl:
 server-debug:
 	@BLUEBIRD_DEBUG=1 node --inspect=localhost:9229 -r esm  $(ROOT)/bin/app.mjs
 
+server-debug-remote:
+	ssh -N -T -L 9229:localhost:9229 sleepbot.com
+
 server-production: server-debug
 
 server: server-debug
