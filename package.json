@@ -32,7 +32,7 @@
     "test": "NODE_ENV=test  make test"
   },
   "engines": {
-    "node": ">= 8.0.0"
+    "node": ">= 10.0.0"
   },
   "esm": {
     "mode": "strict",
@@ -71,27 +71,26 @@
     "report-dir": "./build/coverage"
   },
   "dependencies": {
-    "axios": "~0.18.0",
+    "axios": "~0.19.2",
     "bluebird": "^3.4.1",
     "cookie-parser": "^1.4.3",
-    "csv-parse": "^2.4.0",
+    "csv-parse": "^4.12.0",
     "ejs": "^2.6.1",
     "esm": "^3.0.46",
     "express": "^4.16.3",
     "glob": "^7.0.5",
     "lodash": "^4.17.10",
-    "marked-engine": "~0.2.0",
     "minimist": "^1.2.0",
     "moment": "^2.22.2",
     "morgan": "^1.10.0",
     "nconf": "~0.10.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.1",
+    "coveralls": "^3.1.0",
     "eslint": "^4.19.1",
-    "gulp": "^4.0.0",
+    "gulp": "^4.0.2",
     "gulp-clean": "~0.4.0",
-    "gulp-cli": "^2.0.1",
+    "gulp-cli": "^2.3.0",
     "gulp-eslint": "^4.0.2",
     "gulp-jsdoc3": "^2.0.0",
     "gulp-sourcemaps": "^2.6.4",
@@ -102,7 +101,7 @@
     "nock": "^9.3.0",
     "node-mocks-http": "^1.7.0",
     "notes": "~0.0.4",
-    "nyc": "^12.0.1",
+    "nyc": "^15.1.0",
     "proxyquire": "^1.7.10",
     "rewire": "^4.0.1",
     "sinon": "^5.0.10",

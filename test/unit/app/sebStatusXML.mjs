@@ -32,7 +32,7 @@ describe('sebStatusXML', () => {
 
       // some basics
       assert.equal(url.indexOf(sebServerPrimary.url), 0);
-      assert(url.match(/mode=viewxml$/));
+      assert(url.match(/statistics$/));
       assert.equal(auth.username, sebServerPrimary.user);
       assert.equal(auth.password, sebServerPrimary.pass);
 

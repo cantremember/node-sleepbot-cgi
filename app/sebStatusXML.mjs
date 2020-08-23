@@ -23,7 +23,7 @@ export default async function middleware(req, res, next) {
   try {
     const response = await axios.request({
       method: 'GET',
-      url: (sebServerPrimary.url + '/admin.cgi?mode=viewxml'),
+      url: (sebServerPrimary.url + '/statistics'),
       headers: {
         'User-Agent': 'XML Getter (Mozilla Compatible)', // <= yeah, it's important
       },

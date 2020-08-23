@@ -212,8 +212,7 @@ describe('app integration', () => {
 
     // produces HTTP 404 unless everything matches
     const nocked = nock(NOCK_SEB_URL)
-    .get('/admin.cgi')
-    .query({ mode: 'viewxml' })
+    .get('/statistics')
     .matchHeader('user-agent', /^XML Getter/)
     .matchHeader('authorization', `Basic ${ authorization }`)
     .reply(200, NOCK_DATA, {

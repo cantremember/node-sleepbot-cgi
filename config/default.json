@@ -8,7 +8,7 @@
 
   "sebServers": [
     {
-      "url": "http://sc13.shoutcaststreaming.us:8218/seb",
+      "url": "http://sc13.shoutcaststreaming.us:8218",
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"

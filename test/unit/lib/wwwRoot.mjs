@@ -65,7 +65,7 @@ describe('lib/wwwRoot', () => {
 
       return wwwRoot.willLoadTSV('/test.tsv')
       .then(theHelper.notCalled, (err) => {
-        assert(err.message.match(/Number of columns is inconsistent/));
+        assert(err.message.match(/Invalid Record Length/));
       });
     });
 

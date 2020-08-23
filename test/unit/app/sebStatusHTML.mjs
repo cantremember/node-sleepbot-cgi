@@ -28,11 +28,13 @@ describe('sebStatusHTML', () => {
   it('proxies from the primary Shoutcast server', async () => {
     sandbox.stub(axios, 'request').callsFake(async (options) => { // eslint-disable-line require-await
       const { sebServerPrimary } = theLib;
-      const { url } = options;
+      const { url, auth } = options;
 
       // some basics
       assert.equal(url.indexOf(sebServerPrimary.url), 0);
       assert(url.match(/7.html$/));
+      assert.equal(auth.username, sebServerPrimary.user);
+      assert.equal(auth.password, sebServerPrimary.pass);
 
       return {
         data: 'BODY',

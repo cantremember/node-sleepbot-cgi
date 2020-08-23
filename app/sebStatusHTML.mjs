@@ -26,6 +26,10 @@ export default async function middleware(req, res, next) {
       headers: {
         'User-Agent': 'XML Getter (Mozilla Compatible)', // <= yeah, it's important
       },
+      auth: {
+        username: sebServerPrimary.user,
+        password: sebServerPrimary.pass,
+      },
       maxRedirects: 1,
     });
 
