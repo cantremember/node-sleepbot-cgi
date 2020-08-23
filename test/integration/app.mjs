@@ -54,7 +54,7 @@ quip
 const NOCK_DATA = 'NOCK_DATA';
 const NOCK_SEB_URL = 'http://seb.nock'; // does not undergo DNS resolution
 const NOCK_SEB_PRIMARY = {
-  url: NOCK_SEB_URL,
+  serverUrl: NOCK_SEB_URL,
   primary: true,
   user: 'USER',
   pass: 'PASS',

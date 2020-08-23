@@ -29,12 +29,9 @@ export default function middleware(req, res) {
   ].concat(sebServers.map((server, index) => {
     const n = index + 1;
     return [
-      'File' +   n + '=' + server.url,
-      'Title' +  n + '=Sleepbot Environmental Broadcast',
+      'File' +   n + '=' + server.streamUrl,
+      'Title' +  n + '=Sleepbot Environmental Broadcast - - sleepbot.com/seb/',
       'Length' + n + '=-1',
-      /* eslint-disable max-len */
-      // Browser1=http://www.winamp.com/bin/sc/sccontext.php?title=Sleepbot+Environmental+Broadcast&genre=Ambient+Downtempo&url=http%3A%2F%2Fsleepbot.com%2Fseb
-      /* eslint-enable max-len */
     ].join('\n');
   })).join('\n') + '\n';
 

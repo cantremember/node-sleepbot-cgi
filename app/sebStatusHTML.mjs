@@ -18,11 +18,12 @@ import theLib from '../lib/index';
  */
 export default async function middleware(req, res, next) {
   const { sebServerPrimary } = theLib;
+  const url = `${ sebServerPrimary.serverUrl }/7.html`;
 
   try {
     const response = await axios.request({
       method: 'GET',
-      url: (sebServerPrimary.url + '/7.html'),
+      url,
       headers: {
         'User-Agent': 'XML Getter (Mozilla Compatible)', // <= yeah, it's important
       },

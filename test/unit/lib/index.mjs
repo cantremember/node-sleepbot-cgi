@@ -36,9 +36,10 @@ describe('lib/index', () => {
     it('returns the primary SEB server', () => {
       const sebServers = theLib.config.get('sebServers');
       assert.equal(sebServers.length, 2);
+      assert.equal(sebServers.every((server) => server.streamUrl), true);
 
       const { sebServerPrimary } = theLib;
-      assert.notEqual(sebServerPrimary, undefined);
+      assert.notEqual(sebServerPrimary.serverUrl, undefined);
       assert.equal(sebServerPrimary.primary, true);
     });
   });

@@ -27,8 +27,8 @@ describe('sebPlaylist', () => {
   it('renders a Shoutcast playlist', () => {
     theHelper.mockConfig({
       sebServers: [
-        { url: 'http://server1.seb/' },
-        { url: 'http://server2.seb/' },
+        { streamUrl: 'http://server1.seb/' },
+        { streamUrl: 'http://server2.seb/' },
       ],
     });
 
@@ -43,10 +43,10 @@ describe('sebPlaylist', () => {
 numberofentries=2
 Version=2
 File1=http://server1.seb/
-Title1=Sleepbot Environmental Broadcast
+Title1=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
 Length1=-1
 File2=http://server2.seb/
-Title2=Sleepbot Environmental Broadcast
+Title2=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
 Length2=-1
 `;
 

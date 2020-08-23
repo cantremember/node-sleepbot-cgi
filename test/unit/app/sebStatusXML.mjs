@@ -31,7 +31,7 @@ describe('sebStatusXML', () => {
       const { url, auth } = options;
 
       // some basics
-      assert.equal(url.indexOf(sebServerPrimary.url), 0);
+      assert.equal(url.indexOf(sebServerPrimary.serverUrl), 0);
       assert(url.match(/statistics$/));
       assert.equal(auth.username, sebServerPrimary.user);
       assert.equal(auth.password, sebServerPrimary.pass);
