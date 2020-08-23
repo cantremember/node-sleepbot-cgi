@@ -77,8 +77,8 @@ edit:
 
 # Run the thing
 
-# server:
-# 	@BLUEBIRD_DEBUG=1 node -r esm  $(ROOT)/bin/app.mjs
+server:
+	@BLUEBIRD_DEBUG=1 node -r esm  $(ROOT)/bin/app.mjs
 
 server-repl:
 	@BLUEBIRD_DEBUG=1 node debug -r esm  $(ROOT)/bin/app.mjs
@@ -89,9 +89,7 @@ server-debug:
 server-debug-remote:
 	ssh -N -T -L 9229:localhost:9229 sleepbot.com
 
-server-production: server-debug
-
-server: server-debug
+server-production: server
 
 
 # Test Suite
