@@ -81,7 +81,7 @@
     "glob": "^7.0.5",
     "lodash": "^4.17.10",
     "marked-engine": "~0.2.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "moment": "^2.22.2",
     "morgan": "^1.10.0",
     "nconf": "~0.10.0"
