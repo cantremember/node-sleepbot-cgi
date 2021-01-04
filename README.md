@@ -2,8 +2,7 @@
 
 A [Node.js](https://nodejs.org) app to replace legacy Perl CGI scripts for [sleepbot.com](http://sleepbot.com)
 
-  [![Build status][travis-img]][travis-url]
-  [![Test coverage][coveralls-img]][coveralls-url]
+  [![Build status][githubactions-img]][githubactions-url]
   [![Dependency status][david-img]][david-url]
   [![License][license-img]][license-url]
 
@@ -42,10 +41,8 @@ In the absence of a true definitive guide,
 [WTFPL][license-url]
 
 
-[travis-img]: https://img.shields.io/travis/cantremember/node-sleepbot-cgi.svg?style=flat-square
-[travis-url]: https://travis-ci.org/cantremember/node-sleepbot-cgi
-[coveralls-img]: https://img.shields.io/coveralls/cantremember/node-sleepbot-cgi.svg?style=flat-square
-[coveralls-url]: https://coveralls.io/r/cantremember/node-sleepbot-cgi
+[githubactions-img]: https://github.com/cantremember/node-sleepbot-cgi/workflows/CI/badge.svg
+[githubactions-url]: https://github.com/cantremember/node-sleepbot-cgi/actions
 [david-img]: https://img.shields.io/david/cantremember/node-sleepbot-cgi.svg?style=flat-square
 [david-url]: https://david-dm.org/cantremember/node-sleepbot-cgi
 [license-img]: https://img.shields.io/badge/license-WTFPL-blue.svg?style=flat-square

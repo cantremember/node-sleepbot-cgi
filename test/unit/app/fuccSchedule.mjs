@@ -9,7 +9,7 @@ import middleware from '../../../app/fuccSchedule';
 
 
 // aligned to Date() local time
-const NOW = moment();
+const NOW = moment(1234567890000);
 const MOMENT_SHOW = moment('2001-01-01T01:00:00Z').add(NOW.utcOffset(), 'minutes');
 const MOMENT_LIVE = moment('2002-02-02T02:00:00Z').add(NOW.utcOffset(), 'minutes');
 

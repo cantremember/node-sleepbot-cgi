@@ -176,21 +176,7 @@ view-coverage:
 # (2) from build
 quality:  only-check lint  build coverage
 
-# https://github.com/cainus/node-coveralls
-#   https://istanbul.js.org/docs/tutorials/mocha/
-#   "Integrating with Coveralls"
-# environment
-#   COVERALLS_SERVICE_NAME  # eg. 'travis-ci', 'local'
-#   COVERALLS_REPO_TOKEN    # from https://coveralls.io/github/cantremember/node-sleepbot-cgi/settings
-# FIXME:  Bad response: 422 {"message":"Couldn't find a repository matching this job.","error":true}
-#   on local / non Travis-CI builds
-#   we are not gonna make CI success dependent upon Coveralls.io
-#   CODE=$?
-#
 ci:  only-check lint  clean build coverage
-	@cat $(COVERAGE_INFO) | $(NODE_BIN)/coveralls || \
-		$(call E_WARN,"Coveralls.io failure ignored")
-	@$(call E_OK,"CI passed!")
 
 
 # Documentation
