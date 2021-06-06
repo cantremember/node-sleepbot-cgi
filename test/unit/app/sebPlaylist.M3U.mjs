@@ -3,10 +3,10 @@ import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
 import theHelper from '../../helper';
-import middleware from '../../../app/sebPlaylist.PLS';
+import middleware from '../../../app/sebPlaylist.M3U';
 
 
-describe('sebPlaylist.PLS', () => {
+describe('sebPlaylist.M3U', () => {
   const sandbox = sinon.createSandbox();
   let next;
   let req;
@@ -37,17 +37,13 @@ describe('sebPlaylist.PLS', () => {
     assert.equal(returned, undefined);
 
     assert(! next.called);
-    assert.deepEqual(res._headers, { 'Content-Type': 'audio/x-scpls' });
+    assert.deepEqual(res._headers, { 'Content-Type': 'application/vnd.apple.mpegurl' });
 
-    const PLAYLIST = `[playlist]
-numberofentries=2
-Version=2
-File1=http://server1.seb/
-Title1=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
-Length1=-1
-File2=http://server2.seb/
-Title2=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
-Length2=-1
+    const PLAYLIST = `#EXTM3U
+#EXTINF:-1,Sleepbot Environmental Broadcast - - sleepbot.com/seb/
+http://server1.seb/
+#EXTINF:-1,Sleepbot Environmental Broadcast - - sleepbot.com/seb/
+http://server2.seb/
 `;
 
     assert.equal(res._getData(), PLAYLIST);

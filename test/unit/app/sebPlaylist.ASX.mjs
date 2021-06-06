@@ -3,10 +3,10 @@ import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
 import theHelper from '../../helper';
-import middleware from '../../../app/sebPlaylist.PLS';
+import middleware from '../../../app/sebPlaylist.ASX';
 
 
-describe('sebPlaylist.PLS', () => {
+describe('sebPlaylist.ASX', () => {
   const sandbox = sinon.createSandbox();
   let next;
   let req;
@@ -37,17 +37,22 @@ describe('sebPlaylist.PLS', () => {
     assert.equal(returned, undefined);
 
     assert(! next.called);
-    assert.deepEqual(res._headers, { 'Content-Type': 'audio/x-scpls' });
+    assert.deepEqual(res._headers, { 'Content-Type': 'video/x-ms-asf' });
 
-    const PLAYLIST = `[playlist]
-numberofentries=2
-Version=2
-File1=http://server1.seb/
-Title1=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
-Length1=-1
-File2=http://server2.seb/
-Title2=Sleepbot Environmental Broadcast - - sleepbot.com/seb/
-Length2=-1
+    const PLAYLIST = `<ASX version="3.0">
+  <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
+  <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+  <ENTRY>
+    <REF href="http://server1.seb/" />
+    <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
+    <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+  </ENTRY>
+  <ENTRY>
+    <REF href="http://server2.seb/" />
+    <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
+    <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+  </ENTRY>
+</ASX>
 `;
 
     assert.equal(res._getData(), PLAYLIST);

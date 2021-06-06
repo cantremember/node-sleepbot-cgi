@@ -6,6 +6,10 @@
   curl -v 'http://localhost:3000/404.cgi'
   curl -v 'http://localhost:3000/cgi/animbot.cgi'
   curl -v 'http://localhost:3000/ambience/cgi/listen.cgi'
+  curl -v 'http://localhost:3000/ambience/cgi/listen.asx'
+  curl -v 'http://localhost:3000/ambience/cgi/listen.m3u'
+  curl -v 'http://localhost:3000/ambience/cgi/listen.pls'
+  curl -v 'http://localhost:3000/ambience/cgi/listen.rm'
   curl -v 'http://localhost:3000/ambience/cgi/7.cgi'
   curl -v 'http://localhost:3000/ambience/cgi/viewxml.cgi'
   curl -v 'http://localhost:3000/ambience/cgi/imgpage.cgi'
@@ -73,8 +77,13 @@ function _client() {
 function _bodyIncludes(string, doesArg) {
   const does = doesArg || (doesArg === undefined);
   return (res) => {
-    // "If the response is ok, it should return falsy"
-    const text = (res.text || '');
+    const text = (
+      res.text ||
+      // if the MIME type seems binary, it'll be a Buffer
+      res.body.toString() ||
+      // "If the response is ok, it should return falsy"
+      ''
+    );
     if (text.includes(string) === does) {
       return;
     }
@@ -174,10 +183,47 @@ describe('app integration', () => {
   it('GET /ambience/cgi/listen.cgi', async () => {
     await _client().get('/ambience/cgi/listen.cgi')
     .expect(200)
+    .expect('content-type', /vnd.apple.mpegurl/)
+    .expect(_bodyIncludes('#EXTM3U'))
+    .endAsync();
+  });
+
+  it('GET /ambience/cgi/listen.asx', async () => {
+    await _client().get('/ambience/cgi/listen.asx')
+    .expect(200)
+    .expect('content-type', /x-ms-asf/)
+    .expect(_bodyIncludes('<ASX '))
+    .endAsync();
+  });
+
+  it('GET /ambience/cgi/listen.m3u', async () => {
+    await _client().get('/ambience/cgi/listen.m3u')
+    .expect(200)
+    .expect('content-type', /vnd.apple.mpegurl/)
+    .expect(_bodyIncludes('#EXTM3U'))
+    .endAsync();
+  });
+
+  it('GET /ambience/cgi/listen.pls', async () => {
+    await _client().get('/ambience/cgi/listen.pls')
+    .expect(200)
     .expect('content-type', /x-scpls/)
     .expect(_bodyIncludes('[playlist]'))
     .endAsync();
   });
+
+  it('GET /ambience/cgi/listen.rm', async () => {
+    await _client().get('/ambience/cgi/listen.rm')
+    .expect(200)
+    .expect('content-type', /vnd.rn-realmedia/)
+    .expect((res) => {
+      // one line per stream URL, and a trailing '\n'
+      const text = (res.text || '');
+      assert.strictEqual(text.split('\n').length, 3);
+    })
+    .endAsync();
+  });
+
 
   it('GET /ambience/cgi/7.cgi', async () => {
     // mock data for `sebServerPrimary`
