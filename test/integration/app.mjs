@@ -6,6 +6,7 @@
   curl -v 'http://localhost:3000/404.cgi'
   curl -v 'http://localhost:3000/cgi/animbot.cgi'
   curl -v 'http://localhost:3000/ambience/cgi/listen.cgi'
+  curl -v 'http://localhost:3000/ambience/cgi/listen.cgi/listen.pls'
   curl -v 'http://localhost:3000/ambience/cgi/listen.asx'
   curl -v 'http://localhost:3000/ambience/cgi/listen.m3u'
   curl -v 'http://localhost:3000/ambience/cgi/listen.pls'
@@ -185,6 +186,14 @@ describe('app integration', () => {
     .expect(200)
     .expect('content-type', /vnd.apple.mpegurl/)
     .expect(_bodyIncludes('#EXTM3U'))
+    .endAsync();
+  });
+
+  it('GET /ambience/cgi/listen.cgi/listen.pls', async () => {
+    await _client().get('/ambience/cgi/listen.cgi/listen.pls')
+    .expect(200)
+    .expect('content-type', /x-scpls/)
+    .expect(_bodyIncludes('[playlist]'))
     .endAsync();
   });
 
