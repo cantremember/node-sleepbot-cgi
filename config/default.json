@@ -13,8 +13,7 @@
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"
-    },
-    { "streamUrl": "http://209.104.5.207:8096/seb" }
+    }
   ],
 
   "ntpServers": [

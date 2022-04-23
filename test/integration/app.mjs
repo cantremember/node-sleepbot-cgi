@@ -228,7 +228,7 @@ describe('app integration', () => {
     .expect((res) => {
       // one line per stream URL, and a trailing '\n'
       const text = (res.text || '');
-      assert.strictEqual(text.split('\n').length, 3);
+      assert.strictEqual(text.split('\n').length, 2);
     })
     .endAsync();
   });
