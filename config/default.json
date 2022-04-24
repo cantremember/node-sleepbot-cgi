@@ -13,7 +13,8 @@
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"
-    }
+    },
+    { "streamUrl": "http://backupstream.sleepbot.com:8096/seb" }
   ],
 
   "ntpServers": [
