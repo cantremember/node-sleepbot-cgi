@@ -1,7 +1,7 @@
 import path from 'path';
 
-import wwwRoot from '../lib/wwwRoot';
-import theLib from '../lib/index';
+import wwwRoot from '../lib/wwwRoot.mjs';
+import theLib from '../lib/index.mjs';
 
 
 /**
@@ -11,7 +11,7 @@ import theLib from '../lib/index';
  * @function app.redirectToRandomFile
  * @params {String} filepath a physical directory *and* root-relative path
  * @params {String} glob a glob pattern
- * @returns {Function<Promise>} an async Express middeware Function
+ * @returns {Function} an async Express middeware Function
  */
 export default function redirectToRandomFile(filepath, /* istanbul ignore next */ glob = '*.*') {
   // a Promise

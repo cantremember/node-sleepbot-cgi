@@ -4,8 +4,8 @@ import path from 'path';
 import glob from 'glob';
 import mitm from 'mitm';
 
-import theConfig from '../lib/config';
-const theConfigDefaults = theConfig.stores[theConfig.FILE_DEFAULT];
+import theConfig, { FILE_DEFAULT } from '../lib/config.mjs';
+const theConfigDefaults = theConfig.stores[FILE_DEFAULT];
 assert.ok(theConfigDefaults, '`nconf` has changed how it stores things');
 
 const REAL_VIEWS_ROOT = theConfigDefaults.get('viewsRoot');

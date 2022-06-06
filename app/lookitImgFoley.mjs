@@ -1,4 +1,4 @@
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 
 
 /**

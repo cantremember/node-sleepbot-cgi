@@ -2,8 +2,8 @@ import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
-import theHelper from '../../helper';
-import middleware from '../../../app/sebPlaylist.ASX';
+import theHelper from '../../helper.mjs';
+import middleware from '../../../app/sebPlaylist.ASX.mjs';
 
 
 describe('sebPlaylist.ASX', () => {

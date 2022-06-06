@@ -1,14 +1,13 @@
 /* eslint max-nested-callbacks: [ 1, 5 ] */
 
-import Promise from 'bluebird';
 import assert from 'assert';
 import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 import _ from 'lodash';
 
-import theLib from '../../../lib/index';
-import theHelper from '../../helper';
+import theLib from '../../../lib/index.mjs';
+import theHelper from '../../helper.mjs';
 
 
 describe('lib/index', () => {
@@ -50,7 +49,7 @@ describe('lib/index', () => {
     let willHaveMemoized;
     beforeEach(() => {
       willPromise = sandbox.spy((value) => {
-        return Promise.delay(0).return(value);
+        return (new Promise((resolve) => setImmediate(resolve))).then(() => value);
       });
       willHaveMemoized = theLib.willMemoize(willPromise);
     });
@@ -205,7 +204,7 @@ describe('lib/index', () => {
         theHelper.notCalled();
       }
       catch (err) {
-        assert.ok(/not applying monkey-patch/.test(err.message));
+        assert.ok((/not applying monkey-patch/).test(err.message));
       }
     });
 

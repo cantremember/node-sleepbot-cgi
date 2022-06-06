@@ -1,5 +1,5 @@
-import wwwRoot from '../lib/wwwRoot';
-import theLib from '../lib/index';
+import wwwRoot from '../lib/wwwRoot.mjs';
+import theLib from '../lib/index.mjs';
 
 
 // column -> index mapping

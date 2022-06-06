@@ -2,8 +2,8 @@ import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
-import theLib from '../../../lib/index';
-import middleware from '../../../app/morganIndex';
+import theLib from '../../../lib/index.mjs';
+import middleware from '../../../app/morganIndex.mjs';
 
 
 describe('morganIndex', () => {

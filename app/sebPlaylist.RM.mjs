@@ -1,7 +1,7 @@
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 import {
   trimmedPlaylist,
-} from '../lib/playlist';
+} from '../lib/playlist.mjs';
 
 
 /**

@@ -1,7 +1,7 @@
-import Promise from 'bluebird';
 import net from 'net';
+import _ from 'lodash';
 
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 
 
 /**
@@ -12,56 +12,24 @@ import theLib from '../lib/index';
  * but this is a good classic Promise reference example to keep around.
  *
  * @params {express.response} res
- * @params {Array<String>} tried all the servers we've tried so far
  * @returns {Promise<String>} a Promise resolving an `ntp` representation
  */
-async function willTryServers(res, tried=[]) { // eslint-disable-line require-await
-  const servers = theLib.config.get('ntpServers');
-
-  if (tried.length >= servers.length) {
-    // they're ALL down?  we are Service Unavailable
-    res.set('Content-Type', 'text/plain').status(503).end();
-    return Promise.resolve();
-  }
+async function willTryServers(res) { // eslint-disable-line require-await
+  const servers = _.shuffle( theLib.config.get('ntpServers') );
 
   // it's a multi-step Promise,
   //   1) choose a server
   //   2) connect -- error rejects
-  return new Promise((resolve /*, reject */) => {
-    // okay, any server we haven't tried yet ...
-    let server;
-    while (true) {
-      server = theLib.chooseAny(servers);
-      if (! tried.includes(server)) {
-        break;
-      }
-    }
-    tried.push(server);
+  for await (const server of servers) {
+    // a deferred Promise -- we will not reject using this implementation
+    let _resolveForServer;
+    const _promiseForServer = new Promise((resolve) => { _resolveForServer = resolve; });
+
 
     // Daytime Protocol
     //   https://tools.ietf.org/html/rfc867
     let connection = net.connect(13, server);
     connection.setTimeout(theLib.config.get('ntpTimeout'));
-
-
-    // retry with the next server
-    //   Node 8 seems to wrap an `async function` it its own Promise;
-    //   so even though we construct & return a `bluebird` Promise, and then
-    //   `resolve( willTryServers(res, tried).finally(release) );`
-    //   we get "TypeError: willTryServers(...).finally is not a function"
-    async function _retry() {
-      let result;
-      try {
-        result = await willTryServers(res, tried);
-      }
-      finally {
-        // there may be more Errors on the way,
-        //   so don't release until the upstream is done
-        release(); // eslint-disable-line no-use-before-define
-
-        resolve(result);
-      }
-    }
 
 
     // fail
@@ -81,11 +49,8 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
         }
         /* eslint-enable no-console */
 
-        // // assume it'll come back
-        // delete servers[server];
-
-        // keep on trying
-        _retry();
+        // this one is no good -- try the next one
+        _resolveForServer(null);
       }
 
       connection.on(topic, listener);
@@ -119,18 +84,13 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
         // if it's non-blank, we've got what we want!
         if (parts.length !== 0) {
           const result = parts.join('\n');
-          res
-          .set('Content-Type', 'text/plain')
-          .status(200)
-          .send(result);
 
-          resolve(result);
-          release(); // eslint-disable-line no-use-before-define
+          _resolveForServer(result);
           return;
         }
 
-        // keep on trying
-        _retry();
+        // this one is no good -- try the next one
+        _resolveForServer(null);
       }
 
       connection.on(topic, listener);
@@ -141,7 +101,7 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
 
 
     // let go
-    function release() {
+    function _release() {
       /* istanbul ignore if */
       if (! connection) {
         return;
@@ -155,7 +115,25 @@ async function willTryServers(res, tried=[]) { // eslint-disable-line require-aw
 
       connection = undefined;
     }
-  });
+
+
+    const result = await _promiseForServer;
+    _release();
+
+    if (result) {
+      res
+      .set('Content-Type', 'text/plain')
+      .status(200)
+      .send(result);
+
+      return Promise.resolve();
+    }
+  }
+
+
+  // they're ALL down?  we are Service Unavailable
+  res.set('Content-Type', 'text/plain').status(503).end();
+  return Promise.resolve();
 }
 
 

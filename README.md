@@ -15,20 +15,6 @@ since no one in their right might has any need for this code besides me.
 The [JSDoc](https://cantremember.github.io/node-sleepbot-cgi/) is provided via GitHub Pages.
 
 
-## Works In Progress
-
-### ES Modules Support
-
-There seem to be some competing thoughts and proposals amongst the Node.js Community as they move towards adopting a static synchronous `import` paradigm.
-In the absence of a true definitive guide,
-
-- this project uses the '*.mjs' filename convention called out in [Native ES Modules in NodeJS](https://medium.com/@giltayar/native-es-modules-in-nodejs-status-and-future-directions-part-i-ee5ea3001f71).
-- its `package.json` has a "module" property,
-  though its use may be incorrect since the [In Defense of .js](https://github.com/dherman/defense-of-dot-js/blob/master/proposal.md) proposal may or may not be current.
-- `import` capabilities are provided by the [esm](https://github.com/standard-things/esm) package,
-  vs. the "native command line option" mentioned in Dr. Rauschmayer's article on [Using ES modules natively in Node.js](http://2ality.com/2017/09/native-esm-node.html).
-
-
 ## Contributing
 
 [Seriously?](CONTRIBUTING.md)

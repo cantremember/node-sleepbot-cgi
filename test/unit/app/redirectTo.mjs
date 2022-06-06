@@ -3,8 +3,8 @@ import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 import _ from 'lodash';
 
-import theLib from '../../../lib/index';
-import builder from '../../../app/redirectTo';
+import theLib from '../../../lib/index.mjs';
+import builder from '../../../app/redirectTo.mjs';
 
 const ROUTE = '/ROUTE';
 

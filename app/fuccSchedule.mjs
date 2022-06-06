@@ -1,5 +1,5 @@
-import wwwRoot from '../lib/wwwRoot';
-import theLib from '../lib/index';
+import wwwRoot from '../lib/wwwRoot.mjs';
+import theLib from '../lib/index.mjs';
 
 
 // // TODO: timezone support
@@ -108,6 +108,7 @@ const willLoadDead = theLib.willMemoize(async () => {
     return file;
   }
   catch (err) /* istanbul ignore next */ {
+    console.error(err); // eslint-disable-line no-console
     return undefined;
   }
 });
@@ -167,6 +168,7 @@ async function checkLive(date) {
   }
   catch (err) {
     // treat as no match
+    console.error(err); // eslint-disable-line no-console
     return undefined;
   }
 }
@@ -222,6 +224,7 @@ async function checkShow(date) {
   }
   catch (err) {
     // treat as no match
+    console.error(err); // eslint-disable-line no-console
     return undefined;
   }
 }

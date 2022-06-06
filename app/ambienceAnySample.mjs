@@ -1,7 +1,5 @@
-import Promise from 'bluebird';
-
-import wwwRoot from '../lib/wwwRoot';
-import theLib from '../lib/index';
+import wwwRoot from '../lib/wwwRoot.mjs';
+import theLib from '../lib/index.mjs';
 
 
 // column -> index mapping
@@ -57,7 +55,7 @@ async function middleware(req, res, next) {
     //   the results are consistent
 
     // we split sample storage into two subdirectories
-    sample.dirNum = (/^[m-z]/.test(sample.file) ? 2 : 1);
+    sample.dirNum = ((/^[m-z]/).test(sample.file) ? 2 : 1);
 
     // things about the album
     const stub = sample.stub;

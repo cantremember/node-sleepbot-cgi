@@ -1,8 +1,8 @@
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 import {
   STREAM_TITLE,
   trimmedPlaylist,
-} from '../lib/playlist';
+} from '../lib/playlist.mjs';
 
 
 /* eslint-disable max-len */

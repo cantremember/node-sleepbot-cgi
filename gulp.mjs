@@ -5,10 +5,16 @@ import clean from 'gulp-clean';
 import eslint from 'gulp-eslint';
 import jsdoc from 'gulp-jsdoc3';
 
-import JSDOC_CONFIG from '../.jsdoc.json';
+// TODO:  import ... assert { type: 'json' };
+//   required by Node 16, unsupported by ESLint 8.x
+//   https://github.com/eslint/eslint/discussions/15305
+import { readFileSync } from 'fs';
+// TODO:  import JSDOC_CONFIG from './.jsdoc.json'; assert { type: 'json' };
+const JSDOC_CONFIG = JSON.parse(readFileSync(new URL('.jsdoc.json', import.meta.url)));
 
 // also @see Makefile
-import PACKAGE_JSON from '../package.json';
+// TODO:  import PACKAGE_JSON from './package.json' assert { type: 'json' };
+const PACKAGE_JSON = JSON.parse(readFileSync(new URL('package.json', import.meta.url)));
 const SOURCE_GLOBS = PACKAGE_JSON.nyc.include;
 
 
@@ -16,7 +22,6 @@ const GLOBS = Object.freeze({
   source: SOURCE_GLOBS,
   test:   [
     'test/bootstrap.mjs',
-    'test/**/*.js',
     'test/**/*.mjs',
   ],
   views:  [ 'views/**' ],

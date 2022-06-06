@@ -7,16 +7,25 @@ COVERAGE_INFO = $(ROOT)/build/coverage/lcov.info
 COVERAGE_REPORT = $(ROOT)/build/coverage/lcov-report/index.html
 DOC_DIR = $(ROOT)/build/doc
 
+# i would rather 'gulp.mjs' wasn't in the root,
+#   but i am not in a mood to fight with 'bin/gulp.mjs' relative directory nonsense
+GULP_EXEC = $(NODE_BIN)/gulp --gulpfile gulp.mjs
+
+# yes, technically `JS_` lists '.mjs' files now
+#   and in reality, we ignore the '*.js' extension entirely
+#   it's all about ESModules & '*.json' now
 # also
 #   @see package.json + `nyc.include`
-#   @see bin/gulp.js
-JS_FILES = gulpfile.js index.js index.mjs
+#   @see gulp.mjs
+JS_FILES = *.mjs
 JS_DIRS = app/ bin/ config/ lib/ test/ views/
-JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | egrep "\.(js|mjs)$")
+#   that ')$"' combo at the end is critical to avoiding a world of pain
+JS_STAGED = $(git diff --cached --name-only --diff-filter=ACM | egrep "\.(mjs)$")
 
-TEST_FILES = $(ROOT)/test/bootstrap.mjs \
-	$(ROOT)/test/**/*.js $(ROOT)/test/**/*.mjs \
-	$(ROOT)/test/**/**/*.js $(ROOT)/test/**/**/*.mjs
+TEST_FILES = \
+	$(ROOT)/test/bootstrap.mjs \
+	$(ROOT)/test/**/*.mjs \
+	$(ROOT)/test/**/**/*.mjs
 
 
 # colors
@@ -41,7 +50,7 @@ CODE_GET=cat $(CODE_FILE)
 .PHONY: \
 	install \
 	init clean build lock edit \
-	server server-production server-debug server-repl \
+	server server-debug server-repl \
 	test test-debug \
 	lint notes only-check coverage view-coverage \
 	quality ci \
@@ -63,7 +72,7 @@ init:
 	@mkdir -p build
 
 clean:
-	@$(NODE_BIN)/gulp clean
+	@$(GULP_EXEC) clean
 
 build:  init
 	@# no build steps, currently
@@ -71,25 +80,21 @@ build:  init
 lock:
 	@npm install --package-lock-only
 
-edit:
-	@subl node-sleepbot-cgi.sublime-project
-
 
 # Run the thing
 
 server:
-	@BLUEBIRD_DEBUG=1 node -r esm  $(ROOT)/bin/app.mjs
+	@# --httpPort=3000
+	@node  $(ROOT)/bin/app.mjs
 
 server-repl:
-	@BLUEBIRD_DEBUG=1 node debug -r esm  $(ROOT)/bin/app.mjs
+	@node inspect  $(ROOT)/bin/app.mjs
 
 server-debug:
-	@BLUEBIRD_DEBUG=1 node --inspect=localhost:9229 -r esm  $(ROOT)/bin/app.mjs
+	@node --inspect=localhost:9229  $(ROOT)/bin/app.mjs
 
 server-debug-remote:
 	ssh -N -T -L 9229:localhost:9229 sleepbot.com
-
-server-production: server
 
 
 # Test Suite
@@ -97,8 +102,7 @@ server-production: server
 #   because it's a pain to enable a debugger REPL in a Gulp Task
 #   `gulp debug` => "Task never defined: debug", etc.
 test:
-	@BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha \
-		-r esm \
+	@NODE_ENV=test $(NODE_BIN)/mocha \
 		--recursive --ui bdd --reporter spec --timeout 2000 \
 		$(TEST_FILES) \
 		&& $(CODE_OK) || $(CODE_FAIL)
@@ -110,8 +114,7 @@ test:
 	fi
 
 test-debug:
-	@BLUEBIRD_DEBUG=1 NODE_ENV=test $(NODE_BIN)/mocha debug \
-		-r esm \
+	@NODE_ENV=test  node inspect  $(NODE_BIN)/mocha \
 		--recursive --ui bdd --reporter spec --timeout 2000 \
 		$(TEST_FILES)
 
@@ -119,7 +122,7 @@ test-debug:
 # Code Quality Tasks
 
 lint:
-	@$(NODE_BIN)/gulp lint \
+	@$(GULP_EXEC) lint \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
@@ -142,6 +145,7 @@ only-check:
 		$(call E_ERR,"please remove '.only' calls from the Test Suite"); exit 1; \
 	fi
 
+
 # https://github.com/istanbuljs/nyc
 #   https://github.com/istanbuljs/istanbuljs
 #   `nyc help`
@@ -152,19 +156,23 @@ only-check:
 #   /* istanbul ignore else */
 #   /* istanbul ignore next */
 #   /* istanbul ignore file */
-# TODO:  Gulp task
-#	current `gulp-istanbul` is for 1.0, https://github.com/gotwarlost/istanbul
-coverage:
-	@NODE_ENV=test $(NODE_BIN)/nyc \
-		$(MAKE) test
-	@$(NODE_BIN)/nyc check-coverage \
-		&& $(CODE_OK) || $(CODE_FAIL)
+# TODO:  restore Coverage support
+#   ES Modules don't use `require` :(
+#   [todo: figure out how to instrument .mjs files](https://github.com/istanbuljs/nyc/issues/659)
+#   [NYC style code coverage](https://github.com/nodejs/node/issues/42243)
+coverage:  test
 
-	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
-		$(call E_ERR,"Coverage failed"); exit 1; \
-	else \
-		$(call E_OK,"Coverage passed!"); \
-	fi
+# coverage:
+# 	@NODE_ENV=test $(NODE_BIN)/nyc \
+# 		$(MAKE) test
+# 	@$(NODE_BIN)/nyc check-coverage \
+# 		&& $(CODE_OK) || $(CODE_FAIL)
+#
+# 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \
+# 		$(call E_ERR,"Coverage failed"); exit 1; \
+# 	else \
+# 		$(call E_OK,"Coverage passed!"); \
+# 	fi
 
 view-coverage:
 	open $(COVERAGE_REPORT)
@@ -182,7 +190,7 @@ ci:  only-check lint  clean build coverage
 # Documentation
 
 doc:  build
-	@$(NODE_BIN)/gulp doc \
+	$(GULP_EXEC) doc \
 		&& $(CODE_OK) || $(CODE_FAIL)
 
 	@if [[ "`$(CODE_GET)`" != "0" ]]; then \

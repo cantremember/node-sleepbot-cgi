@@ -2,7 +2,7 @@ import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 
-import middleware from '../../../app/lookitImgFoley';
+import middleware from '../../../app/lookitImgFoley.mjs';
 
 
 describe('lookitImgFoley', () => {

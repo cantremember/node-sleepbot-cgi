@@ -4,8 +4,8 @@ import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 import moment from 'moment';
 
-import wwwRoot from '../../../lib/wwwRoot';
-import middleware from '../../../app/fuccSchedule';
+import wwwRoot from '../../../lib/wwwRoot.mjs';
+import middleware from '../../../app/fuccSchedule.mjs';
 
 
 // aligned to Date() local time

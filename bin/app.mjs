@@ -1,19 +1,9 @@
 /*
-  #!/usr/bin/env node -r esm
-
-  https://stackoverflow.com/questions/4303128/how-to-use-multiple-arguments-for-awk-with-a-shebang-i-e
-    "... everything after the path of the shebang gets parsed to the program as one argument."
-    so that's a problem ... we can't self pre-load ESModules
-  better alternatives going forward
-    `make server`
-    `/bin/bash -c 'make server 2>&1 >> stdio.log'`
-
   ENV
     HTTP_PORT
     WWW_ROOT
     ...
     NODE_ENV
-    BLUEBIRD_DEBUG=1
 
   TODO
     https://github.com/trentm/node-bunyan
@@ -23,13 +13,11 @@
 
 import minimist from 'minimist';
 
-import wwwRoot from '../lib/wwwRoot';
-import theLib from '../lib/index';
-import theApp from '../lib/app';
+import wwwRoot from '../lib/wwwRoot.mjs';
+import theLib from '../lib/index.mjs';
+import theApp from '../lib/app.mjs';
 
 
-// TODO:  make this work with ESModules
-//   specifically, `import('path').basename( import('url').parse( import.meta.url ).path )`
 const FILENAME = 'app.mjs';
 const USAGE = `Usage:  ${ FILENAME } --port <PORT>`;
 

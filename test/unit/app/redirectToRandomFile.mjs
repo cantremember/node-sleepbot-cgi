@@ -3,9 +3,9 @@ import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
 import _ from 'lodash';
 
-import theLib from '../../../lib/index';
-import theHelper from '../../helper';
-import builder from '../../../app/redirectToRandomFile';
+import theLib from '../../../lib/index.mjs';
+import theHelper from '../../helper.mjs';
+import builder from '../../../app/redirectToRandomFile.mjs';
 
 
 describe('redirectToRandomFile', () => {

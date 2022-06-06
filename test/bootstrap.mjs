@@ -4,7 +4,7 @@
 
 import assert from 'assert';
 import sinon from 'sinon';
-import theHelper from './helper';
+import theHelper from './helper.mjs';
 
 // non-HTTP `net.socket` mocking
 //   must be executed before any import of 'net'

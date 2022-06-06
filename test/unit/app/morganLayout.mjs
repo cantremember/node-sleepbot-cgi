@@ -3,8 +3,8 @@ import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 
-import wwwRoot from '../../../lib/wwwRoot';
-import middleware from '../../../app/morganLayout';
+import wwwRoot from '../../../lib/wwwRoot.mjs';
+import middleware from '../../../app/morganLayout.mjs';
 
 const CARD_DATA = `
 ID\tABBREV\tTITLE

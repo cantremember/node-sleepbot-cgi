@@ -33,19 +33,19 @@
   ```
 */
 
-import Promise from 'bluebird';
 import assert from 'assert';
+import { promisify } from 'util';
 import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import supertest from 'supertest';
 import nock from 'nock';
 
-supertest.Test.prototype.endAsync = Promise.promisify(supertest.Test.prototype.end);
+supertest.Test.prototype.endAsync = promisify(supertest.Test.prototype.end);
 
-import wwwRoot from '../../lib/wwwRoot';
-import theLib from '../../lib/index';
-import theApp from '../../lib/app';
-import theHelper from '../helper';
+import wwwRoot from '../../lib/wwwRoot.mjs';
+import theLib from '../../lib/index.mjs';
+import theApp from '../../lib/app.mjs';
+import theHelper from '../helper.mjs';
 
 const { mitm } = theHelper;
 
@@ -681,7 +681,7 @@ id\tabbrev\ttitle
     .expect(() => {
       assert.ok(ntpResponse.called);
       assert.ok(socketError);
-      assert.ok(/The "err" argument must be of type number./.test(socketError.message), socketError.message);
+      assert.ok((/The "err" argument must be of type number./).test(socketError.message), socketError.message);
     })
     .endAsync();
   });

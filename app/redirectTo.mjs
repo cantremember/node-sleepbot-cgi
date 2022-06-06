@@ -1,4 +1,4 @@
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 
 
 /**
@@ -7,7 +7,7 @@ import theLib from '../lib/index';
  *
  * @function app.redirectTo
  * @params {String} route a root-relative path
- * @returns {Function<Promise>} an async Express middeware Function
+ * @returns {Function} an async Express middeware Function
  */
 export default function redirectTo(route) {
   return (req, res) => {

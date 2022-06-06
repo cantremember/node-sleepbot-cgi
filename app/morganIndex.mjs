@@ -1,4 +1,4 @@
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 
 const COOKIE_NAME = 'morgan_config';
 const ROUTE_FLAT = 'flat';

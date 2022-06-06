@@ -13,8 +13,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 10
-          # - 12
+          - 16
       max-parallel: 2
       fail-fast: false
 

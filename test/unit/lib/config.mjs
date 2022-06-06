@@ -1,16 +1,19 @@
 import assert from 'assert';
-import proxyquire from 'proxyquire';
 
-import theHelper from '../../helper';
-import configTest from '../../../config/test';
-import configDefault from '../../../config/default';
+import theHelper from '../../helper.mjs';
+// TODO:  import ... assert { type: 'json' };
+//   required by Node 16, unsupported by ESLint 8.x
+//   https://github.com/eslint/eslint/discussions/15305
+import { readFileSync } from 'fs';
+// import configTest from '../../../config/test.json' assert { type: 'json' };
+// import configDefault from '../../../config/default.json' assert { type: 'json' };
+const configTest = JSON.parse(readFileSync(new URL('../../../config/test.json', import.meta.url)));
+const configDefault = JSON.parse(readFileSync(new URL('../../../config/default.json', import.meta.url)));
 
-import theConfig from '../../../lib/config';
-const { FILE_DEFAULT } = theConfig;
-
-
-const CONFIG_PATH = '../../../lib/config';
-const STUBS = Object.freeze({ '@noCallThru': false });
+import theConfig, {
+  FILE_DEFAULT,
+  getConfigForEnvironment,
+} from '../../../lib/config.mjs';
 
 
 describe('lib/config', () => {
@@ -27,10 +30,18 @@ describe('lib/config', () => {
   });
 
 
-  it('provides a test environment', () => {
+  it('assumes the test environment', () => {
     assert.equal(process.env.NODE_ENV, 'test');
 
-    config = proxyquire(CONFIG_PATH, STUBS);
+    assert.equal(theConfig.get('NODE_ENV'), 'test');
+    assert.equal(theConfig.get('wwwRoot'), configTest.wwwRoot);
+    assert.equal(theConfig.get('httpPort'), configDefault.httpPort);
+  });
+
+
+  it('provides a test environment', () => {
+    config = getConfigForEnvironment('test');
+
     assert.deepEqual(
       Object.keys(config.stores),
       [ 'mock', 'memory', 'argv', 'env', 'file/test', FILE_DEFAULT ]
@@ -42,23 +53,21 @@ describe('lib/config', () => {
   });
 
   it('provides no environment', () => {
-    delete process.env.NODE_ENV;
+    config = getConfigForEnvironment();
 
-    config = proxyquire(CONFIG_PATH, STUBS);
     assert.deepEqual(
       Object.keys(config.stores),
       [ 'mock', 'memory', 'argv', 'env', FILE_DEFAULT ]
     );
 
-    assert.strictEqual(config.get('NODE_ENV'), undefined);
+    assert.strictEqual(config.get('NODE_ENV'), '');
     assert.equal(config.get('wwwRoot'), configDefault.wwwRoot);
     assert.equal(config.get('httpPort'), configDefault.httpPort);
   });
 
   it('survives an invalid environment', () => {
-    process.env.NODE_ENV = 'BOGUS';
+    config = getConfigForEnvironment('BOGUS');
 
-    config = proxyquire(CONFIG_PATH, STUBS);
     assert.deepEqual(
       Object.keys(config.stores),
       [ 'mock', 'memory', 'argv', 'env', FILE_DEFAULT ]
@@ -66,19 +75,6 @@ describe('lib/config', () => {
 
     assert.equal(config.get('NODE_ENV'), 'BOGUS');
     assert.equal(config.get('wwwRoot'), configDefault.wwwRoot);
-    assert.equal(config.get('httpPort'), configDefault.httpPort);
-  });
-
-  it('can be overridden with mock values', () => {
-    config = proxyquire(CONFIG_PATH, STUBS);
-    theHelper.mockConfig({ wwwRoot: 'mock' }, config);
-
-    assert.deepEqual(
-      Object.keys(config.stores),
-      [ 'mock', 'memory', 'argv', 'env', 'file/test', FILE_DEFAULT ]
-    );
-    assert.equal(config.get('wwwRoot'), 'mock');
-    assert.equal(config.get('ntpTimeout'), configTest.ntpTimeout);
     assert.equal(config.get('httpPort'), configDefault.httpPort);
   });
 });

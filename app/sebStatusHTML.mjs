@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import theLib from '../lib/index';
+import theLib from '../lib/index.mjs';
 
 
 /**

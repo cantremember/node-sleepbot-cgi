@@ -4,12 +4,12 @@
   },
   "source": {
     "include": [
+      "gulp.mjs",
+      "index.mjs",
       "app/",
       "bin/",
       "config/",
       "lib/",
-      "index.js",
-      "index.mjs",
       "views/",
       "README.md"
     ],

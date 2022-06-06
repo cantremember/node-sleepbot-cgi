@@ -4,7 +4,7 @@ import httpMocks from 'node-mocks-http';
 
 import theApp, {
   logError,
-} from '../../../lib/app';
+} from '../../../lib/app.mjs';
 
 
 describe('lib/app', () => {
