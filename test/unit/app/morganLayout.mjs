@@ -3,11 +3,14 @@ import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 
+import theLib from '../../../lib/index.mjs';
 import wwwRoot from '../../../lib/wwwRoot.mjs';
-import middleware from '../../../app/morganLayout.mjs';
+import {
+  default as middleware,
+  willLoadCards,
+} from '../../../app/morganLayout.mjs';
 
-const CARD_DATA = `
-ID\tABBREV\tTITLE
+const CARD_DATA = `ID\tABBREV\tTITLE
 1\tone\tONE
 2\ttwo\tTWO
 3\tthree\tTHREE
@@ -37,8 +40,29 @@ describe('morganLayout', () => {
     sandbox.spy(wwwRoot, 'willLoadTSV');
   });
   afterEach(() => {
+    theLib.forget();
+
     sandbox.restore();
     mockfs.restore();
+  });
+
+
+  describe('willLoadCards', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'morgan': {
+          'card.txt': CARD_DATA,
+        },
+      } });
+
+      const cards = await willLoadCards();
+      assert.equal(cards.length, 10);
+      assert.deepEqual(cards[0], {
+        id: '1',
+        abbrev: 'one',
+        title: 'ONE',
+      });
+    });
   });
 
 

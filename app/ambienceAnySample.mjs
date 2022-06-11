@@ -10,15 +10,20 @@ const FAKE_QUIP = Object.freeze({ text: '' });
 
 
 // load the samples file
-const willLoadSamples = theLib.willMemoize(async () => {
-  const rows = await wwwRoot.willLoadTSV('ambience/any.txt');
+export const willLoadSamples = theLib.willMemoize(async () => {
+  const rows = await wwwRoot.willLoadTSV('ambience/any.txt', {
+    columns: false, // its first line is a count of rows
+    relax_column_count_more: true,
+  });
   return rows.map((row) => theLib.dataColumnMap(row, SAMPLE_COLUMNS));
 });
 
 // load the quips file
-const willLoadQuips = theLib.willMemoize(async () => {
-  const rows = await wwwRoot.willLoadTSV('ambience/anyquip.txt');
-  return rows.map((row) => theLib.dataColumnMap(row, QUIP_COLUMNS));
+//   into a sythetic `{ text }` mapping
+export const willLoadQuips = theLib.willMemoize(async () => {
+  // it's just pure lines
+  const lines = await wwwRoot.willLoadLines('ambience/anyquip.txt');
+  return lines.map((line) => theLib.dataColumnMap([ line ], QUIP_COLUMNS));
 });
 
 

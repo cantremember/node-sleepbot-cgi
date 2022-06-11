@@ -3,18 +3,22 @@ import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 
-import wwwRoot from '../../../lib/wwwRoot.mjs';
 import theLib from '../../../lib/index.mjs';
 import theHelper from '../../helper.mjs';
-import middleware from '../../../app/ambienceAnySample.mjs';
+import {
+  default as middleware,
+  willLoadSamples,
+  willLoadQuips,
+} from '../../../app/ambienceAnySample.mjs';
 
 const NO_DATA = Buffer.alloc(0);
-const ANY_DATA = `
+// its first line is a count of rows
+const ANY_DATA = `2
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize
 `;
-const QUIP_DATA = `
-text
+// it's just data
+const QUIP_DATA = `text
 text
 `;
 
@@ -31,8 +35,6 @@ describe('ambienceAnySample', () => {
     // mock Request & Response
     req = httpMocks.createRequest();
     res = httpMocks.createResponse();
-
-    sandbox.spy(wwwRoot, 'willLoadTSV');
   });
   afterEach(() => {
     sandbox.restore();
@@ -41,6 +43,58 @@ describe('ambienceAnySample', () => {
 
     theLib.forget();
     middleware.forget();
+  });
+
+
+  describe('willLoadSamples', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'ambience': {
+          'any.txt': ANY_DATA,
+        },
+      } });
+
+      const samples = await willLoadSamples();
+      assert.deepEqual(samples, [
+        {
+          file: 'file',
+          ext: 'ext',
+          page: 'page',
+          stub: 'stub',
+          artist: 'artist',
+          album: 'album',
+          track: 'track',
+          size: 'size',
+        },
+        {
+          file: 'file',
+          ext: 'ext',
+          page: 'page',
+          stub: 'stub',
+          artist: 'artist',
+          album: 'album',
+          track: 'track',
+          size: 'size',
+        },
+      ]);
+    });
+  });
+
+
+  describe('willLoadQuips', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'ambience': {
+          'anyquip.txt': QUIP_DATA,
+        },
+      } });
+
+      const quips = await willLoadQuips();
+      assert.deepEqual(quips, [
+        { text: 'text' },
+        { text: 'text' },
+      ]);
+    });
   });
 
 
@@ -63,8 +117,6 @@ describe('ambienceAnySample', () => {
       // it resolves the Response
       const returned = await middleware(req, res, next);
       assert.equal(returned, res);
-
-      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
       assert(! next.called);
       assert.equal(res._getData(), 'ambienceAnySample.ejs');
@@ -98,8 +150,6 @@ describe('ambienceAnySample', () => {
       // un-cached
       await middleware(req, res, next);
 
-      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
-
       assert(! next.called);
       assert.equal(res._getData(), 'ambienceAnySample.ejs');
 
@@ -108,8 +158,6 @@ describe('ambienceAnySample', () => {
       // and again, cached
       res = httpMocks.createResponse();
       await middleware(req, res, next);
-
-      assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
       assert(! next.called);
       assert.equal(res._getData(), 'ambienceAnySample.ejs');
@@ -130,8 +178,6 @@ zzzz\text\tpage\tstub\tartist\talbum\ttrack\tsize
     } });
 
     await middleware(req, res, next);
-
-    assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
     assert(! next.called);
     assert.equal(res._getData(), 'ambienceAnySample.ejs');

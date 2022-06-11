@@ -51,8 +51,7 @@ const { mitm } = theHelper;
 
 
 const NO_DATA = Buffer.alloc(0);
-const QUIP_DATA = `
-text
+const QUIP_DATA = `quip
 quip
 `;
 
@@ -310,8 +309,8 @@ describe('app integration', () => {
     it('with data', async () => {
       mockfs({ '/mock-fs': {
         'ambience': {
-          'any.txt': `
-FILE\tEXT\tPAGE\tSTUB\tARTIST\tALBUM\tTRACK\tSIZE
+          // its first line is a count of rows
+          'any.txt': `1
 file\text\tpage\tstub\tartist\talbum\ttrack\tsize
 `,
           'anyquip.txt': QUIP_DATA,
@@ -372,11 +371,9 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
       } });
 
       await _client().get('/fucc/cgi/schednow.cgi')
-      .expect(500, JSON.stringify({
-        name: 'Error',
-        message: 'ENOENT, no such file or directory \'/mock-fs/fucc/showquip.txt\'',
-      }))
-      .expect('content-type', /json/)
+      .expect(200)
+      .expect('content-type', /html/)
+      .expect(_bodyIncludes('<TITLE>F.U.C.C Radio Now</TITLE>'))
       .endAsync();
     });
 
@@ -401,8 +398,7 @@ file\text\tpage\tstub\tartist\talbum\ttrack\tsize
     it('with live data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': {
-          'live.txt': `
-file\tanchor\tyear\tmonth\tday\thourStart\thourEnd
+          'live.txt': ` file\tanchor\tyear\tmonth\tday\thourStart\thourEnd
 file\tanchor\t${
   date.getYear() }\t${ date.getMonth() }\t${ date.getDate() }\t${
   date.getHours() }\t${ date.getHours() + 1
@@ -433,8 +429,7 @@ live3
     it('with show data', async () => {
       mockfs({ '/mock-fs': {
         'fucc': {
-          'show.txt': `
-file\tanchor\tdayOfWeek\thourStart\thourEnd
+          'show.txt': `file\tanchor\tdayOfWeek\thourStart\thourEnd
 file\tanchor\t${ date.getDay() }\t${ date.getHours() }\t${ date.getHours() + 1 }
 `,
           'show.html': `
@@ -543,8 +538,7 @@ show3
       beforeEach(() => {
         mockfs({ '/mock-fs': {
           'morgan': {
-            'card.txt': `
-id\tabbrev\ttitle
+            'card.txt': `id\tabbrev\ttitle
 1\tone\tONE
 2\ttwo\tTWO
 3\tthree\tTHREE

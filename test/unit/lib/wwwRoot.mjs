@@ -39,7 +39,7 @@ describe('lib/wwwRoot', () => {
 
 
   describe('willLoadTSV', () => {
-    it('loads and trims the rows of a TSV by default', () => {
+    it('loads columns and trims the rows of a TSV by default', () => {
       mockfs({ '/mock-fs': {
         'test.tsv': TSV_CONTENT
       } });
@@ -49,6 +49,24 @@ describe('lib/wwwRoot', () => {
         assert.deepEqual(rows, [
           [ 1, 2 ],
           [ 'ä', '🐝' ],
+        ]);
+      });
+    });
+
+    it('handles quotes', () => {
+      mockfs({ '/mock-fs': {
+        // make sure header is on the 1st line
+        'test.tsv': `A\tB
+"1 multi
+line"\t" 2 whitespace "
+""\t"double""quote"
+`      } });
+
+      return wwwRoot.willLoadTSV('/test.tsv')
+      .then((rows) => {
+        assert.deepEqual(rows, [
+          [ '1 multi\nline', ' 2 whitespace ' ],
+          [ '', 'double"quote' ],
         ]);
       });
     });
@@ -73,13 +91,13 @@ describe('lib/wwwRoot', () => {
         'test.tsv': TSV_CONTENT
       } });
 
-      return wwwRoot.willLoadTSV('/test.tsv', { /* default CSV */ })
+      return wwwRoot.willLoadTSV('/test.tsv', {
+        delimiter: ',', // CSV
+      })
       .then((rows) => {
         assert.deepEqual(rows, [
-          [ '' ],
           [ '1 \t2' ],
-          [ '' ],
-          [ ' ä\t 🐝' ]
+          [ 'ä\t 🐝' ]
         ]);
       });
     });
@@ -110,6 +128,36 @@ describe('lib/wwwRoot', () => {
       return wwwRoot.willLoadTSV('/test.tsv')
       .then(theHelper.notCalled, (err) => {
         assert.equal(err.message, 'BOOM');
+      });
+    });
+  });
+
+
+  describe('willLoadLines', () => {
+    it('loads lines from a file', () => {
+      mockfs({ '/mock-fs': {
+        'test.txt': `
+line1
+
+line2
+`     } });
+
+      return wwwRoot.willLoadLines('/test.txt')
+      .then((rows) => {
+        assert.deepEqual(rows, [
+          // it('strips blank lines')
+          'line1',
+          'line2',
+        ]);
+      });
+    });
+
+    it('loads nothing from a missing file', () => {
+      mockfs({ '/mock-fs': { } });
+
+      return wwwRoot.willLoadLines('/test.txt')
+      .then((content) => {
+        assert.deepEqual(content, []);
       });
     });
   });

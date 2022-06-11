@@ -102,7 +102,7 @@ function scrapeBodyTitle( // eslint-disable-line max-params
 /*
    the dead file
 */
-const willLoadDead = theLib.willMemoize(async () => {
+export const willLoadDead = theLib.willMemoize(async () => {
   try {
     const file = await wwwRoot.willLoadFile('fucc/dead.txt');
     return file;
@@ -128,9 +128,12 @@ function isLiveNow(data, date) {
   return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
 
-const willLoadLives = theLib.willMemoize(async () => {
+export const willLoadLives = theLib.willMemoize(async () => {
   const [ rows, page ] = await Promise.all([
-    wwwRoot.willLoadTSV('fucc/live.txt'),
+    // its first line is LIVE_COLUMNS
+    wwwRoot.willLoadTSV('fucc/live.txt', {
+      columns: false, // it makes no sense, but ...
+    }),
     wwwRoot.willLoadFile('fucc/live.html'), // the live schedule, for scrape-age
   ]);
 
@@ -187,9 +190,12 @@ function isShowNow(data, date) {
   return (hour >= data.hourStart) && (hour < data.hourEnd);
 }
 
-const willLoadShows = theLib.willMemoize(async () => {
+export const willLoadShows = theLib.willMemoize(async () => {
   const [ rows, page ] = await Promise.all([
-    wwwRoot.willLoadTSV('fucc/show.txt'),
+    // its first line is SHOW_COLUMNS
+    wwwRoot.willLoadTSV('fucc/show.txt', {
+      columns: false, // it makes no sense, but ...
+    }),
     wwwRoot.willLoadFile('fucc/show.html'), // the show schedule, for scrape-age
   ]);
 
@@ -233,9 +239,10 @@ async function checkShow(date) {
 /*
    the quip file
 */
-const willLoadQuips = theLib.willMemoize(async () => {
-  const file = await wwwRoot.willLoadTSV('fucc/showquip.txt');
-  return file;
+export const willLoadQuips = theLib.willMemoize(async () => {
+  // it's just pure lines
+  const lines = await wwwRoot.willLoadLines('fucc/showquip.txt');
+  return lines.map((line) => [ line ]); // as a one-column TSV
 });
 
 

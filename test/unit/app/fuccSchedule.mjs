@@ -4,8 +4,14 @@ import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
 import moment from 'moment';
 
-import wwwRoot from '../../../lib/wwwRoot.mjs';
-import middleware from '../../../app/fuccSchedule.mjs';
+import theLib from '../../../lib/index.mjs';
+import {
+  default as middleware,
+  willLoadDead,
+  willLoadLives,
+  willLoadShows,
+  willLoadQuips,
+} from '../../../app/fuccSchedule.mjs';
 
 
 // aligned to Date() local time
@@ -14,9 +20,9 @@ const MOMENT_SHOW = moment('2001-01-01T01:00:00Z').add(NOW.utcOffset(), 'minutes
 const MOMENT_LIVE = moment('2002-02-02T02:00:00Z').add(NOW.utcOffset(), 'minutes');
 
 const NO_DATA = Buffer.alloc(0);
+const DEAD_DATA = 'DEAD';
 
-const SHOW_DATA = `
-FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
+const SHOW_DATA = `FILE\tANCHOR\tDAY_OF_WEEK\tHOUR_START\tHOUR_END
 file\tanchor\t${
   MOMENT_SHOW.day() /* of week */ }\t${
   MOMENT_SHOW.hour() }\t${ MOMENT_SHOW.clone().add(1, 'hour').hour()
@@ -35,8 +41,7 @@ show3
 after
 `;
 
-const LIVE_DATA = `
-FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
+const LIVE_DATA = `FILE\tANCHOR\tYEAR\tMONTH\tDAY\tHOUR_START\tHOUR_END
 file\tanchor\t${
   MOMENT_LIVE.year() }\t${ MOMENT_LIVE.month() }\t${ MOMENT_LIVE.date() }\t${
   MOMENT_LIVE.hour() }\t${ MOMENT_LIVE.clone().add(1, 'hour').hour()
@@ -76,11 +81,10 @@ describe('fuccSchedule', () => {
     // mock Request & Response
     req = httpMocks.createRequest();
     res = httpMocks.createResponse();
-
-    sandbox.spy(wwwRoot, 'willLoadTSV');
-    sandbox.spy(wwwRoot, 'willLoadFile');
   });
   afterEach(() => {
+    theLib.forget();
+
     sandbox.restore();
     clock.restore();
 
@@ -88,10 +92,91 @@ describe('fuccSchedule', () => {
   });
 
 
+  describe('willLoadDead', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'fucc': {
+          'dead.txt': DEAD_DATA,
+        }
+      } });
+
+      const dead = await willLoadDead();
+      assert.equal(dead, 'DEAD');
+    });
+  });
+
+  describe('willLoadLives', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'fucc': {
+          'live.txt': LIVE_DATA,
+          'live.html': LIVE_HTML,
+        }
+      } });
+
+      const lives = await willLoadLives();
+      assert.deepEqual(lives, [
+        {
+          anchor: 'anchor',
+          body: 'live1\nlive2\nlive3',
+          day: 1,
+          file: 'file',
+          hourEnd: 11,
+          hourStart: 10,
+          month: 1,
+          type: 'live',
+          year: 2002
+        },
+      ]);
+    });
+  });
+
+  describe('willLoadShows', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'fucc': {
+          'show.txt': SHOW_DATA,
+          'show.html': SHOW_HTML,
+        }
+      } });
+
+      const shows = await willLoadShows();
+      assert.deepEqual(shows, [
+        {
+          anchor: 'anchor',
+          body: 'show1\nshow2\nshow3',
+          dayOfWeek: 0,
+          file: 'file',
+          hourEnd: 10,
+          hourStart: 9,
+          title: 'title',
+          type: 'show'
+        }
+      ]);
+    });
+  });
+
+  describe('willLoadQuips', () => {
+    it('loads representative data', async () => {
+      mockfs({ '/mock-fs': {
+        'fucc': {
+          'showquip.txt': QUIP_DATA,
+        }
+      } });
+
+      const quips = await willLoadQuips();
+      assert.deepEqual(quips, [
+        [ 'text' ],
+        [ 'text' ],
+      ]);
+    });
+  });
+
+
   it('knows when the station is dead', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
-        'dead.txt': 'DEAD',
+        'dead.txt': DEAD_DATA,
         'showquip.txt': QUIP_DATA,
       }
     } });
@@ -100,15 +185,12 @@ describe('fuccSchedule', () => {
     const returned = await middleware(req, res, next);
     assert.equal(returned, res);
 
-    assert.equal(wwwRoot.willLoadFile.callCount, 1);
-    assert.equal(wwwRoot.willLoadTSV.callCount, 1);
-
     assert(! next.called);
     assert.equal(res._getData(), 'fuccSchedule.ejs');
     assert.equal(res.statusCode, 200);
 
     const context = res._getRenderData();
-    assert.equal(context.dead, 'DEAD');
+    assert.equal(context.dead, DEAD_DATA);
     assert(! context.current);
     assert.equal(context.quip.text, 'text');
   });
@@ -128,9 +210,6 @@ describe('fuccSchedule', () => {
     clock.tick(MOMENT_LIVE.valueOf());
 
     await middleware(req, res, next);
-
-    assert.equal(wwwRoot.willLoadFile.callCount, 2);
-    assert.equal(wwwRoot.willLoadTSV.callCount, 2);
 
     assert(! next.called);
     assert.equal(res._getData(), 'fuccSchedule.ejs');
@@ -161,9 +240,6 @@ describe('fuccSchedule', () => {
 
     await middleware(req, res, next);
 
-    assert.equal(wwwRoot.willLoadFile.callCount, 3);
-    assert.equal(wwwRoot.willLoadTSV.callCount, 3);
-
     assert(! next.called);
     assert.equal(res._getData(), 'fuccSchedule.ejs');
 
@@ -193,9 +269,6 @@ describe('fuccSchedule', () => {
 
     await middleware(req, res, next);
 
-    assert.equal(wwwRoot.willLoadFile.callCount, 3);
-    assert.equal(wwwRoot.willLoadTSV.callCount, 3);
-
     assert(! next.called);
     assert.equal(res._getData(), 'fuccSchedule.ejs');
 
@@ -205,26 +278,9 @@ describe('fuccSchedule', () => {
     assert.equal(context.quip.text, 'text');
   });
 
-  it('fails on missing quips', async () => {
+  it('survives missing any given file', async () => {
     mockfs({ '/mock-fs': {
       'fucc': {
-        'show.txt': SHOW_DATA,
-        'show.html': SHOW_HTML,
-      }
-    } });
-
-    await middleware(req, res, next);
-
-    const err = next.args[0][0];
-    assert(err.message.match(/ENOENT/));
-
-    // it('will fail gracefully')
-  });
-
-  it('survives missing everything EXCEPT quips', async () => {
-    mockfs({ '/mock-fs': {
-      'fucc': {
-        'showquip.txt': QUIP_DATA,
       }
     } });
 
