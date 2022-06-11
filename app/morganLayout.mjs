@@ -20,9 +20,9 @@ const QUIPS = [
 
 // load the cards file
 export const willLoadCards = theLib.willMemoize(async () => {
-  // its first line is CARD_COLUMNS
   const rows = await wwwRoot.willLoadTSV('morgan/card.txt', {
-    columns: false, // it make no sense, but ...
+    columns: false, // its first line is a count of rows
+    relax_column_count_more: true,
   });
 
   return rows.map((row) => {

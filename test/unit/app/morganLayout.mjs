@@ -10,7 +10,8 @@ import {
   willLoadCards,
 } from '../../../app/morganLayout.mjs';
 
-const CARD_DATA = `ID\tABBREV\tTITLE
+// its first line is a count of rows
+const CARD_DATA = `10
 1\tone\tONE
 2\ttwo\tTWO
 3\tthree\tTHREE

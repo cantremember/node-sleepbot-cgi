@@ -1,4 +1,4 @@
-SHELL = /bin/bash
+SHELL = /bin/sh
 ROOT = $(shell pwd)
 REPO_URL = git@github.com:cantremember/node-sleepbot-cgi.git
 
@@ -56,6 +56,7 @@ CODE_GET=cat $(CODE_FILE)
 	quality ci \
 	doc view-doc  gh-pages \
 	post-install pre-commit \
+	package push container compose \
 
 .DEFAULT_GOAL: test
 
@@ -84,7 +85,9 @@ lock:
 # Run the thing
 
 server:
-	@# --httpPort=3000
+	@# overrides
+	@#   `node ... --httpPort=3000`
+	@#   or `httpPort=3000 node ...`
 	@node  $(ROOT)/bin/app.mjs
 
 server-repl:
@@ -187,6 +190,34 @@ quality:  only-check lint  build coverage
 ci:  only-check lint  clean build coverage
 
 
+# Packaging
+
+# multi-architecture build (Apple M1 Silicon + x86_64)
+package:
+	@docker buildx build . --platform linux/arm64 -t cantremember/node-sleepbot-cgi:latest-arm64  -f Dockerfile
+	@docker buildx build . --platform linux/amd64 -t cantremember/node-sleepbot-cgi:latest-amd64  -f Dockerfile
+
+push:
+	docker push cantremember/node-sleepbot-cgi:latest-arm64
+	docker push cantremember/node-sleepbot-cgi:latest-amd64
+	@# ...
+	@docker manifest rm cantremember/node-sleepbot-cgi:latest || true
+	@docker manifest create cantremember/node-sleepbot-cgi:latest  cantremember/node-sleepbot-cgi:latest-arm64 cantremember/node-sleepbot-cgi:latest-amd64
+	docker manifest push cantremember/node-sleepbot-cgi:latest
+	@# ...
+	@$(eval SHA := $(shell git rev-parse HEAD | cut -c 1-8))
+	@docker tag cantremember/node-sleepbot-cgi:latest-arm64  cantremember/node-sleepbot-cgi:commit-$(SHA)-arm64
+	@docker tag cantremember/node-sleepbot-cgi:latest-amd64  cantremember/node-sleepbot-cgi:commit-$(SHA)-amd64
+	docker push cantremember/node-sleepbot-cgi:commit-$(SHA)-arm64
+	docker push cantremember/node-sleepbot-cgi:commit-$(SHA)-amd64
+
+container:
+	@docker run -p 0.0.0.0:4100:4100  cantremember/node-sleepbot-cgi:latest
+
+compose:
+	@docker-compose -f docker-compose.yml  up --remove-orphans
+
+
 # Documentation
 
 doc:  build
@@ -252,7 +283,7 @@ post-install:
 	    mkdir -p $(ROOT)/.git/hooks; \
 		\
 	    $(call E_INFO,"installing .git/hooks"); \
-	    echo -e "#!/bin/bash\nmake pre-commit" > $(ROOT)/.git/hooks/pre-commit; \
+	    echo -e "#!/bin/sh\nmake pre-commit" > $(ROOT)/.git/hooks/pre-commit; \
 	    chmod 755 $(ROOT)/.git/hooks/pre-commit; \
 	fi
 

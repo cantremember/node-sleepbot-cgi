@@ -10,6 +10,38 @@ Provided as a [GitHub project](https://github.com/cantremember/node-sleepbot-cgi
 since no one in their right might has any need for this code besides me.
 
 
+## Running
+
+```sh
+npm run start
+
+make server
+
+# within Docker, as deployed
+#   expects production mongo credentials and other ENVs
+make container
+make compose
+```
+
+
+## Environment Configuration
+
+from 'config/*.json'
+
+- NODE_ENV
+- httpPort
+- baseURL
+- wwwRoot
+- viewsRoot
+- caching
+- ... and more
+
+```bash
+# the Dockerfile self-specifies its own ENVs
+httpPort=3000 wwwRoot="/opt/www/sleepbot.com"  make server
+```
+
+
 ## Documentation
 
 The [JSDoc](https://cantremember.github.io/node-sleepbot-cgi/) is provided via GitHub Pages.

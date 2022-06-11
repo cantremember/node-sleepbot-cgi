@@ -77,4 +77,16 @@ describe('lib/config', () => {
     assert.equal(config.get('wwwRoot'), configDefault.wwwRoot);
     assert.equal(config.get('httpPort'), configDefault.httpPort);
   });
+
+
+  it('overrides with process.env values', () => {
+    // using the exact naming of the JSON keys
+    process.env.httpPort = '9001';
+
+    config = getConfigForEnvironment('test');
+
+    assert.equal(config.get('NODE_ENV'), 'test');
+    assert.equal(config.get('wwwRoot'), configTest.wwwRoot);
+    assert.equal(config.get('httpPort'), '9001');
+  });
 });

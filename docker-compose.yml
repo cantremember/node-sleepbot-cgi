@@ -1,0 +1,15 @@
+services:
+  node-sleepbot-cgi:
+    image: cantremember/node-sleepbot-cgi:latest
+
+    working_dir: /opt/project
+
+    environment:
+      NODE_ENV: "production"
+      httpPort: 3000
+      wwwRoot: "/mnt/ec2-http/sleepbot.com"
+
+    ports:
+      - "3000:3000"
+    volumes:
+      - /Volumes/GrandMasterKashik/archive/http:/mnt/ec2-http/sleepbot.com

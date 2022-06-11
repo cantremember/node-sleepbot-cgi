@@ -537,8 +537,9 @@ show3
     describe('with data', () => {
       beforeEach(() => {
         mockfs({ '/mock-fs': {
+          // its first line is a count of rows
           'morgan': {
-            'card.txt': `id\tabbrev\ttitle
+            'card.txt': `5
 1\tone\tONE
 2\ttwo\tTWO
 3\tthree\tTHREE
