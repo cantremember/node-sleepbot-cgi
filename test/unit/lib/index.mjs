@@ -4,7 +4,7 @@ import assert from 'assert';
 import sinon from 'sinon';
 import mockfs from 'mock-fs';
 import httpMocks from 'node-mocks-http';
-import _ from 'lodash';
+import { isFunction } from 'lodash-es';
 
 import theLib from '../../../lib/index.mjs';
 import theHelper from '../../helper.mjs';
@@ -214,7 +214,7 @@ describe('lib/index', () => {
           render: sandbox.spy((filename, context, cb) => {
             assert.equal(filename, FILENAME);
             assert.equal(context, CONTEXT);
-            assert.equal(_.isFunction(cb), true);
+            assert.equal(isFunction(cb), true);
 
             cb(null, RENDERED);
           }),

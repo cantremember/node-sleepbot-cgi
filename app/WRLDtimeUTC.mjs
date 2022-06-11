@@ -1,5 +1,5 @@
 import net from 'net';
-import _ from 'lodash';
+import { shuffle } from 'lodash-es';
 
 import theLib from '../lib/index.mjs';
 
@@ -15,7 +15,7 @@ import theLib from '../lib/index.mjs';
  * @returns {Promise<String>} a Promise resolving an `ntp` representation
  */
 async function willTryServers(res) { // eslint-disable-line require-await
-  const servers = _.shuffle( theLib.config.get('ntpServers') );
+  const servers = shuffle( theLib.config.get('ntpServers') );
 
   // it's a multi-step Promise,
   //   1) choose a server

@@ -1,7 +1,7 @@
 import assert from 'assert';
 import sinon from 'sinon';
 import httpMocks from 'node-mocks-http';
-import _ from 'lodash';
+import { isFunction } from 'lodash-es';
 
 import theLib from '../../../lib/index.mjs';
 import builder from '../../../app/redirectTo.mjs';
@@ -28,7 +28,7 @@ describe('redirectTo', () => {
 
 
   it('builds a middleware Function', () => {
-    assert.ok(_.isFunction(middleware));
+    assert.ok(isFunction(middleware));
   });
 
   it('will redirect to a route relative to baseURL', () => {
