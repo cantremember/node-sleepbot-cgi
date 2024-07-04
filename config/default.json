@@ -8,8 +8,8 @@
 
   "sebServers": [
     {
-      "streamUrl": "http://sc13.shoutcaststreaming.us:8218/seb",
-      "serverUrl": "http://sc13.shoutcaststreaming.us:8218",
+      "streamUrl": "http://shoutcaststreaming.xyz:8218/seb",
+      "serverUrl": "http://shoutcaststreaming.xyz:8218",
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"
