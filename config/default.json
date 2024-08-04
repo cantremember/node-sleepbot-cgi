@@ -8,8 +8,8 @@
 
   "sebServers": [
     {
-      "streamUrl": "http://shoutcaststreaming.xyz:8218/seb",
-      "serverUrl": "http://shoutcaststreaming.xyz:8218",
+      "streamUrl": "http://primarystream.sleepbot.com:8218/seb",
+      "serverUrl": "http://primarystream.sleepbot.com:8218",
       "primary": true,
       "user": "admin",
       "pass": "deepDeepSleep"

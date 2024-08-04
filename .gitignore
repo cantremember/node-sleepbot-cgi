@@ -32,3 +32,5 @@ logs
 *.sublime-workspace
 sftp-config.json
 sftp-settings.json
+
+.vscode
