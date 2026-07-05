@@ -24,14 +24,14 @@ export default function middleware(req, res) {
   const body = trimmedPlaylist(`
 <ASX version="3.0">
   <TITLE>${ STREAM_TITLE }</TITLE>
-  <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+  <PARAM name="HTMLView" value="//sleepbot.com/seb" />
   `
   + sebServers.map((server) => `
 
   <ENTRY>
     <REF href="${ server.streamUrl }" />
     <TITLE>${ STREAM_TITLE }</TITLE>
-    <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+    <PARAM name="HTMLView" value="//sleepbot.com/seb" />
   </ENTRY>
 
   `).join('\n')

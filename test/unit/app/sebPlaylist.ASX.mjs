@@ -41,16 +41,16 @@ describe('sebPlaylist.ASX', () => {
 
     const PLAYLIST = `<ASX version="3.0">
   <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
-  <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+  <PARAM name="HTMLView" value="//sleepbot.com/seb" />
   <ENTRY>
     <REF href="http://server1.seb/" />
     <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
-    <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+    <PARAM name="HTMLView" value="//sleepbot.com/seb" />
   </ENTRY>
   <ENTRY>
     <REF href="http://server2.seb/" />
     <TITLE>Sleepbot Environmental Broadcast - - sleepbot.com/seb/</TITLE>
-    <PARAM name="HTMLView" value="http://sleepbot.com/seb" />
+    <PARAM name="HTMLView" value="//sleepbot.com/seb" />
   </ENTRY>
 </ASX>
 `;

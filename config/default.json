@@ -1,7 +1,7 @@
 {
   "httpPort": 3000,
   "wwwRoot": "/mnt/ec2-http/sleepbot.com",
-  "baseURL": "http://www.sleepbot.com",
+  "baseURL": "//sleepbot.com",
   "caching": false,
 
   "viewsRoot": "../views",

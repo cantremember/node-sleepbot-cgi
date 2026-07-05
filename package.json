@@ -8,7 +8,7 @@
     "url": "ssh://git@sink.cantremember.com/opt/git-repo/node-sleepbot-cgi.git"
   },
   "license": "WTFPL",
-  "homepage": "http://sleepbot.com",
+  "homepage": "https://sleepbot.com",
   "email": "webmaster@sleepbot.com",
   "keywords": [
     "sleepbot"
